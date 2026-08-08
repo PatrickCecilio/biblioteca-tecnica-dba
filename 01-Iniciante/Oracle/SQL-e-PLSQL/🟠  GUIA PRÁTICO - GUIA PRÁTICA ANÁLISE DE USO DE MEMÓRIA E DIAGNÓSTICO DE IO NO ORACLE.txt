@@ -1,0 +1,149 @@
+================================================================================
+🏷️ GUIA PRÁTICO
+ANÁLISE DE USO DE MEMÓRIA E DIAGNÓSTICO DE I/O NO ORACLE
+================================================================================
+🚀 1. CONFIGURAÇÃO DO AMBIENTE
+================================================================================
+
+1.1 VERIFICAR ESTATÍSTICAS DE I/O NO SISTEMA OPERACIONAL
+--------------------------------------------------------------------------------
+Comando:
+
+    iostat -x 1 10
+
+Função do comando:
+- iostat exibe estatísticas gerais de I/O.
+- -x mostra métricas detalhadas (await, svctm, %util).
+- 1 10 coleta dados a cada 1s, por 10 ciclos.
+
+O que observar:
+- %util alto → possível saturação do disco.
+- await e svctm altos → latência do storage.
+
+================================================================================
+🔍 2. EXECUÇÃO DA ANÁLISE NO ORACLE
+================================================================================
+
+select sql_id, disk_reads, executions
+from v$sql
+order by disk_reads desc fetch first 10 rows only;
+
+
+2.1 LISTAR SQL IDs RELEVANTES
+--------------------------------------------------------------------------------
+Use a consulta abaixo para verificar SQL_IDs no Shared Pool:
+
+    select sql_id, plan_hash_value
+    from v$sql
+    where sql_id in (
+        'sql_id',
+        'sql_id'
+    );
+
+Função:
+- Identifica se o SQL está carregado.
+- Obtém o plan_hash para investigação.
+
+2.2 ANALISAR PLANO DE EXECUÇÃO COM ESTATÍSTICAS
+--------------------------------------------------------------------------------
+
+    select *
+    from table(
+        dbms_xplan.display_cursor('sql_id', null, 'ALLSTATS LAST')
+    );
+
+Função:
+- Exibe o plano real executado.
+- ALLSTATS LAST → mostra métricas da última execução.
+
+O que observar:
+- Diferenças grandes entre A-Rows e E-Rows → problema de estimativas.
+- Etapas com muitas leituras físicas.
+- Operações que consomem mais tempo total.
+
+--------------------------------------------------------------------------------
+select name, type, text
+from dba_source
+where name = 'GM_STP_JOB_ATUALIZFOTOAPP'
+order by line;
+
+----------------------------------------------------------------------------------
+select HASH_VALUE, SQL_ID, PLAN_HASH_VALUE, OPERATION, OPTIONS, OBJECT_NAME, CARDINALITY, FULL_PLAN_HASH_VALUE
+from v$sql_plan
+where sql_id = '1rsmp0xmp31xb'
+order by child_number, id;
+
+================================================================================
+📘 3. INTERPRETAÇÃO DO EVENTO: "db file sequential read"
+================================================================================
+
+3.1 O QUE SIGNIFICA
+--------------------------------------------------------------------------------
+Este evento indica leitura física de um único bloco no disco.
+
+Ocorrência típica:
+- Acesso via índice.
+- Table access by ROWID.
+- Nested loops.
+- Small full scans.
+
+
+3.2 QUANDO ESSE EVENTO AUMENTA
+--------------------------------------------------------------------------------
+Possíveis causas:
+
+1. EXCESSO DE ACESSO POR ÍNDICES
+   - Muitas buscas individuais por blocos específicos.
+
+2. SQL MAL OTIMIZADO
+   - Falta de filtros.
+   - Estatísticas desatualizadas.
+   - Join inadequado.
+
+3. BUFFER CACHE NÃO RETENDO BLOCOS
+   - Memória insuficiente.
+   - Queries grandes expulsando blocos úteis.
+
+4. STORAGE LENTO OU COM CONTENÇÃO
+   - await alto no iostat.
+   - Filas grandes de I/O.
+
+OBS IMPORTANTE:
+Se await e %util estiverem altos no iostat → problema provavelmente no STORAGE.
+
+
+================================================================================
+🧪 4. VALIDAÇÃO FINAL
+================================================================================
+
+Checklist lógico de validação:
+
+1. Confirmar se os SQLs que mais consomem I/O estão ativos nos picos do sistema.
+2. Validar coerência entre o plano de execução e o volume processado.
+3. Correlacionar timestamps (Oracle x SO).
+4. Verificar se o comportamento é esperado (pico normal) ou anômalo.
+5. Documentar conclusões:
+   - SQL problemático?
+   - Falta de memória?
+   - Storage lento?
+   - Estatísticas incorretas?
+
+
+================================================================================
+✔️ CHECKLIST DE EXECUÇÃO
+================================================================================
+
+[ ] Rodou "iostat -x 1 10" e verificou latência e utilização do storage.
+[ ] Identificou os SQL_IDs no v$sql.
+[ ] Analisou o plano real via DBMS_XPLAN (ALLSTATS LAST).
+[ ] Avaliou operações com maior número de leituras físicas.
+[ ] Verificou se o evento "db file sequential read" é coerente com o tipo de acesso.
+[ ] Comparou horários entre Oracle e SO.
+[ ] Identificou possíveis gargalos no buffer cache.
+[ ] Validou estatísticas do banco.
+[ ] Registrou conclusões de forma clara para relatório ao cliente.
+
+
+================================================================================
+📄 FIM DO DOCUMENTO
+================================================================================

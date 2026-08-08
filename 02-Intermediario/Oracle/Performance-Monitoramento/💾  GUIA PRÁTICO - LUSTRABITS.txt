@@ -1,0 +1,22 @@
+SELECT blocking_session,
+       sid,
+       serial#,
+       wait_class,
+       seconds_in_wait
+FROM v$session
+WHERE blocking_session IS NOT NULL
+ORDER BY blocking_session;
+
+SELECT machine,
+       COUNT(*) AS inactive_sessions
+FROM v$session
+WHERE status = 'INACTIVE'
+GROUP BY machine
+ORDER BY inactive_sessions DESC;
+
+SELECT 'ALTER SYSTEM KILL SESSION ''' || sid || ',' || serial# || ''' IMMEDIATE;' AS command
+FROM v$session
+WHERE machine = '<MACHINE_NAME>'
+  AND username NOT IN ('SYS', 'SYSTEM');
+
+ALTER USER <USERNAME> ACCOUNT LOCK;

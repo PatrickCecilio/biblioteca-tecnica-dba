@@ -1,0 +1,6 @@
+VERIFICAR USO DE DISCO
+
+df -hT
+df -ih
+
+Validação: revise uso por blocos e por inodes; ambos podem impedir novas gravações.

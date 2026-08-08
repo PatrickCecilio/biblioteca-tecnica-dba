@@ -1,0 +1,17 @@
+uname -a
+
+free -h
+
+df -hT
+
+lsblk -f
+
+ip addr show
+
+ip route show
+
+ss -lntp
+
+ps -ef | grep '[p]mon'
+
+lsnrctl status

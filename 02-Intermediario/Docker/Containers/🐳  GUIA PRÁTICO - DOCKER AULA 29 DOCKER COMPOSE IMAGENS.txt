@@ -1,0 +1,34 @@
+curl -L " -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+chmod +x /usr/local/bin/docker-compose
+
+ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+
+docker-compose --version
+
+git clone
+
+cd Linux/docker_compose/
+
+docker-compose build
+
+docker-compose up
+
+docker-compose up -d
+
+docker-compose ps
+
+docker-compose down
+
+docker-compose down -v
+
+docker-compose -p meu-app up
+
+docker-compose down
+
+docker-compose up -d
+docker-compose up -d --scale web=3
+
+docker-compose ps
+
+curl -4 localhost:32768

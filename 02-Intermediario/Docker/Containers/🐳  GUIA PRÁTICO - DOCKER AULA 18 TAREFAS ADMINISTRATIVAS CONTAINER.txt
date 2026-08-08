@@ -1,0 +1,11 @@
+mkdir -p ~/fod/simple-task && cd ~/fod/simple-task
+
+ more text
+
+		elif letter == ' ':
+
+print("Linhas:", lines)
+print("Palavras:", words)
+print("Letras:", letters)
+
+docker container run --rm -it \

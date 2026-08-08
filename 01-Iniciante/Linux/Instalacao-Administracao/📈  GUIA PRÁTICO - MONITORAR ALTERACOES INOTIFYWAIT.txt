@@ -1,0 +1,5 @@
+sudo dnf install epel-release -y
+sudo dnf install inotify-tools -y
+
+inotifywait /tmp
+rpm -qi inotify-tools

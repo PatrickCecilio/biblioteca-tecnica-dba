@@ -1,0 +1,15 @@
+# Minute   Hour   Day of Month       Month          Day of Week     Command
+# (0-59)  (0-23)     (1-31)    (1-12 or Jan-Dec)  (0-6 or Sun-Sat)
+
+# Backup Semanal (Banco Inteiro): CDBPROD
+  0        1          *             *                0              /home/oracle/CCM/scripts/backup_rman_CCM.sh level0 CDBPROD /u02/backup/prod/rman/database
+# Backup Diario  (Banco Incremental): CDBPROD
+  0        1          *             *                1-6            /home/oracle/CCM/scripts/backup_rman_CCM.sh level1 CDB1 /u02/backup/prod/rman/database
+# Backup Archive
+  0        *          *             *                0-7            /home/oracle/CCM/scripts/backup_rman_CCM.sh archive CDB1 /u02/backup/prod/rman/database
+# Delete archive
+  0        *          *             *                0-7            /home/oracle/CCM/scripts/delete-archive-CCM.sh
+# Limpa Alert Traces
+  0        3          *             *                0              /home/oracle/CCM/scripts/limpa-alert-traces.sh
+# Delete Backups Antigos
+  0        23         *             *                *              /home/oracle/CCM/scripts/limpa-backups-antigos.sh

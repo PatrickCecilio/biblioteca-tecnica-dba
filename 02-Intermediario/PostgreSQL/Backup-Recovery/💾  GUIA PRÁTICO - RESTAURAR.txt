@@ -1,0 +1,74 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+1️⃣ Preparar o ambiente
+
+Pare o PostgreSQL:
+
+systemctl stop postgresql
+# ou
+pg_ctl stop -D /database/main
+
+
+Certifique-se de que o diretório de dados está vazio ou limpo antes do restore, para evitar conflitos.
+
+2️⃣ Restaurar usando incremental (delta)
+
+O comando pgBackRest identifica automaticamente os incrementais mais recentes se você não especificar:
+
+pgbackrest --stanza=main --repo1-path=/database/backup restore
+
+
+Por padrão, ele vai restaurar o full mais recente e aplicar todos os incrementais posteriores até o último backup.
+
+O parâmetro --delta pode ser usado para manter arquivos que não mudaram, evitando copiar tudo de novo.
+
+pgbackrest --stanza=main --repo1-path=/database/backup --delta restore
+
+3️⃣ Restaurar para um ponto específico
+
+Se você quiser restaurar até um determinado ponto no tempo ou LSN (por exemplo, antes de um erro), pode usar:
+
+pgbackrest --stanza=main --repo1-path=/database/backup --type=time --target="2025-12-18 15:30:00" restore
+
+
+ou por LSN:
+
+pgbackrest --stanza=main --repo1-path=/database/backup --type=lsn --target="0/20000A0" restore
+
+4️⃣ Após o restore
+
+Verifique os arquivos restaurados.
+
+Inicie o PostgreSQL:
+
+systemctl start postgresql
+
+
+Confira se os dados estão corretos.
+
+______________________________________________________________________________________________
+______________________________________________________________________________________________
+______________________________________________________________________________________________
+
+CONSULTAR OS BACKUP:
+
+pgbackrest --stanza=main info
+
+📌 Como resolver
+Você tem duas opções:
+🔹 Opção A – Restaurar em diretório limpo (mais seguro)
+1. 	Pare o PostgreSQL:
+sudo systemctl stop postgresql
+
+
+2. 	Limpe o diretório de dados (⚠️ isso apaga o banco atual):
+rm -rf /var/lib/pgsql/14/data/*
+
+
+3. 	Rode o restore:
+pgbackrest --stanza=main --set=20260126-113130F_20260126-132516I restore
+pgbackrest --stanza=main --set=20251218-204005F_20251219-132807I restore
+
+4. 	Inicie novamente o PostgreSQL:
+
+sudo systemctl start postgresql

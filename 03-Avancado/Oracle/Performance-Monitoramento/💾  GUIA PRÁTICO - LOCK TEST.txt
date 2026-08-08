@@ -1,0 +1,74 @@
+-- =========================================================
+-- CONFIGURAÇÃO INICIAL
+-- =========================================================
+ALTER SESSION SET CONTAINER = pdb1;
+
+-- Criação de usuário de teste (se ainda não existir)
+CREATE USER teste IDENTIFIED BY teste;
+GRANT CONNECT, RESOURCE TO teste;
+
+-- =========================================================
+-- CRIAÇÃO DE OBJETO PARA TESTE DE LOCK
+-- =========================================================
+CREATE TABLE test_block (
+  id       NUMBER PRIMARY KEY,
+  info     VARCHAR2(100),
+  contador NUMBER DEFAULT 0
+);
+
+INSERT INTO test_block (id, info) VALUES (1, 'linha para lock');
+COMMIT;
+
+-- =========================================================
+-- SESSÃO 1 (LOCKER): Segura o bloqueio com FOR UPDATE
+-- =========================================================
+SET SERVEROUTPUT ON
+VARIABLE hold_secs NUMBER
+
+BEGIN
+  -- Define tempo de hold (padrão 120s se não for passado argumento)
+  :hold_secs := NVL(&1, 120);
+END;
+/
+
+DECLARE
+  v_id test_block.id%TYPE;
+BEGIN
+  SELECT id
+  INTO v_id
+  FROM test_block
+  WHERE id = 1
+  FOR UPDATE;
+
+  dbms_output.put_line('Locker segurou o FOR UPDATE na linha 1.');
+  dbms_output.put_line('Segurando por ' || :hold_secs || ' segundos...');
+
+  DBMS_LOCK.SLEEP(:hold_secs);
+
+  dbms_output.put_line('Locker vai commitar e liberar...');
+  COMMIT;
+END;
+/
+EXIT;
+
+-- =========================================================
+-- SESSÃO 2 (WAITER): Tenta atualizar a mesma linha
+-- =========================================================
+SET SERVEROUTPUT ON
+PROMPT waiter iniciando: tentará UPDATE e ficará bloqueado até locker liberar
+
+BEGIN
+  UPDATE test_block
+  SET contador = contador + 1
+  WHERE id = 1;
+
+  dbms_output.put_line('UPDATE executado. Aguardou liberação se havia lock.');
+  COMMIT;
+  dbms_output.put_line('COMMIT realizado pelo waiter.');
+EXCEPTION
+  WHEN OTHERS THEN
+    dbms_output.put_line('ERRO: ' || SQLERRM);
+    ROLLBACK;
+END;
+/
+EXIT;

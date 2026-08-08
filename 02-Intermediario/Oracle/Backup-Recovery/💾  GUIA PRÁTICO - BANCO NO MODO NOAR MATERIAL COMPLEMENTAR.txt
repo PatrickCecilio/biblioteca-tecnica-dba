@@ -1,0 +1,151 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+Seu banco de dados está no modo NOARCHIVELOG, o que significa que os **redologs antigos são sobrescritos e não há archivelogs sendo gerados. Isso tem **implicações diretas** para backup, recuperação e Data Guard.
+
+ 📌 O que isso significa?
+- Sem archivelogs, não é possível fazer backup incremental do banco de dados em modo aberto.
+- Se o banco de dados cair, você só poderá restaurá-lo para o último backup completo disponível.
+- Não é possível configurar um Data Guard nesse estado.
+- Backups online são limitados, pois alguns tipos de backups (como de tablespaces individuais) precisam do banco em ARCHIVELOG.
+
+---
+
+ ✅ Como ativar o MODO ARCHIVELOG?
+Para ativar o modo ARCHIVELOG, siga os passos abaixo:
+
+1️⃣ Pare o banco de dados
+
+SHUTDOWN IMMEDIATE;
+
+
+2️⃣ Inicie o banco em modo MOUNT
+
+STARTUP MOUNT;
+
+
+3️⃣ Habilite o MODO ARCHIVELOG
+
+ALTER DATABASE ARCHIVELOG;
+
+
+4️⃣ Abra o banco de dados
+
+ALTER DATABASE OPEN;
+
+
+5️⃣ Confirme se foi alterado com sucesso
+
+SELECT log_mode FROM v$database;
+
+Se tudo estiver certo, o resultado deve ser:
+plaintext
+LOG_MODE
+------------
+ARCHIVELOG
+
+---
+
+🔧 Passos adicionais (Importante!)
+Agora que você ativou o modo ARCHIVELOG, é necessário verificar algumas configurações:
+
+📂 1. Configurar o destino dos archivelogs
+Execute:
+
+ALTER SYSTEM SET log_archive_dest_1='LOCATION=/u01/oracle/archivelogs' SCOPE=BOTH;
+
+>OBS: Certifique-se de que o diretório existe e tem permissão de escrita para o usuário do Oracle.
+
+---
+
+📊 2. Verificar espaço em disco
+Agora que os archivelogs serão gerados constantemente, é essencial monitorar o espaço disponível no diretório de armazenamento para evitar problemas.
+
+Verifique a ocupação da Flash Recovery Area (FRA):
+
+SELECT name, space_limit, space_used, space_reclaimable
+FROM v$recovery_file_dest;
+se ele não retornou nenhuma linha, isso significa que o Fast Recovery Area (FRA) não está configurado no seu ambiente Oracle.
+
+🔍 O que isso significa?
+O Fast Recovery Area (FRA) é um local gerenciado pelo Oracle para armazenar backupsets do RMAN, archivelogs, redo logs e flashback logs. Se ele não estiver configurado, os archivelogs serão armazenados apenas no local especificado em `LOG_ARCHIVE_DEST_1` e não haverá uma área dedicada para recuperação automatizada.
+
+---
+
+✅ Como configurar o FRA corretamente
+1️⃣ Verificar a configuração atual
+Execute:
+
+
+SHOW PARAMETER db_recovery_file_dest;
+SHOW PARAMETER db_recovery_file_dest_size;
+
+
+Se os valores retornados estiverem vazios, significa que o FRA não está configurado.
+
+---
+
+2️⃣ Configurar o FRA
+Agora, configure um diretório e defina o tamanho do FRA:
+
+ALTER SYSTEM SET DB_RECOVERY_FILE_DEST_SIZE=50G SCOPE=BOTH;
+
+ALTER SYSTEM SET DB_RECOVERY_FILE_DEST='/u01/oracle/fast_recovery_area' SCOPE=BOTH;
+
+Isso define /u01/oracle/fast_recovery_area como o local do FRA e um limite de 50GB para armazenar backups, archivelogs e flashback logs.
+
+---
+
+3️⃣ Criar o diretório no sistema operacional
+Se o diretório não existir, crie manualmente no Linux:
+
+mkdir -p /u01/oracle/fast_recovery_area
+chown oracle:oinstall /u01/oracle/fast_recovery_area
+chmod 750 /u01/oracle/fast_recovery_area
+
+
+---
+
+4️⃣ Confirmar a configuração
+Depois de definir o FRA, execute novamente a consulta:
+
+
+SELECT name, space_limit, space_used, space_reclaimable FROM v$recovery_file_dest;
+
+
+Agora deve retornar os valores corretamente.
+
+---
+
+📌 Conclusão
+✔ O FRA não está configurado por padrão – precisa ser habilitado manualmente.
+✔ Configurar o FRA melhora a gerência de backups e recuperação automática.
+✔ Se o FRA não estiver configurado, o Oracle apenas armazenará os archivelogs no diretório do `log_archive_dest_1`.
+
+Verificar se a configuração foi aplicada.:
+SHOW PARAMETER DB_RECOVERY_FILE_DEST;
+SHOW PARAMETER DB_RECOVERY_FILE_DEST_SIZE;
+
+Se precisar aumentar o espaço da FRA:
+
+ALTER SYSTEM SET db_recovery_file_dest_size = 20G;
+
+
+---
+
+📆 3. Criar uma política de backup
+Agora que você tem archivelogs, é recomendável criar um plano de backup. O ideal é:
+- Fazer backup dos archivelogs regularmente para evitar que o disco fique cheio.
+- Usar RMAN para backups incrementais e restores mais rápidos.
+
+Um exemplo de backup que inclui archivelogs no RMAN:
+
+RMAN> BACKUP DATABASE PLUS ARCHIVELOG;
+
+
+---
+
+⚠️ Conclusão
+Agora que o banco está em ARCHIVELOG, você poderá:
+✅ Fazer backup incremental do banco sem precisar desligá-lo.
+✅ Restaurar o banco até qualquer ponto no tempo (PITR).
+✅ Configurar Data Guard para alta disponibilidade.

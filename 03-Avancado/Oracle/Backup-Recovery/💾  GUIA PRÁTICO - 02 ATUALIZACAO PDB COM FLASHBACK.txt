@@ -1,0 +1,454 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+============================================================
+--- ATUALIZAÇÃO CCM — PROCEDIMENTO COM FLASHBACK DO PDB PROD
+============================================================
+
+Obs.: Comentar todos os jobs da crontab antes do início da atividade e descomentar somente após a conclusão do processo.
+
+---
+
+1. Parar todos os jobs da crontab
+
+---
+
+Acessar o crontab do usuário oracle:
+
+crontab -e
+
+Comentar temporariamente os jobs agendados, principalmente rotinas automáticas de backup, limpeza, archivelog ou rotinas operacionais que possam interferir na atividade.
+
+Exemplo:
+
+# 0 1 * * 0 /home/oracle/CCM/scripts/backup_rman_CCM.sh level0 CDBPROD /u02/backup/prod/rman/database
+
+# 0 1 * * 1-6 /home/oracle/CCM/scripts/backup_rman_CCM.sh level1 CDBPROD /u02/backup/prod/rman/database
+
+# 0 * * * * /home/oracle/CCM/scripts/backup_rman_CCM.sh archive CDBPROD /u02/backup/prod/rman/database
+
+---
+
+2. Executar backup incremental do banco
+
+---
+
+Executar backup incremental antes da atualização:
+
+/home/oracle/CCM/scripts/backup_rman_CCM.sh level1 CDBPROD /u02/backup/prod/rman/database
+
+Caso seja uma atualização crítica, pode ser executado um backup level 0:
+
+/home/oracle/CCM/scripts/backup_rman_CCM.sh level0 CDBPROD /u02/backup/prod/rman/database
+
+---
+
+3. Parar jobs internos da base no CDB e no PDB
+
+---
+
+Acessar o SQL*Plus:
+
+sqlplus / as sysdba
+
+No CDB$ROOT:
+
+alter session set container=CDB$ROOT;
+
+alter system set job_queue_processes=0 scope=both;
+
+No PDB PROD:
+
+alter session set container=PROD;
+
+alter system set job_queue_processes=0 scope=both;
+
+Validar:
+
+show parameter job_queue_processes;
+
+---
+
+4. Validar configuração da FRA
+
+---
+
+No SQL*Plus:
+
+alter session set container=CDB$ROOT;
+
+show parameter db_recovery_file_dest;
+
+---
+
+5. Criar restore point garantido para o PDB PROD
+
+---
+
+Importante:
+
+Para permitir o retorno do PDB PROD via Flashback Pluggable Database, deve ser criado um restore point garantido para o PDB.
+
+No CDB$ROOT:
+
+alter session set container=CDB$ROOT;
+
+Criar o restore point:
+
+create restore point CCM_RESTORE_11062026
+for pluggable database PROD
+guarantee flashback database;
+
+Resultado obtido:
+
+Restore point created.
+
+---
+
+6. Validar restore point criado
+
+---
+
+Executar:
+
+SELECT NAME, SCN, TIME, GUARANTEE_FLASHBACK_DATABASE
+FROM V$RESTORE_POINT;
+
+---
+
+7. Salvar SCN atual antes da atualização
+
+---
+
+No CDB$ROOT:
+
+select dbms_flashback.get_system_change_number from dual;
+
+Também pode ser validado no PDB PROD:
+
+alter session set container=PROD;
+
+select dbms_flashback.get_system_change_number from dual;
+
+---
+
+8. Validar dados antes da atualização
+
+---
+
+No PDB PROD:
+
+alter session set container=PROD;
+
+Executar validação das tabelas principais:
+
+select 'CCM_PROD' as schema_name, count(*) as total_registros
+from CCM_PROD.t1
+union all
+select 'CCM_TESTE' as schema_name, count(*) as total_registros
+from CCM_TESTE.t1;
+
+==============================================================================
+SIMULAÇÃO DE FALHA / TESTE DE RETORNO COM FLASHBACK
+===================================================
+
+---
+
+9. Dropar tabela de validação no PDB PROD
+
+---
+
+No PDB PROD:
+
+alter session set container=PROD;
+
+Executar o drop da tabela:
+
+drop table CCM_PROD.t1 purge;
+
+Resultado obtido:
+
+Table dropped.
+
+---
+
+10. Validar que a tabela foi removida
+
+---
+
+Executar:
+
+select count(*) from CCM_PROD.t1;
+
+Resultado obtido:
+
+ERROR at line 1:
+ORA-00942: table or view does not exist
+
+Conclusão:
+
+O erro ORA-00942 é esperado nesta etapa, pois confirma que a tabela CCM_PROD.T1 foi removida com sucesso.
+
+==============================================================================
+RETORNO APÓS ATUALIZAÇÃO — FLASHBACK DO PDB PROD
+================================================
+
+---
+
+1. Retornar para o CDB$ROOT
+
+---
+
+alter session set container=CDB$ROOT;
+
+Resultado obtido:
+
+Session altered.
+
+---
+
+2. Fechar o PDB PROD
+
+---
+
+alter pluggable database PROD close immediate;
+
+Resultado obtido:
+
+Pluggable database altered.
+
+---
+
+3. Executar Flashback Pluggable Database
+
+---
+
+Executar o flashback do PDB PROD para o restore point criado antes da atualização:
+
+flashback pluggable database PROD
+to restore point CCM_RESTORE_11062026;
+
+Resultado obtido:
+
+Flashback complete.
+
+Conclusão:
+
+O PDB PROD foi restaurado para o ponto CCM_RESTORE_11062026.
+
+---
+
+4. Abrir o PDB PROD com RESETLOGS
+
+---
+
+Após o flashback, abrir o PDB com RESETLOGS:
+
+alter pluggable database PROD open resetlogs;
+
+Resultado obtido:
+
+Pluggable database altered.
+
+---
+
+5. Validar abertura do PDB PROD
+
+---
+
+Executar:
+
+show pdbs;
+
+Resultado obtido:
+
+CON_ID CON_NAME                       OPEN MODE  RESTRICTED
+
+---
+
+2      PDB$SEED                       READ ONLY  NO
+3      PROD                           READ WRITE NO
+
+Conclusão:
+
+O PDB PROD foi aberto com sucesso em READ WRITE após o flashback.
+
+---
+
+6. Validar retorno da tabela CCM_PROD.T1
+
+---
+
+Entrar no PDB PROD:
+
+alter session set container=PROD;
+
+Configurar visualização:
+
+set lines 200
+col owner format a15
+col table_name format a20
+col tablespace_name format a20
+
+Validar se a tabela voltou:
+
+select owner,
+table_name,
+tablespace_name
+from dba_tables
+where owner = 'CCM_PROD'
+and table_name = 'T1';
+
+Resultado obtido:
+
+OWNER           TABLE_NAME           TABLESPACE_NAME
+
+---
+
+CCM_PROD        T1                   CCM_TBS
+
+Conclusão:
+
+A tabela CCM_PROD.T1 foi restaurada com sucesso pelo flashback do PDB PROD.
+
+---
+
+7. Validar quantidade de registros após o flashback
+
+---
+
+Executar:
+
+select count(*) from CCM_PROD.t1;
+
+Resultado obtido:
+
+## COUNT(*)
+
+55410
+
+Conclusão:
+
+A tabela CCM_PROD.T1 voltou com 55410 registros, confirmando que o flashback restaurou os dados corretamente.
+
+==============================================================================
+PÓS-ATUALIZAÇÃO
+===============
+
+---
+
+1. Ativar novamente os jobs internos da base
+
+---
+
+No CDB$ROOT:
+
+alter session set container=CDB$ROOT;
+
+alter system set job_queue_processes=160 scope=both;
+
+No PDB PROD:
+
+alter session set container=PROD;
+
+alter system set job_queue_processes=160 scope=both;
+
+Validar:
+
+show parameter job_queue_processes;
+
+---
+
+2. Descomentar a crontab
+
+---
+
+Acessar a crontab:
+
+crontab -e
+
+Descomentar os jobs que haviam sido comentados antes da atividade.
+
+Validar:
+
+crontab -l
+
+---
+
+3. Executar backup incremental após a atualização
+
+---
+
+Após confirmar que o ambiente está íntegro, executar backup incremental:
+
+/home/oracle/CCM/scripts/backup_rman_CCM.sh level1 CDBPROD /u02/backup/prod/rman/database
+
+Caso tenha ocorrido abertura com RESETLOGS ou mudança crítica, executar backup level 0:
+
+/home/oracle/CCM/scripts/backup_rman_CCM.sh level0 CDBPROD /u02/backup/prod/rman/database
+
+---
+
+4. Dropar restore point após intervalo seguro
+
+---
+
+Observação:
+
+O restore point garantido mantém a capacidade de retorno, mas também pode consumir espaço na FRA. Por isso, deve ser removido somente após validação segura da atualização, normalmente no primeiro dia útil após a atividade.
+
+No CDB$ROOT:
+
+alter session set container=CDB$ROOT;
+
+Validar restore points existentes:
+
+SELECT NAME, SCN, TIME, GUARANTEE_FLASHBACK_DATABASE
+FROM V$RESTORE_POINT;
+
+Dropar restore point utilizado na atividade:
+
+drop restore point CCM_RESTORE_11062026;
+
+Validar novamente:
+
+SELECT NAME, SCN, TIME, GUARANTEE_FLASHBACK_DATABASE
+FROM V$RESTORE_POINT;
+
+Resultado esperado:
+
+O restore point CCM_RESTORE_11062026 não deve mais aparecer na listagem.
+
+==============================================================================
+RESUMO DA ATIVIDADE EXECUTADA
+=============================
+
+Durante a atividade, foram realizadas as seguintes ações:
+
+1. Validação da FRA em /u02/fast_recovery_area com tamanho de 20G.
+2. Criação do restore point garantido CCM_RESTORE_11062026 para o PDB PROD.
+3. Validação do restore point com GUARANTEE_FLASHBACK_DATABASE = YES.
+4. Validação inicial da tabela CCM_PROD.T1 com 55410 registros.
+5. Validação inicial da tabela CCM_TESTE.T1 com 55410 registros.
+6. Drop da tabela CCM_PROD.T1 com PURGE.
+7. Confirmação da remoção da tabela através do erro ORA-00942.
+8. Fechamento do PDB PROD.
+9. Execução do FLASHBACK PLUGGABLE DATABASE PROD para o restore point.
+10. Abertura do PDB PROD com RESETLOGS.
+11. Validação do PDB PROD em READ WRITE.
+12. Validação de retorno da tabela CCM_PROD.T1.
+13. Confirmação de retorno dos 55410 registros da tabela CCM_PROD.T1.
+
+==============================================================================
+STATUS FINAL VALIDADO
+=====================
+
+PDB PROD: READ WRITE
+Restore Point utilizado: CCM_RESTORE_11062026
+Tabela restaurada: CCM_PROD.T1
+Tablespace da tabela: CCM_TBS
+Quantidade de registros após flashback: 55410
+Resultado do flashback: concluído com sucesso
+
+==============================================================================
+FIM DO PROCEDIMENTO — ATUALIZAÇÃO SALUX COM FLASHBACK DO PDB PROD
+=================================================================

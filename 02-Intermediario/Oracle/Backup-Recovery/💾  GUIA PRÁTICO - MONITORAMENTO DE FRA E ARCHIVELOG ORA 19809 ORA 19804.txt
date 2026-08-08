@@ -1,0 +1,210 @@
+================================================================================
+           GUIA PRÁTICO – MONITORAMENTO DE FRA E ARCHIVELOG ORA-19809 ORA-19804
+================================================================================
+ Oracle Database 19c
+ Guia de Consulta Rápida para Operação DBA
+================================================================================
+1. CONFIGURAÇÃO DO AMBIENTE SQL*PLUS
+================================================================================
+
+Os comandos abaixo NÃO alteram o banco de dados.
+Eles servem apenas para melhorar a visualização das consultas.
+
+Comandos:
+
+SET LINES 200
+SET PAGES 200
+
+DICA
+----
+Sempre ajuste LINES e PAGES antes de consultas administrativas.
+Evita:
+- Resultados truncados
+- Leitura incorreta
+- Erros de interpretação em incidentes
+
+================================================================================
+2. EXECUÇÃO – CONSULTAS DE VERIFICAÇÃO
+================================================================================
+
+------------------------------------------------------------------------------
+2.1 Uso da FRA por tipo de arquivo
+------------------------------------------------------------------------------
+
+Objetivo:
+Identificar O QUE está consumindo espaço na FRA.
+
+SQL:
+
+COLUMN file_type FORMAT A20
+COLUMN percent_space_used FORMAT 999.99
+COLUMN percent_space_reclaimable FORMAT 999.99
+COLUMN number_of_files FORMAT 999,999
+
+SELECT file_type,
+       percent_space_used,
+       percent_space_reclaimable,
+       number_of_files
+FROM v$flash_recovery_area_usage;
+
+INTERPRETAÇÃO SIMPLES
+--------------------
+- file_type                  : Tipo de arquivo (ARCHIVELOG, BACKUP PIECE, etc.)
+- percent_space_used          : Percentual da FRA utilizado
+- percent_space_reclaimable   : Espaço que pode ser liberado automaticamente
+- number_of_files             : Quantidade de arquivos
+
+DICA DE DBA
+-----------
+- ARCHIVELOG alto + reclaimable baixo = RISCO DE FRA CHEIA
+- BACKUP PIECE alto = revisar retenção do RMAN
+
+------------------------------------------------------------------------------
+2.2 Tamanho total e uso da FRA (MB)
+------------------------------------------------------------------------------
+
+SQL:
+
+COLUMN MB_LIMIT FORMAT 999,999
+COLUMN MB_USED FORMAT 999,999
+COLUMN MB_RECLAIMABLE FORMAT 999,999
+
+SELECT SPACE_LIMIT/1024/1024       AS MB_LIMIT,
+       SPACE_USED/1024/1024        AS MB_USED,
+       SPACE_RECLAIMABLE/1024/1024 AS MB_RECLAIMABLE
+FROM V$RECOVERY_FILE_DEST;
+
+INTERPRETAÇÃO
+-------------
+- MB_LIMIT        : Tamanho total configurado da FRA
+- MB_USED         : Espaço atualmente utilizado
+- MB_RECLAIMABLE  : Espaço que o Oracle pode limpar automaticamente
+
+ATENÇÃO
+-------
+Se MB_USED estiver próximo de MB_LIMIT
+E MB_RECLAIMABLE for baixo,
+AÇÃO IMEDIATA é necessária.
+
+------------------------------------------------------------------------------
+2.3 Localização dos Control Files
+------------------------------------------------------------------------------
+
+SQL:
+
+COLUMN name FORMAT A50
+
+SELECT name FROM v$controlfile;
+
+POR QUE ISSO É IMPORTANTE?
+-------------------------
+- Control files podem estar localizados na FRA
+- FRA cheia pode impedir atualização do control file
+- Sempre valide se existem MÚLTIPLAS CÓPIAS
+
+------------------------------------------------------------------------------
+2.4 Verificação dos Archive Destinations
+------------------------------------------------------------------------------
+
+2.4.1 Status geral dos destinos de archive
+
+SQL:
+
+SELECT DEST_ID,
+       DEST_NAME,
+       STATUS,
+       ERROR
+FROM V$ARCHIVE_DEST_STATUS
+WHERE STATUS = 'VALID';
+
+INTERPRETAÇÃO
+-------------
+- STATUS = VALID  : destino operacional
+- ERROR vazio     : funcionamento normal
+- ERROR preenchido: problema no archive
+
+------------------------------------------------------------------------------
+2.4.2 Consulta de apoio (colunas disponíveis)
+------------------------------------------------------------------------------
+
+SQL:
+
+SELECT column_name
+FROM all_tab_columns
+WHERE table_name = 'V_$ARCHIVE_DEST_STATUS';
+
+DICA
+----
+Útil para troubleshooting avançado e entendimento da view.
+
+------------------------------------------------------------------------------
+2.5 Confirmar modo do banco
+------------------------------------------------------------------------------
+
+SQL:
+
+SELECT LOG_MODE FROM V$DATABASE;
+
+Resultado esperado:
+
+ARCHIVELOG
+
+OBSERVAÇÃO
+----------
+Se estiver NOARCHIVELOG:
+- FRA existe
+- Porém não será usada para archives
+
+------------------------------------------------------------------------------
+2.6 Ver logs arquivados
+------------------------------------------------------------------------------
+
+SQL:
+
+SELECT * FROM V$ARCHIVED_LOG;
+
+USO PRÁTICO
+-----------
+- Validar geração de archived logs
+- Conferir sequência
+- Apoiar troubleshooting de RMAN e Data Guard
+
+------------------------------------------------------------------------------
+2.7 Ver processos de archive
+------------------------------------------------------------------------------
+
+SQL:
+
+SELECT * FROM V$ARCHIVE_PROCESSES;
+
+INTERPRETAÇÃO
+-------------
+- Processos ativos   : normal
+- Processos parados  : atenção imediata
+- Status em erro     : investigar
+
+================================================================================
+3. VALIDAÇÃO FINAL
+================================================================================
+
+Ao final das verificações, confirme:
+
+[OK] FRA não está próxima do limite
+[OK] Existe espaço reclaimable
+[OK] ArchiveLog está sendo gerado
+[OK] Destinos de archive em status VALID
+[OK] Nenhum erro em V$ARCHIVE_DEST_STATUS
+[OK] Control files acessíveis
+
+================================================================================
+4. MENTALIDADE DE DBA EM OPERAÇÃO
+================================================================================
+
+- FRA cheia PARA o banco
+- ArchiveLog parado IMPACTA backup e Data Guard
+- Monitoramento preventivo evita incidentes
+- HugePages + FRA controlada = ambiente estável
+
+================================================================================
+FIM DO GUIA
+================================================================================

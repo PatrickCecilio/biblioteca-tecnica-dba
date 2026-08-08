@@ -1,0 +1,35 @@
+# GUIA PRÁTICO ORACLE
+
+## Criação de Relacionamento com Foreign Key
+
+### 1. Pré-requisito
+
+A tabela principal deve possuir a coluna que será referenciada como chave:
+
+```sql
+<CLIENT_TABLE>.<CLIENT_ID_COLUMN>
+```
+
+---
+
+### 2. Criar a tabela relacionada
+
+```sql
+CREATE TABLE <ORDER_TABLE> (
+    id_pedido    NUMBER PRIMARY KEY,
+    id_cliente   NUMBER,
+    valor        NUMBER(10,2),
+    data_pedido  DATE DEFAULT SYSDATE
+);
+```
+
+---
+
+### 3. Criar a Foreign Key
+
+```sql
+ALTER TABLE <ORDER_TABLE>
+ADD CONSTRAINT <FK_NAME>
+FOREIGN KEY (id_cliente)
+REFERENCES <CLIENT_TABLE>(id_cliente);
+```

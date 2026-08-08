@@ -1,0 +1,34 @@
+analise de uso de memoria:
+
+iostat -x 1 10
+
+select sql_id, plan_hash_value
+from v$sql
+where sql_id in ('cq9kyaj10qk08','2n60zbrhr4m2d','43b1z77xzrmc2','9v1nty15bngp6','8c1m29q0f0066');
+
+
+select *
+from table(dbms_xplan.display_cursor('8c1m29q0f0066', null, 'ALLSTATS LAST'));
+
+
+-=============================================================================
+
+1. O que significa “db file sequential read”
+
+O evento db file sequential read indica:
+
+Leitura de um único bloco no disco.
+
+Chamado normalmente por:
+• índices
+• table access by rowid
+• nested loops
+• full scans pequenos
+
+Tipicamente ocorre quando:
+• há muitas buscas por índice
+• há queries mal otimizadas
+• o buffer cache não está retendo os blocos
+• há contenção ou latência no storage
+
+Quando esse evento explode, o Oracle está esperando pelo disco.

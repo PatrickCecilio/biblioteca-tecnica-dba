@@ -1,0 +1,9 @@
+O que é Swap no Sistema Operacional
+
+O swap é uma parte importante da forma como os sistemas operacionais lidam com memória, principalmente no Linux. Ele funciona como um espaço extra no disco usado quando a RAM não dá conta de tudo o que está rodando. Quando isso acontece, o sistema não precisa travar ou encerrar programas. Em vez disso, ele move para o swap os dados que não estão sendo usados naquele momento e libera a RAM para o que é mais urgente.
+
+Na prática, o swap age como uma extensão mais lenta da RAM. Esse espaço pode estar em uma partição própria ou em um arquivo criado só para isso. Como o disco é bem mais lento que a memória, o desempenho cai quando o sistema usa swap, mas ainda assim ele é importante. Em servidores, máquinas virtuais e sistemas que lidam com muita carga, o swap ajuda a manter tudo funcionando sem interrupções.
+
+O kernel também usa o swap para organizar melhor o que fica na RAM. Ele pode tirar da memória informações que quase não são acessadas, deixando apenas o que é mais importante para o momento. Esse comportamento depende do parâmetro “swappiness”, que define o quanto o sistema deve recorrer ao swap. Ajustar isso ajuda a adaptar o desempenho a diferentes tipos de uso.
+
+Em resumo, o swap não substitui a RAM, mas funciona como uma rede de segurança. Ele dá estabilidade, evita travamentos e garante que processos continuem rodando mesmo em momentos de alta demanda. Por isso, entender e configurar bem o swap é algo essencial para quem administra sistemas ou trabalha com infraestrutura.

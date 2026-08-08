@@ -1,0 +1,83 @@
+-- conectar como SYS e mudar para o PDB (ou conectar diretamente ao service name do PDB)
+sqlplus / as sysdba
+ALTER SESSION SET CONTAINER = <NOME_DO_PDB>;   -- ex: PDB1
+
+
+CREATE TABLESPACE PERFSTAT
+DATAFILE '/u01/app/oracle/oradata/CDB1/pdb1/perfstat01.dbf'
+SIZE 50M
+AUTOEXTEND ON
+NEXT 50M
+MAXSIZE 5G;
+
+-- como SYS conectado ao container/PDB onde vai instalar:
+@?/rdbms/admin/catdbsyn.sql   -- apenas se necessário (sinônimos de dicionário)
+@?/rdbms/admin/dbmspool.sql   -- se recomendado no seu S.O. (documentação indica)
+
+-- ainda conectado como SYS no PDB (ou após ALTER SESSION SET "_oracle_script"=TRUE se no CDB$ROOT)
+@?/rdbms/admin/spcreate.sql
+
+
+O instalador vai pedir:
+
+Senha para PERFSTAT (forneça uma senha segura).
+
+Tablespace default — escolha PERFSTAT (ou outra que criou).
+
+Temporary tablespace — geralmente TEMP.
+
+Coletar estatísticas do schema PERFSTAT (boa prática)
+EXEC DBMS_STATS.GATHER_SCHEMA_STATS('PERFSTAT');
+
+Gerar um snapshot manualmente
+EXEC STATSPACK.SNAP;
+
+CREATE TABLESPACE PERFSTAT
+  DATAFILE '/u01/app/oracle/oradata/SEU_BANCO/perfstat01.dbf'
+  SIZE 500M
+  AUTOEXTEND ON NEXT 100M MAXSIZE UNLIMITED;
+
+CREATE TABLESPACE PERFSTAT
+DATAFILE '/u01/app/oracle/oradata/CDB1/pdb1/perfstat01.dbf'
+SIZE 50M
+AUTOEXTEND ON
+NEXT 50M
+MAXSIZE 5G;
+
+
+EXEC statspack.purge(i_begin_snap => 1, i_end_snap => 36553);
+
+
+SELECT MIN(snap_id) AS menor_snap,
+       MAX(snap_id) AS maior_snap,
+       COUNT(*)     AS total_snapshots
+FROM stats$snapshot;
+
+
+SELECT snap_id,
+       snap_time
+FROM stats$snapshot
+WHERE snap_id <= 36553
+ORDER BY snap_id;
+
+
+SELECT COUNT(*) AS snapshots_a_remover
+FROM stats$snapshot
+WHERE snap_id <= 36553;
+
+
+SELECT SNAP_ID,
+       SNAP_TIME
+FROM STATS$SNAPSHOT
+ORDER BY SNAP_ID;
+
+EXEC statspack.purge(i_begin_snap => 1, i_end_snap => 36553);
+
+Erro a partir da linha : 1 no comando -
+BEGIN statspack.purge(i_begin_snap => 1, i_end_snap => 36553); END;
+Relatório de erros -
+ORA-20200: Snapshot 1 does not exist for DB Id/Instance 4264409280/1
+ORA-06512: em "PERFSTAT.STATSPACK", line 731
+ORA-06512: em "PERFSTAT.STATSPACK", line 1493
+ORA-06512: em "PERFSTAT.STATSPACK", line 1537
+ORA-06512: em line 1

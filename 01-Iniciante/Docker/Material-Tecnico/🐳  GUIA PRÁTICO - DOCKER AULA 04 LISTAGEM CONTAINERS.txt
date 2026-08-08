@@ -1,0 +1,28 @@
+// Aula 4 - Listando os containers
+
+
+# apt install jq
+
+# yum install jq
+
+while :
+do
+	wget -qO-  | jq .[0].question
+	sleep 5
+done
+
+$ docker container run -d --name trivia fundamentalsofdocker/trivia:ed2
+
+$ docker container ls -l
+
+$ docker rm -f trivia
+
+# docker container ls
+
+# docker container ls -a
+
+# docker container ls -q
+
+# docker container rm -f $(docker container ls -a -q)
+
+# docker container ls -h

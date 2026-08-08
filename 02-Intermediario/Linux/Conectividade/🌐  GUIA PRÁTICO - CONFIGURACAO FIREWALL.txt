@@ -1,0 +1,7 @@
+sudo firewall-cmd --list-ports
+
+sudo firewall-cmd --permanent --add-port=1521/tcp
+
+sudo firewall-cmd --reload
+
+sudo firewall-cmd --list-ports

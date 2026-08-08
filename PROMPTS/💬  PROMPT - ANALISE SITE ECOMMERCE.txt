@@ -1,0 +1,44 @@
+Quero que você atue como especialista em UX, UI, CRO, SEO e desenvolvimento web para e-commerce.
+
+Analise profundamente a estrutura, funcionalidades, design, navegação, arquitetura e experiência do usuário dos seguintes sites:
+
+
+Seu objetivo:
+
+Identificar padrões de design
+
+Estrutura de páginas e hierarquia de informações
+
+Navegação e organização de menus
+
+Layout e componentes principais (headers, banners, cards, grids, filtros, busca, footer)
+
+Estratégias de vendas, ofertas e upsell
+
+Funções essenciais do carrinho e checkout
+
+Recursos de confiança (reviews, badges, selos)
+
+Elementos de persuasão e experiência do usuário
+
+Recursos de suporte ao cliente
+
+Tecnologias comuns utilizadas
+
+Estrutura ideal para versão desktop e mobile
+
+Melhores práticas identificadas nesses sites
+
+Após a análise, produza:
+
+✅ Resumo estratégico do que faz esses sites serem líderes
+✅ Lista de features essenciais para meu e-commerce
+✅ Checklist de páginas obrigatórias
+✅ Estrutura sugerida para meu site
+✅ Protótipo textual (wireframe) da home e páginas principais
+✅ Sugestões de layout e paleta moderna inspirada nesses portais
+✅ Sugestões para aumentar conversão desde o lançamento
+
+Meu objetivo é criar um site profissional, moderno e eficiente inspirado nesses líderes globais, adaptado ao mercado brasileiro e ao meu nicho.
+
+Quando terminar a análise, me pergunte detalhadamente sobre meu nicho, produtos, público-alvo e estilo desejado antes de propor o design final.

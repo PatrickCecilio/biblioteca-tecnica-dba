@@ -1,0 +1,22 @@
+sqlplus / as sysdba
+
+SHOW PDBS;
+
+ALTER SESSION SET CONTAINER=<PDB_NAME>;
+
+SHOW CON_NAME;
+
+SELECT sid, serial#, username, status, machine, program
+FROM v$session
+WHERE username IS NOT NULL
+ORDER BY status, username, sid;
+
+ALTER SYSTEM KILL SESSION '<SID>,<SERIAL_NUMBER>' IMMEDIATE;
+
+SELECT p.spid, s.sid, s.serial#, s.username
+FROM v$session s
+JOIN v$process p ON p.addr = s.paddr
+WHERE s.sid = <SID>
+  AND s.serial# = <SERIAL_NUMBER>;
+
+kill -TERM <SPID>

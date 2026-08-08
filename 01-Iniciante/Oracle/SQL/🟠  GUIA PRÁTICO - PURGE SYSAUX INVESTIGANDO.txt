@@ -1,0 +1,59 @@
+SELECT
+window_name,
+repeat_interval,
+duration,
+enabled
+FROM
+dba_scheduler_windows
+WHERE
+enabled = 'TRUE';
+
+SELECT
+occupant_name,
+ROUND(space_usage_kbytes/1024, 2) AS space_mb,
+schema_name,
+move_procedure
+FROM
+v$sysaux_occupants
+ORDER BY
+space_usage_kbytes DESC;
+
+SELECT
+owner,
+segment_name,
+segment_type,
+ROUND(bytes / 1024 / 1024, 2) AS size_mb
+FROM
+dba_segments
+WHERE
+tablespace_name = 'SYSAUX'
+ORDER BY
+bytes DESC
+FETCH FIRST 20 ROWS ONLY;
+
+SELECT
+l.owner,
+l.table_name,
+l.column_name,
+s.segment_name,
+ROUND(s.bytes/1024/1024, 2) size_mb
+FROM
+dba_lobs l
+JOIN
+dba_segments s ON l.segment_name = s.segment_name
+WHERE
+s.tablespace_name = 'SYSAUX'
+ORDER BY
+s.bytes DESC
+FETCH FIRST 10 ROWS ONLY;
+
+SELECT
+name,
+owner,
+statement_count,
+created,
+last_modified
+FROM
+dba_sqlset
+ORDER BY
+statement_count DESC;

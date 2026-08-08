@@ -1,0 +1,13 @@
+dnf install -y chrony
+
+systemctl enable --now chronyd
+
+systemctl status chronyd
+
+chronyc tracking
+
+timedatectl status
+
+timedatectl set-local-rtc 0
+
+hwclock --systohc

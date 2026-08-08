@@ -1,0 +1,61 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+============================================
+   GUIA PRÁTICO DBA – GERENCIAMENTO DE SESSÕES PDB
+============================================
+🛠 CONFIGURAÇÃO – ACESSANDO O PDB
+============================================
+
+1) Conectar direto no PDB
+--------------------------------------------
+sqlplus sys@PDBAULAS as sysdba
+-- ou
+sqlplus system@PDBAULAS
+
+2) Conectar via CDB$ROOT e mudar para o PDB
+--------------------------------------------
+ALTER SESSION SET CONTAINER = PDBAULAS;
+
+3) Confirmar onde está conectado
+--------------------------------------------
+SHOW CON_NAME;
+-- ou
+SELECT SYS_CONTEXT('USERENV','CON_NAME') FROM DUAL;
+
+============================================
+✅ VALIDAÇÃO FINAL
+============================================
+- Checar processos no SO:
+  ps -ef | grep oracle
+
+- Confirmar container:
+  SHOW CON_NAME;
+
+- Verificar sessões:
+  SELECT * FROM v$session;
+============================================
+🚀 EXECUÇÃO – ENCERRANDO SESSÕES
+============================================
+
+1) Encerrar sessão Oracle
+--------------------------------------------
+ALTER SYSTEM KILL SESSION 'sid,serial#' IMMEDIATE;
+
+Exemplo:
+ALTER SYSTEM KILL SESSION '123,4567' IMMEDIATE;
+
+⚠️ Cuidado: pode abortar transações ativas.
+
+2) Sessão presa (zumbi) – localizar SPID
+--------------------------------------------
+SELECT p.spid, s.sid, s.serial#, s.username
+FROM   v$session s
+JOIN   v$process p ON p.addr = s.paddr
+WHERE  s.sid = &SID AND s.serial# = &SERIAL;
+
+3) Finalizar no Linux (somente se necessário)
+--------------------------------------------
+kill -9 <SPID>
+
+Dica: sempre confirme o ambiente antes de executar comandos críticos.
+⚠️ Use com extremo cuidado! Impacto direto no SO.

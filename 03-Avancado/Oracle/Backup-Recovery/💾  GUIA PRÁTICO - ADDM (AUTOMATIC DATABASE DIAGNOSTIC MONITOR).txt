@@ -1,0 +1,16 @@
+SELECT task_name, status, analysis_start_time, analysis_end_time
+FROM dba_advisor_tasks
+WHERE advisor_name = 'ADDM'
+ORDER BY analysis_end_time DESC;
+
+SET LONG 200000
+SET PAGESIZE 0
+SPOOL addm_report.html
+SELECT DBMS_ADVISOR.GET_TASK_REPORT(
+  task_name => :task_name,
+  task_owner => 'SYS',
+  type => 'TEXT',
+  level => 'TYPICAL'
+)
+FROM dual;
+SPOOL OFF;

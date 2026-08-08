@@ -1,0 +1,95 @@
+Você pode consultar o valor atual do LOG_BUFFER usando a seguinte consulta SQL:
+
+show parameter log_buffer;
+
+NAME       TYPE        VALUE
+---------- ----------- -----
+log_buffer big integer 6448K
+
+OBS: O valor está em Kbytes, no meu caso cerca de 6MBytes.
+
+Melhores práticas para performance:
+
+Aqui estão algumas práticas recomendadas:
+
+- Ajuste com base na carga de trabalho: O tamanho do LOG_BUFFER pode ser ajustado com base na carga
+  de trabalho do seu sistema.
+  Se você tiver muitas transações intensivas em gravação, será benéfico aumentar o tamanho do buffer.
+  Os valores default definidos pela Oracle estão entre 2 MB a 32 MB, dependendo do tamanho do SGA e
+  do número de CPUs, mas para quem
+  trabalha com FlashBack considere no minimo 64MB.
+
+- Monitore o desempenho: Use ferramentas como o Oracle Enterprise Manager ou consultas SQL para
+  monitorar o desempenho do sistema.
+  Isso ajudará a identificar se o tamanho do LOG_BUFFER está adequado para suas operações.
+
+Para identificar se há problemas relacionados ao LOG_BUFFER através de eventos de espera
+(wait events) no Oracle, você pode usar
+a visão dinâmica V$SESSION_EVENT para monitorar os eventos de espera associados às sessões ativas.
+Se você observar um grande número de waits relacionados ao log_buffer_space, isso pode indicar
+que o tamanho do LOG_BUFFER
+pode ser um fator limitante no desempenho.
+
+Aqui está um exemplo de como você pode verificar esses eventos:
+
+  SELECT
+  event,
+  total_waits,
+  time_waited
+FROM
+  v$session_event
+WHERE
+  event LIKE '%buffer%'
+ORDER BY
+  total_waits DESC;
+
+Este código mostra a quantidade de eventos de waits e o tempo em milisegundos (para ver segundos,
+precisa dividir por 1000) que outros recursos precisou esperar para rodar porque o log buffer estava
+a fazer algum trabalho. A vezes tempos muito grandes são indicativos que
+temos problemas em algum recurso do Oracle, que precisam ser melhor dimensionados.
+
+Se quiser ver todos os waits basta remover o filtro:
+
+  SELECT
+  event,
+  total_waits,
+  time_waited
+FROM
+  v$session_event
+ORDER BY
+  total_waits DESC;
+
+*** WAITS É ALGO QUE PRECISA MONITORAR, PORQUE SAO INDICATIVOS QUE O ORACLE ESTA A AGUARDAR
+ALGUM RECURSO COMO CPU, DISCO, MEMORIA, REDE, BLOQUEIOS EM PAGINAS DE DADOS OU TABELAS, PARA
+PODER EXECUTAR ALGUM COMANDO.
+
+--
+
+- Considere outros parâmetros relacionados: Além do LOG_BUFFER, outros parâmetros,
+  como LOG_FILE_SIZE, também podem afetar o desempenho do redo log.
+  Certifique-se de revisar e ajustar esses parâmetros conforme necessário.
+
+- Teste em ambientes controlados: Antes de fazer alterações em ambientes de produção, teste as
+  configurações propostas em ambientes controlados de QA
+  para avaliar o impacto nas operações e no desempenho do sistema.
+
+Vamos ao LAB
+
+Vamos alterar o parametro atual para 128MB. Este parametro Só poderá ser alterarado no SPFILE
+e NÃO USANDO MEMORY OU BOTH.
+
+ALTER SYSTEM SET log_buffer=128M SCOPE=SPFILE;
+shut immediate;
+startup;
+
+SELECT open_mode FROM v$database;
+
+- Vamos verificar se o valor foi alterado:
+
+show parameter log_buffer;
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------
+log_buffer                           big integer 128M
+
+-------------------------------------------------------------------------------------------------------------------------------------------

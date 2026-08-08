@@ -1,0 +1,12 @@
+export ORACLE_BASE=<ORACLE_BASE>
+export ORACLE_HOME=<ORACLE_HOME>
+export ORACLE_SID=<SID>
+export PATH="$ORACLE_HOME/bin:$PATH"
+
+printf '%s\n' "$ORACLE_BASE" "$ORACLE_HOME" "$ORACLE_SID" "$PATH"
+
+command -v sqlplus
+
+command -v lsnrctl
+
+sqlplus / as sysdba

@@ -1,0 +1,209 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+# GUIA PRÁTICO ORACLE
+
+## Ajuste de SGA, HugePages e ORA-27104
+
+### 1. Verificar memória, Swap e HugePages
+
+```bash
+cat /proc/meminfo | grep -E "MemTotal|SwapTotal|HugePages"
+```
+
+```bash
+free -h
+```
+
+---
+
+### 2. Verificar limites e grupos do usuário Oracle
+
+```bash
+su - oracle
+```
+
+```bash
+ulimit -l
+```
+
+```bash
+id oracle
+```
+
+---
+
+### 3. Verificar parâmetros Oracle
+
+```bash
+sqlplus / as sysdba
+```
+
+```sql
+SHOW PARAMETER memory_target;
+```
+
+```sql
+SHOW PARAMETER memory_max_target;
+```
+
+```sql
+SHOW PARAMETER use_large_pages;
+```
+
+```sql
+SHOW PARAMETER sga;
+```
+
+---
+
+### 4. Configurar HugePages
+
+```bash
+id oracle
+```
+
+```bash
+vi /etc/sysctl.conf
+```
+
+```text
+vm.nr_hugepages = 2500
+vm.hugetlb_shm_group = 54321
+```
+
+```bash
+sysctl -p
+```
+
+---
+
+### 5. Configurar memlock
+
+```bash
+vi /etc/security/limits.conf
+```
+
+```text
+oracle soft memlock 5120000
+oracle hard memlock 5120000
+```
+
+---
+
+### 6. Verificar Transparent HugePages
+
+```bash
+cat /sys/kernel/mm/transparent_hugepage/enabled
+```
+
+---
+
+### 7. Criar configuração do Tuned
+
+```bash
+mkdir /etc/tuned/oracle-custom
+```
+
+```bash
+vi /etc/tuned/oracle-custom/tuned.conf
+```
+
+```ini
+[main]
+include=enterprise-storage
+
+[vm]
+transparent_hugepages=never
+```
+
+```bash
+tuned-adm profile oracle-custom
+```
+
+---
+
+### 8. Desabilitar AMM
+
+```bash
+sqlplus / as sysdba
+```
+
+```sql
+ALTER SYSTEM RESET memory_target SCOPE=SPFILE SID='*';
+```
+
+```sql
+ALTER SYSTEM RESET memory_max_target SCOPE=SPFILE SID='*';
+```
+
+---
+
+### 9. Configurar SGA e PGA
+
+```sql
+ALTER SYSTEM SET sga_max_size=4800M SCOPE=SPFILE;
+```
+
+```sql
+ALTER SYSTEM SET sga_target=4800M SCOPE=SPFILE;
+```
+
+```sql
+ALTER SYSTEM SET pga_aggregate_target=1200M SCOPE=SPFILE;
+```
+
+```sql
+ALTER SYSTEM SET pga_aggregate_limit=2400M SCOPE=SPFILE;
+```
+
+---
+
+### 10. Configurar Large Pages
+
+```sql
+ALTER SYSTEM SET use_large_pages=ONLY SCOPE=SPFILE;
+```
+
+---
+
+### 11. Reiniciar a instância
+
+```sql
+SHUTDOWN IMMEDIATE;
+```
+
+```sql
+STARTUP;
+```
+
+---
+
+### 12. Validar HugePages
+
+```bash
+grep Huge /proc/meminfo
+```
+
+```bash
+su - oracle -c "ulimit -l"
+```
+
+---
+
+### 13. Validar parâmetros Oracle
+
+```bash
+sqlplus / as sysdba
+```
+
+```sql
+SHOW PARAMETER use_large_pages;
+```
+
+```sql
+SHOW PARAMETER sga;
+```
+
+```sql
+SELECT * FROM v$huge_pages_info;
+```

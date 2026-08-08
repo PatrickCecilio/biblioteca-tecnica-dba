@@ -1,0 +1,17 @@
+# GUIA PRÁTICO ORACLE
+
+## Parada e Inicialização de Database com SRVCTL
+
+### 1. Parar o banco
+
+```bash
+srvctl stop database -db <DB_UNIQUE_NAME> -stopoption immediate
+```
+
+---
+
+### 2. Iniciar o banco
+
+```bash
+srvctl start database -db <DB_UNIQUE_NAME> -stopoption immediate
+```

@@ -1,0 +1,80 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+================================================================================
+🗄️  GUIA RÁPIDO — REMOÇÃO DE DATABASE (SQL SERVER)
+Base: SANKHYA_TREINA
+Objetivo: Validar existência da base, encerrar conexões e executar DROP DATABASE
+================================================================================
+## 📌 ETAPA 0 — VERIFICAR AS BASES
+
+SELECT name
+FROM sys.databases
+ORDER BY name;
+
+
+## 📌 ETAPA 1 — VERIFICAR SE A BASE EXISTE
+
+SELECT name
+FROM sys.databases
+WHERE name = 'SANKHYA_TREINA';
+
+📌 ETAPA 2 — VERIFICAR SESSÕES ATIVAS NA BASE
+(Identifica usuários ou aplicações conectadas)
+
+---
+
+SELECT
+session_id,
+login_name,
+host_name,
+program_name
+FROM sys.dm_exec_sessions
+WHERE database_id = DB_ID('SANKHYA_TREINA');
+
+📌 ETAPA 3 — GARANTIR QUE A SESSÃO NÃO ESTÁ CONECTADA NA BASE
+(O DROP deve ser executado fora da database)
+
+---
+
+USE master;
+GO
+
+Confirmar banco atual:
+
+SELECT DB_NAME() AS BancoAtual;
+
+📌 ETAPA 4 — DERRUBAR CONEXÕES ATIVAS
+(Força desconexão de usuários conectados)
+
+---
+
+ALTER DATABASE SANKHYA_TREINA
+SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+
+📌 ETAPA 5 — REMOVER A DATABASE
+⚠️ ATENÇÃO: operação irreversível
+
+---
+
+DROP DATABASE SANKHYA_TREINA;
+
+## 📌 ETAPA 6 — CONFIRMAR QUE A BASE FOI REMOVIDA
+
+SELECT name
+FROM sys.databases
+WHERE name = 'SANKHYA_TREINA';
+
+## 📌 COMANDO OPCIONAL — VERIFICAR BANCO ATUAL DA SESSÃO
+
+SELECT DB_NAME() AS BancoAtual;
+
+## 📎 OBSERVAÇÕES IMPORTANTES
+
+✔ O comando DROP DATABASE remove permanentemente todos os dados.
+✔ Sempre confirmar aceite do cliente antes da execução.
+✔ Garantir que não existem backups pendentes ou dependências.
+✔ Executar o DROP estando conectado na base "master".
+
+================================================================================
+FIM DO PROCEDIMENTO
+===================

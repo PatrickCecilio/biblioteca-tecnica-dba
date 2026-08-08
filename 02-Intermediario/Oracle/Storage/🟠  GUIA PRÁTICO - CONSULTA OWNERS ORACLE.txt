@@ -1,0 +1,4 @@
+SELECT DISTINCT owner
+FROM dba_segments
+WHERE tablespace_name = UPPER('<TABLESPACE_NAME>')
+ORDER BY owner;

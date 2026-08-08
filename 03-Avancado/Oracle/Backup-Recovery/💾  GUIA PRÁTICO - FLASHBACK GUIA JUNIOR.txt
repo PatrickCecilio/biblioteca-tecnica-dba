@@ -1,0 +1,26 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+sqlplus / as sysdba
+
+SELECT log_mode, flashback_on, open_mode
+FROM v$database;
+
+SHOW PARAMETER db_recovery_file_dest;
+
+SHOW PARAMETER db_recovery_file_dest_size;
+
+SHUTDOWN IMMEDIATE;
+
+STARTUP MOUNT;
+
+ALTER DATABASE FLASHBACK ON;
+
+ALTER DATABASE OPEN;
+
+CREATE RESTORE POINT <RESTORE_POINT_NAME> GUARANTEE FLASHBACK DATABASE;
+
+SELECT name, scn, time, guarantee_flashback_database
+FROM v$restore_point
+ORDER BY time DESC;
+
+EXIT;

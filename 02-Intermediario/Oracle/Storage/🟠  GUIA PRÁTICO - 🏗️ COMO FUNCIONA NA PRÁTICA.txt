@@ -1,0 +1,42 @@
+🏗️ Como funciona na prática?
+🔹 Nível 1 — BLOCKS
+
+Menor unidade física.
+
+Tamanho fixo.
+
+Onde ficam os dados reais.
+
+🔹 Nível 2 — EXTENTS
+
+Agrupamento de blocks.
+
+Unidade mínima de alocação de espaço.
+
+Um segmento cresce adicionando extents.
+
+🔹 Nível 3 — SEGMENTOS
+
+Conjunto de extents que pertencem a um mesmo objeto (tabela, índice, LOB).
+
+| Conceito       | Analogia            | Função                               |
+| -------------- | ------------------- | ------------------------------------ |
+| **Block**      | Tijolo              | Menor peça onde ficam os dados       |
+| **Extent**     | Caixa de tijolos    | Módulo que o Oracle usa para crescer |
+| **Segmento**   | Parede construída   | Objeto físico (tabela, índice, etc.) |
+| **Tablespace** | Conjunto de paredes | Agrupamento lógico                   |
+| **Datafile**   | Prédio              | Armazenamento físico real            |
+
+
+| Cenário          | Valor típico |
+| ---------------- | ------------ |
+| Dev / Teste      | 4096 – 8192  |
+| Produção pequena | 16384        |
+| Produção média   | 32768        |
+| Produção crítica | **65535**    |
+
+| Ambiente         | Tempo            |
+| ---------------- | ---------------- |
+| Dev              | 60–120s          |
+| Produção média   | 300–600s         |
+| Produção crítica | **900s ou mais** |

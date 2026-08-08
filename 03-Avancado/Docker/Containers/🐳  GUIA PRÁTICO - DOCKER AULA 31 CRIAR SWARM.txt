@@ -1,0 +1,7 @@
+docker swarm init --advertise-addr <IP_ADDRESS>
+
+docker swarm join-token worker
+
+docker swarm join --token <JOIN_TOKEN> <MANAGER_IP>:2377
+
+docker node ls

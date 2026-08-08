@@ -1,0 +1,10 @@
+SHOW PARAMETER log_buffer;
+
+SELECT name, value
+FROM v$parameter
+WHERE name = 'log_buffer';
+
+SELECT name, value
+FROM v$sysstat
+WHERE name IN ('redo buffer allocation retries', 'redo entries', 'redo size')
+ORDER BY name;

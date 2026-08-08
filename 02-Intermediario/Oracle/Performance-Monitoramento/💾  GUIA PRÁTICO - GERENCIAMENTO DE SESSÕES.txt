@@ -1,0 +1,19 @@
+-- Contar sessões inativas por máquina
+SELECT MACHINE, COUNT(*) AS QTD_SESSOES_INATIVAS
+FROM V$SESSION
+WHERE STATUS = 'INACTIVE'
+GROUP BY MACHINE
+ORDER BY QTD_SESSOES_INATIVAS DESC;
+
+-- Detalhar sessões de uma máquina
+SELECT sid, serial#, status, username, osuser, program, machine, module, action, logon_time, last_call_et
+FROM v$session
+WHERE status = 'INACTIVE'
+AND machine = 'FMTHVD\SALUX237921';
+
+-- Matar sessões inativas com mais de 1h
+SELECT 'ALTER SYSTEM KILL SESSION ''' || sid || ',' || serial# || ''' IMMEDIATE;' AS kill_cmd
+FROM v$session
+WHERE status = 'INACTIVE'
+AND username IS NOT NULL
+AND last_call_et > 3600;

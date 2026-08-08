@@ -1,0 +1,255 @@
+# GUIA PRÁTICO ORACLE
+
+## Instalação do Oracle Database 21c no Oracle Linux
+
+### 1. Validar hostname e rede
+
+```bash
+hostname
+```
+
+```bash
+ip a
+```
+
+```bash
+nmcli con show <INTERFACE_NAME>
+```
+
+---
+
+### 2. Atualizar o Oracle Linux
+
+```bash
+sudo yum update -y
+```
+
+```bash
+sudo yum upgrade -y
+```
+
+---
+
+### 3. Localizar o Oracle Preinstallation RPM
+
+```bash
+yum search preinstall
+```
+
+---
+
+### 4. Instalar o Oracle Preinstallation RPM
+
+```bash
+dnf install oracle-database-preinstall-21c.x86_64
+```
+
+Alternativa:
+
+```bash
+yum install oracle-database-preinstall-21c.x86_64
+```
+
+---
+
+### 5. Criar o Oracle Home
+
+```bash
+mkdir -p <ORACLE_HOME>
+```
+
+Exemplo utilizado no material:
+
+```bash
+mkdir -p /app/oracle/product/21c/dbhome_1
+```
+
+---
+
+### 6. Ajustar proprietário e permissões
+
+```bash
+chown -R oracle:oinstall /app/oracle
+```
+
+```bash
+chmod -R 775 /app/oracle
+```
+
+---
+
+### 7. Validar espaço em disco
+
+```bash
+df -h
+```
+
+---
+
+### 8. Acessar o Oracle Home
+
+```bash
+cd <ORACLE_HOME>
+```
+
+```bash
+pwd
+```
+
+```bash
+ls -l
+```
+
+---
+
+### 9. Descompactar o instalador
+
+```bash
+unzip LINUX*.zip
+```
+
+---
+
+### 10. Iniciar instalação do Oracle Software
+
+Executar como usuário `oracle`:
+
+```bash
+cd <ORACLE_HOME>
+```
+
+```bash
+./runInstaller
+```
+
+---
+
+### 11. Executar root.sh
+
+Executar como `root` quando solicitado pelo instalador:
+
+```bash
+<ORACLE_HOME>/root.sh
+```
+
+---
+
+### 12. Configurar o Listener
+
+Executar como usuário `oracle`:
+
+```bash
+netca
+```
+
+---
+
+### 13. Validar o Listener
+
+```bash
+lsnrctl status
+```
+
+Caso necessário:
+
+```bash
+lsnrctl start
+```
+
+---
+
+### 14. Criar o CDB e PDB
+
+Executar como usuário `oracle`:
+
+```bash
+dbca
+```
+
+---
+
+### 15. Conectar ao banco
+
+```bash
+sqlplus / as sysdba
+```
+
+---
+
+### 16. Validar CDB
+
+```sql
+SELECT
+    name,
+    cdb
+FROM v$database;
+```
+
+---
+
+### 17. Validar PDBs
+
+```sql
+SELECT pdb_name
+FROM cdb_pdbs;
+```
+
+```sql
+SELECT
+    name,
+    open_mode
+FROM v$pdbs;
+```
+
+---
+
+### 18. Abrir a PDB
+
+```sql
+ALTER PLUGGABLE DATABASE <PDB_NAME> OPEN;
+```
+
+---
+
+### 19. Salvar o estado da PDB
+
+```sql
+ALTER PLUGGABLE DATABASE <PDB_NAME> SAVE STATE;
+```
+
+---
+
+### 20. Validar estado das PDBs
+
+```sql
+SHOW PDBS;
+```
+
+---
+
+### 21. Validar a instância
+
+```sql
+SELECT status
+FROM v$instance;
+```
+
+---
+
+### 22. Validar variáveis Oracle
+
+```bash
+echo $ORACLE_HOME
+```
+
+```bash
+echo $ORACLE_SID
+```
+
+```bash
+echo $PATH
+```
+
+```bash
+echo $ORACLE_BASE
+```

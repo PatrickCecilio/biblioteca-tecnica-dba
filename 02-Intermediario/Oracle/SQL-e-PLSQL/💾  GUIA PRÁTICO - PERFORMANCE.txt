@@ -1,0 +1,46 @@
+# GUIA PRÁTICO ORACLE
+
+## Criação de Índice para Performance
+
+### 1. Criar o índice
+
+```sql
+CREATE INDEX <INDEX_NAME>
+ON <TABLE_NAME> (<COLUMN_NAME>);
+```
+
+---
+
+### 2. Validar a criação do índice
+
+```sql
+SELECT
+    index_name,
+    table_name,
+    status
+FROM user_indexes
+WHERE index_name = UPPER('<INDEX_NAME>');
+```
+
+---
+
+### 3. Validar a coluna indexada
+
+```sql
+SELECT
+    index_name,
+    table_name,
+    column_name,
+    column_position
+FROM user_ind_columns
+WHERE index_name = UPPER('<INDEX_NAME>')
+ORDER BY column_position;
+```
+
+---
+
+### 4. Remover o índice, se necessário
+
+```sql
+DROP INDEX <INDEX_NAME>;
+```

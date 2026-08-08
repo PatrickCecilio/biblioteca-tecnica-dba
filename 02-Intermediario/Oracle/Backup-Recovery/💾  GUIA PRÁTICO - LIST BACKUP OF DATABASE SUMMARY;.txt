@@ -1,0 +1,4 @@
+list backup of database summary;
+list backup of controlfile;
+UNTIL TIME/SCN
+show all;

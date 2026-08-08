@@ -1,0 +1,5 @@
+sudo adduser protegido
+
+sudo chown protegido:protegido /caminho/da/pasta
+
+sudo chmod 700 /caminho/da/pasta

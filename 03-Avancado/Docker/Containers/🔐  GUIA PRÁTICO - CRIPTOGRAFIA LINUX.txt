@@ -1,0 +1,19 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+sudo dnf install cryptsetup
+
+sudo dd if=/dev/zero of=/app.img bs=1M count=3072
+
+sudo cryptsetup luksFormat /app.img
+
+sudo cryptsetup luksOpen /app.img app_crypt
+
+sudo mkfs.ext4 /dev/mapper/app_crypt
+
+sudo mount /dev/mapper/app_crypt /app
+
+sudo nano /etc/fstab
+
+sudo umount /app
+
+sudo cryptsetup luksClose app_crypt

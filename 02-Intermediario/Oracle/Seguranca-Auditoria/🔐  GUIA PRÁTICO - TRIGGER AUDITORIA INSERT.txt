@@ -1,0 +1,96 @@
+# GUIA PRÁTICO ORACLE
+
+## Trigger de Auditoria para INSERT
+
+### 1. Criar a tabela de auditoria
+
+```sql
+CREATE TABLE <AUDIT_TABLE> (
+    usuario   VARCHAR2(30),
+    data_log  DATE,
+    acao      VARCHAR2(30)
+);
+```
+
+---
+
+### 2. Criar a Trigger de auditoria
+
+```sql
+CREATE OR REPLACE TRIGGER <TRIGGER_NAME>
+AFTER INSERT ON <TABLE_NAME>
+BEGIN
+
+    INSERT INTO <AUDIT_TABLE> (
+        usuario,
+        data_log,
+        acao
+    )
+    VALUES (
+        USER,
+        SYSDATE,
+        'INSERT'
+    );
+
+END;
+/
+```
+
+---
+
+### 3. Validar a Trigger
+
+```sql
+SELECT
+    trigger_name,
+    table_name,
+    status
+FROM user_triggers
+WHERE trigger_name = UPPER('<TRIGGER_NAME>');
+```
+
+---
+
+### 4. Executar um INSERT de teste
+
+```sql
+INSERT INTO <TABLE_NAME> (
+    <COLUMN_1>,
+    <COLUMN_2>
+)
+VALUES (
+    <VALUE_1>,
+    <VALUE_2>
+);
+
+COMMIT;
+```
+
+---
+
+### 5. Consultar os registros de auditoria
+
+```sql
+SELECT
+    usuario,
+    data_log,
+    acao
+FROM <AUDIT_TABLE>
+ORDER BY data_log DESC;
+```
+
+---
+
+### 6. Desabilitar a Trigger, se necessário
+
+```sql
+ALTER TRIGGER <TRIGGER_NAME> DISABLE;
+```
+
+---
+
+### 7. Habilitar novamente
+
+```sql
+ALTER TRIGGER <TRIGGER_NAME> ENABLE;
+```

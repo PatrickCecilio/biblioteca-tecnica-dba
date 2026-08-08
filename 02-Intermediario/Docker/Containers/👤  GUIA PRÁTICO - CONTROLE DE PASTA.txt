@@ -1,0 +1,269 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+1. Configuração Inicial do Volume Criptografado
+
+
+a. Instalar o Cryptsetup
+
+sudo dnf install cryptsetup
+
+
+b. Criar um Arquivo Container (Exemplo: 1GB)
+
+sudo dd if=/dev/zero of=/script/master.img bs=1M count=1024
+
+Esse comando cria um arquivo de 1 GB que servirá como container criptografado.
+
+
+c. Configurar o Container com LUKS
+
+sudo cryptsetup luksFormat /script/master.img
+
+Ao executar, confirme digitando YES em maiúsculas e defina uma senha forte.
+
+
+d. Abrir o Container e Mapear o Dispositivo
+
+sudo cryptsetup luksOpen /script/master.img cripto_vol
+
+
+e. Criar um Sistema de Arquivos no Volume
+
+sudo mkfs.ext4 /dev/mapper/cripto_vol
+
+
+f. Criar o Diretório de Montagem e Montar o Volume
+
+sudo mkdir -p /mnt/seguro
+
+sudo mount /dev/mapper/cripto_vol /mnt/seguro
+
+=====================================================================
+
+2. Configurar Usuário Protegido e Permissões do Diretório
+
+a. Alterar a Propriedade do Diretório Montado
+
+sudo chown protegido:protegido /mnt/seguro
+
+
+c. Definir Permissões Restritas (700)
+
+sudo chmod 700 /mnt/seguro
+
+Com essas permissões, somente o usuário “protegido” poderá acessar o conteúdo quando o volume estiver montado.
+
+
+=================================================================================================================
+
+3. Instalação das ferramentas do Script de Monitoramento para Matar o usuário não permitido de forma Automática
+
+agora iremos fazer as instalações das ferramentas do script que monitora eventos de acesso e, se detectar um usuário não autorizado.
+
+Para isso, usaremos as ferramentas:
+
+inotifywait: Monitora eventos no sistema de arquivos.
+
+lsof: Lista os arquivos abertos e os respectivos usuários.
+
+awk: Para filtrar e tratar a saída.
+
+
+a. Instalar o inotify-tools
+
+sudo dnf install python3-inotify
+
+b. Instalar o gawk e lsof
+
+sudo dnf install -y gawk lsof
+
+
+C. Criar o Script de Monitoramento
+
+sudo nano /usr/local/bin/monitor.sh
+
+===============================================================================================================
+
+4. Script de Monitoramento para Matar o Usuário não permitido Automáticamente
+
+import os
+
+import subprocess
+
+import pyinotify
+
+
+# Diretório a ser monitorado
+
+MONITORED_DIR = "/mnt/seguro"
+
+# Lista de usuários autorizados
+
+ALLOWED_USERS = ["protegido"]
+
+# Nome do volume criptografado mapeado
+
+CRYPT_NAME = "cripto_vol"
+
+
+class EventHandler(pyinotify.ProcessEvent):
+
+  def process_IN_OPEN(self, event):
+
+    self.check_access(event.pathname)
+
+
+  def process_IN_ATTRIB(self, event):
+
+    self.check_access(event.pathname)
+
+
+  def process_IN_MODIFY(self, event):
+
+    self.check_access(event.pathname)
+
+
+  def check_access(self, path):
+
+    # Verifica quais usuários estão acessando o diretório
+
+    result = subprocess.run(["lsof", "+D", MONITORED_DIR], capture_output=True, text=True)
+
+    lines = result.stdout.split("\n")
+
+
+    unauthorized_users = []
+
+    for line in lines[1:]:
+
+      columns = line.split()
+
+      if len(columns) > 2:
+
+        user = columns[2]
+
+        # Se não estiver na lista de autorizados, adiciona
+
+        if user not in ALLOWED_USERS and user not in unauthorized_users:
+
+          unauthorized_users.append(user)
+
+
+    # Se houver usuários não autorizados, chama o método para matar
+
+    if unauthorized_users:
+
+      print(f"Acesso não autorizado detectado: {', '.join(unauthorized_users)}")
+
+
+    # Descobrir quais processos estão usando o diretório
+
+    result = subprocess.run(["lsof", "+D", MONITORED_DIR], capture_output=True, text=True)
+
+    lines = result.stdout.split("\n")
+
+
+    pids = []
+
+    for line in lines[1:]:
+
+      columns = line.split()
+
+      if len(columns) > 1:
+
+        try:
+
+          pids.append(int(columns[1])) # PID do processo
+
+        except ValueError:
+
+          continue
+
+
+    # Se houver processos usando a pasta, matá-los antes de desmontar
+
+    if pids:
+
+      print(f"Matando processos que estão usando {MONITORED_DIR}: {pids}")
+
+      for pid in pids:
+
+        subprocess.run(["kill", "-9", str(pid)])
+
+
+def main():
+
+  wm = pyinotify.WatchManager()
+
+  handler = EventHandler()
+
+  notifier = pyinotify.Notifier(wm, handler)
+
+
+  # Monitorar eventos de OPEN, ATTRIB e MODIFY de forma recursiva
+
+  wm.add_watch(MONITORED_DIR,
+
+         pyinotify.IN_OPEN | pyinotify.IN_ATTRIB | pyinotify.IN_MODIFY,
+
+         rec=True)
+
+
+  print(f"Monitorando {MONITORED_DIR} para acessos não autorizados...")
+
+  notifier.loop()
+
+
+if __name__ == "__main__":
+
+  main()
+
+
+================================================================================================================
+
+sudo chmod +x /usr/local/bin/monitor.sh
+
+================================================================================================================
+
+
+4. Automatização com systemd
+
+Vamos garantir que o monitoramento seja iniciado automaticamente, e crie um serviço systemd.
+
+a. Criar o Arquivo de Serviço
+
+sudo vi /etc/systemd/system/monitor.service
+
+b. Conteúdo do Serviço
+
+[Unit]
+
+Description=Monitor de acesso para volume criptografado
+
+After=network.target
+
+
+[Service]
+
+Type=simple
+
+ExecStart=/usr/bin/python3 /usr/local/bin/monitor.py
+
+Restart=on-failure
+
+RestartSec=5
+
+
+[Install]
+
+WantedBy=multi-user.target
+
+===================================================================================================================
+
+c. Ativar e Iniciar o Serviço
+
+sudo systemctl daemon-reload
+
+sudo systemctl enable monitor.service
+
+sudo systemctl start monitor.service

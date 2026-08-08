@@ -1,0 +1,21 @@
+1️⃣ Habilitar a captura do trace
+
+EXEC dbms_monitor.serv_mod_act_trace_enable(service_name => 'ORASX01', module_name => 'portal.exe');
+
+
+2️⃣ Desativar a captura do trace
+
+EXEC dbms_monitor.serv_mod_act_trace_disable(service_name => 'ORASX01', module_name  => 'portal.exe');
+
+3️⃣Acessar o diretório de trace
+
+cd $ORACLE_BASE/diag/rdbms/orasx01/ORASX01/trace
+
+
+4️⃣ Consolidar os arquivos de trace (unir todos os arquivos)
+
+trcsess output=portal.trc service=ORASX01 module=portal.exe
+
+5️⃣ Gerar o relatório formatado com tkprof
+
+tkprof portal.trc portal.txt sys=n waits=y sort=exeqry

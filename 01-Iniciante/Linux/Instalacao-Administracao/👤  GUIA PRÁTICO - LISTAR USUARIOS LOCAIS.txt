@@ -1,0 +1,8 @@
+LISTAR USUÁRIOS LOCAIS
+
+Objetivo: listar os nomes registrados no banco local de contas.
+
+cut -d: -f1 /etc/passwd
+getent passwd | cut -d: -f1
+
+Observação: a saída inclui contas de serviço; não significa que todas permitem login interativo.

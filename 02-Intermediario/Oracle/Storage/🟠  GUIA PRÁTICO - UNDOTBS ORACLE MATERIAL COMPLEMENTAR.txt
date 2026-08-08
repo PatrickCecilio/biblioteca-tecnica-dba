@@ -1,0 +1,11 @@
+UNDOTBS: a memória do Oracle que garante consistência
+
+A UNDOTBS é a tablespace responsável por armazenar os dados antigos sempre que uma transação altera informações no Oracle Database. Enquanto as tablespaces comuns guardam o estado atual dos dados, a UNDOTBS preserva o estado anterior, permitindo que o banco volte atrás quando necessário.
+
+Sempre que ocorre um insert, update ou delete, o Oracle grava o novo valor na tabela e armazena o valor antigo na UNDOTBS. Esse mecanismo sustenta três funções essenciais. A primeira é o rollback, que permite desfazer alterações não confirmadas ou operações com erro. A segunda é a consistência de leitura, garantindo que consultas vejam os dados exatamente como estavam no momento em que começaram, mesmo com outras transações acontecendo ao mesmo tempo. A terceira é o flashback query, que possibilita consultar versões recentes dos dados no passado.
+
+A UNDOTBS funciona de forma cíclica, reutilizando espaço conforme as transações são finalizadas. Quando ela é pequena ou muito exigida, pode ocorrer o erro ORA-01555 (snapshot too old), indicando que dados antigos foram sobrescritos antes de serem usados. O dimensionamento correto da tablespace e o ajuste do parâmetro UNDO_RETENTION evitam esse problema.
+
+É importante não confundir undo com redo. O redo serve para recuperar o banco após falhas físicas, enquanto o undo permite desfazer operações e manter a consistência lógica.
+
+Em resumo, a UNDOTBS é fundamental para a consistência, a recuperação lógica e a estabilidade do Oracle Database.

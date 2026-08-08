@@ -1,0 +1,18 @@
+3. Comandos no Data Guard Broker (DGMGRL)
+dgmgrl
+-- Exibe a configuração completa e seus detalhes
+SHOW CONFIGURATION VERBOSE;
+
+-- Exibe informações detalhadas de um banco específico
+SHOW DATABASE VERBOSE 'CDBPRD';
+SHOW DATABASE VERBOSE 'CDBAMDG';
+
+-- Valida a configuração do Data Guard
+VALIDATE CONFIGURATION;
+
+-- Valida um banco específico
+VALIDATE DATABASE 'CDBAMDG';
+
+-- Checar monitor de FSFO
+SHOW OBSERVER;
+SHOW FAST_START FAILOVER;

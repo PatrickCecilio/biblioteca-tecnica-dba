@@ -1,0 +1,18 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+# Remoção de traces
+rm -rf log_*
+> listener.log
+
+# Buscar e remover traces antigos
+find /opt/oracle/diag/rdbms/free/FREE/trace/ -type f -mtime +5 -exec rm -f {} \;
+
+# Limpeza por servidor:
+cd /u01/app/oracle/diag/rdbms/cdbweb/CDBWEB/trace
+rm -rf CDBWEB_* cdmp_* Incdir_*
+
+cd /u01/app/oracle/diag/tnslsnr/srv-modal-db1/listener/alert
+rm -rf log_*
+
+cd /u01/app/oracle/diag/tnslsnr/srv-modal-db1/listener/trace
+> listener.log

@@ -1,0 +1,110 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+# GUIA PRÁTICO ORACLE
+
+## Ajuste de Memória SGA e PGA
+
+### 1. Conectar como SYSDBA
+
+```bash
+sqlplus / as sysdba
+```
+
+---
+
+### 2. Verificar parâmetros atuais de memória
+
+```sql
+SELECT
+    name,
+    value/1024/1024 AS value_mb
+FROM v$parameter
+WHERE name IN (
+    'memory_max_target',
+    'memory_target',
+    'sga_max_size',
+    'sga_target',
+    'pga_aggregate_limit',
+    'pga_aggregate_target'
+)
+ORDER BY 1;
+```
+
+---
+
+### 3. Desabilitar AMM
+
+```sql
+ALTER SYSTEM SET memory_max_target=0 SCOPE=SPFILE;
+```
+
+```sql
+ALTER SYSTEM SET memory_target=0 SCOPE=SPFILE;
+```
+
+---
+
+### 4. Configurar SGA
+
+```sql
+ALTER SYSTEM SET sga_max_size=<SGA_MAX_SIZE> SCOPE=SPFILE;
+```
+
+```sql
+ALTER SYSTEM SET sga_target=<SGA_TARGET> SCOPE=SPFILE;
+```
+
+---
+
+### 5. Configurar PGA
+
+```sql
+ALTER SYSTEM SET pga_aggregate_limit=<PGA_LIMIT> SCOPE=SPFILE;
+```
+
+```sql
+ALTER SYSTEM SET pga_aggregate_target=<PGA_TARGET> SCOPE=SPFILE;
+```
+
+---
+
+### 6. Reiniciar o banco
+
+```sql
+SHUTDOWN IMMEDIATE;
+```
+
+```sql
+STARTUP;
+```
+
+---
+
+### 7. Validar os novos valores
+
+```sql
+SELECT
+    name,
+    value/1024/1024 AS value_mb
+FROM v$parameter
+WHERE name IN (
+    'memory_max_target',
+    'memory_target',
+    'sga_max_size',
+    'sga_target',
+    'pga_aggregate_limit',
+    'pga_aggregate_target'
+)
+ORDER BY 1;
+```
+
+---
+
+### 8. Validar o estado do banco
+
+```sql
+SELECT
+    name,
+    open_mode
+FROM v$database;
+```

@@ -1,0 +1,210 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+================================================================================
+🛠️  GUIA PRÁTICO — CONFIGURAÇÃO DE DATA GUARD 19c VIA RMAN DUPLICATE
+================================================================================
+
+🎯 OBJETIVO
+--------------------------------------------------------------------------------
+Ensinar, passo a passo, como configurar um PHYSICAL STANDBY (Data Guard) no
+Oracle 19c usando RMAN DUPLICATE (FROM ACTIVE DATABASE), garantindo que um
+analista júnior consiga:
+  • Entender pré-requisitos (rede, parâmetros, senhas);
+  • Preparar PRIMARY e STANDBY corretamente;
+  • Executar o DUPLICATE FOR STANDBY com segurança;
+  • Iniciar e validar a aplicação de logs no STANDBY.
+
+================================================================================
+📌 1) PRÉ-REQUISITOS
+================================================================================
+
+1.1 ACESSOS NECESSÁRIOS
+  • Usuário do SO: oracle nos servidores PRIMARY e STANDBY;
+  • Acesso SYSDBA em ambos os bancos:
+      SQL> sqlplus / as sysdba
+  • Mesma senha do usuário SYS em PRIMARY e STANDBY.
+
+1.2 VERSÃO E ARQUITETURA
+  • Oracle Database 19c (19.3/19.6/19.11/19.18/19.21);
+  • Single Instance (ASM ou File System).
+
+1.3 REDE E NOMES LÓGICOS (TNS / DB_UNIQUE_NAME)
+  • DB_NAME: MCE (mesmo nos dois);
+  • DB_UNIQUE_NAME: PRIMARY=MCE | STANDBY=MCEC (devem ser diferentes);
+  • Entradas TNS/Listener ativas para MCE e MCEC em ambos os lados (tnsping OK).
+
+1.4 PARÂMETROS IMPORTANTES NO 19c (PRIMARY)
+  • Recomenda-se NÃO manter no PRIMARY:
+      ALTER SYSTEM SET db_file_name_convert='' SCOPE=SPFILE;
+      ALTER SYSTEM SET log_file_name_convert='' SCOPE=SPFILE;
+    Motivo: o 19c lida melhor com mapeamentos sem esses parâmetros no PRIMARY.
+
+1.5 PASSWORD FILE
+  • Obrigatório no 19c:
+      ALTER SYSTEM SET remote_login_passwordfile='EXCLUSIVE' SCOPE=SPFILE;
+  • Garanta que o orapw (ex.: orapwMCE) exista no STANDBY no caminho correto.
+
+================================================================================
+⚙️ 2) CONFIGURAÇÃO
+================================================================================
+
+2.1 PLANEJAR HOSTS E SERVIÇOS
+  • PRIMARY  → DB_UNIQUE_NAME=MCE   | Serviço TNS=MCE
+  • STANDBY  → DB_UNIQUE_NAME=MCEC  | Serviço TNS=MCEC
+  • Confirme conectividade com tnsping MCE / tnsping MCEC em ambos os hosts.
+
+2.2 MÉTODO DE DUPLICATE
+  • Usaremos RMAN DUPLICATE FROM ACTIVE DATABASE (não requer backup prévio).
+
+2.3 SCRIPT RMAN DE DUPLICATE (RODAR NO STANDBY)
+--------------------------------------------------------------------------------
+Crie o arquivo: duplicate_standby.sh
+
+$ vi duplicate_standby.sh
+--------------------------------------------------------------------------------
+$ORACLE_HOME/bin/rman target=sys/SENHA_SYS@MCE auxiliary / <<EOF
+
+run {
+  allocate channel c1 device type disk;
+  allocate channel c2 device type disk;
+  allocate channel c3 device type disk;
+
+  allocate auxiliary channel a1 device type disk;
+  allocate auxiliary channel a2 device type disk;
+
+  duplicate target database for standby
+    from active database
+    dorecover
+    nofilenamecheck;
+
+  release channel c1;
+  release channel c2;
+  release channel c3;
+  release channel a1;
+  release channel a2;
+}
+exit;
+EOF
+--------------------------------------------------------------------------------
+• target=sys/SENHA_SYS@MCE  → conecta no PRIMARY;
+• auxiliary /               → conecta localmente no STANDBY;
+• from active database      → copia via rede, sem backup prévio;
+• dorecover                 → aplica recuperação ao final do duplicate;
+• nofilenamecheck           → permite diretórios diferentes entre os lados.
+
+2.4 AJUSTAR PARÂMETROS DO DATA GUARD NO PRIMARY (MCE)
+--------------------------------------------------------------------------------
+SQL> ALTER SYSTEM SET LOG_ARCHIVE_CONFIG='DG_CONFIG=(CDB1,CDB1DG)' SCOPE=BOTH;
+
+SQL> ALTER SYSTEM SET LOG_ARCHIVE_DEST_2=
+ 'SERVICE=CDB1DG ASYNC NOAFFIRM
+  VALID_FOR=(ONLINE_LOGFILES,PRIMARY_ROLE)
+  DB_UNIQUE_NAME=CDB1DG'
+ SCOPE=BOTH;
+
+SQL> ALTER SYSTEM SET LOG_ARCHIVE_MAX_PROCESSES=5 SCOPE=BOTH;
+SQL> ALTER SYSTEM SET FAL_SERVER='CDB1DG' SCOPE=BOTH;
+SQL> ALTER SYSTEM SET FAL_CLIENT='CDB1DG'  SCOPE=BOTH;
+
+2.5 PASSWORD FILE (ORAPW)
+--------------------------------------------------------------------------------
+COL USERNAME              FOR A20
+COL SYSDBA                FOR A6
+COL SYSOPER               FOR A6
+COL CON_ID                FOR 9999
+COL PASSWORDFILE_MODE     FOR A20
+
+SELECT
+    u.username,
+    u.sysdba,
+    u.sysoper,
+    u.con_id,
+    p.value AS passwordfile_mode
+FROM
+    v$pwfile_users u
+CROSS JOIN
+    (SELECT value FROM v$parameter WHERE name = 'remote_login_passwordfile') p;
+
+
+• Se estiver no ASM, copie para filesystem:
+  asmcmd pwcopy +DATA/MCE/PASSWORD/orapwMCE \
+                 /u01/app/oracle/product/19c/dbhome_1/dbs/orapwMCE
+• Se estiver em filesystem, copie do PRIMARY para o mesmo caminho no STANDBY.
+
+================================================================================
+▶️ 3) EXECUÇÃO
+================================================================================
+
+3.1 PREPARAR O STANDBY
+  SQL> SHUTDOWN IMMEDIATE;
+  SQL> STARTUP NOMOUNT;
+
+3.2 EXECUTAR O DUPLICATE (STANDBY)
+  $ chmod +x duplicate_standby.sh
+  $ nohup ./duplicate_standby.sh > duplicate_standby.log 2>&1 &
+  $ tail -f duplicate_standby.log
+
+  • O RMAN irá: conectar ao PRIMARY/STANDBY, copiar datafiles via rede,
+    criar o Standby e aplicar a recuperação (dorecover).
+
+3.3 APÓS O DUPLICATE — INICIAR MODO STANDBY
+  SQL> ALTER DATABASE MOUNT;
+
+  -- Real-Time Apply (aplica redo em tempo quase real):
+  SQL> ALTER DATABASE RECOVER MANAGED STANDBY DATABASE
+       USING CURRENT LOGFILE DISCONNECT FROM SESSION;
+
+================================================================================
+✔️ 4) VALIDAÇÃO FINAL
+================================================================================
+
+4.1 FORÇAR TROCA DE LOG NO PRIMARY
+  SQL> ALTER SYSTEM SWITCH LOGFILE;
+
+4.2 VERIFICAR ALERT.LOG NO STANDBY
+  Esperado:
+    Media Recovery Log ... thread_1_seq_XXXX...
+    Media Recovery Waiting for thread 1 sequence XXXX (in transit)
+
+4.3 VISTAS DO DATA GUARD (STANDBY)
+  SQL> SELECT OPEN_MODE, DATABASE_ROLE FROM V$DATABASE;
+  • Esperado: OPEN_MODE=MOUNTED | DATABASE_ROLE=PHYSICAL STANDBY
+
+4.4 GAP MANUAL (SE NECESSÁRIO)
+  RMAN> restore archivelog from sequence 67118 until sequence 67123 thread 1;
+
+================================================================================
+🧾 5) CHECKLIST DE EXECUÇÃO
+================================================================================
+| PASSO                                                                                  | OK |
+| -------------------------------------------------------------------------------------- |:--:|
+| DB_UNIQUE_NAME correto (PRIMARY=MCE | STANDBY=MCEC)                                    | ⬜ |
+| remote_login_passwordfile='EXCLUSIVE' no SPFILE                                        | ⬜ |
+| Password file copiado corretamente para o STANDBY                                      | ⬜ |
+| TNS/Listener OK entre MCE ↔ MCEC (tnsping OK)                                          | ⬜ |
+| Script duplicate_standby.sh criado e revisado                                          | ⬜ |
+| DUPLICATE FROM ACTIVE DATABASE executado com sucesso                                   | ⬜ |
+| LOG_ARCHIVE_CONFIG / DEST_2 / FAL_SERVER / FAL_CLIENT configurados no PRIMARY          | ⬜ |
+| Recuperação iniciada no STANDBY (USING CURRENT LOGFILE)                                | ⬜ |
+| Teste de SWITCH LOGFILE no PRIMARY executado                                           | ⬜ |
+| alert.log do STANDBY mostra Media Recovery Log sem erros                               | ⬜ |
+| Sem GAP crítico ou GAP resolvido com RESTORE ARCHIVELOG no RMAN                        | ⬜ |
+
+================================================================================
+💡 NOTAS & BOAS PRÁTICAS
+================================================================================
+• Mantenha senhas e tnsnames.ora sincronizados;
+• Use ASYNC/NOAFFIRM para latência alta; AFFIRM para consistência mais rígida;
+• Documente: horários do duplicate, LOG_ARCHIVE_CONFIG, DEST_2, FAL_*;
+• Monitore MRP0 (processo de apply) e alert.log após mudanças de rede/OS;
+• Planeje testes de switchover/failover em janela de manutenção.
+
+================================================================================
+🏁 RESULTADO ESPERADO
+================================================================================
+✅ Standby físico criado e sincronizado;
+✅ Real-Time Apply ativo (USING CURRENT LOGFILE);
+✅ Envio/aplicação de archives validado;
+✅ Procedimento claro, repetível e amigável para DBA Júnior.
+
+================================================================================

@@ -1,0 +1,20 @@
+echo $ORACLE_HOME
+echo $ORACLE_SID
+echo $PATH
+echo $ORACLE_BASE
+echo $ORACLE_HOSTNAME
+
+lsnrctl status
+
+sqlplus / as sysdba
+
+SELECT status
+FROM v$instance;
+
+SHOW PDBS;
+
+sudo journalctl -xe
+
+sudo ausearch -m avc -ts recent
+
+lsnrctl

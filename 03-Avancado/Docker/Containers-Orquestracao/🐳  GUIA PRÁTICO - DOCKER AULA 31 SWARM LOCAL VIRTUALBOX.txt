@@ -1,0 +1,36 @@
+// Aula 31 - Criando um Swarm local no VirtualBox
+
+
+Link de ref:
+
+# base= && curl -L $base/docker-machine-$(uname -s)-$(uname -m) >/tmp/docker-machine && sudo mv /tmp/docker-machine /usr/local/bin/docker-machine && chmod +x /usr/local/bin/docker-machine
+
+# docker-machine create --driver virtualbox default
+
+# docker-machine ls
+
+# docker-machine start default
+
+# for NODE in `seq 1 5`; do
+docker-machine create --driver virtualbox "node-${NODE}"
+done
+
+# docker-machine ls
+
+# docker-machine start node-1 node-2 node-3 node-4 node-5
+
+# export IP=$(docker-machine ip node-1)
+
+# docker-machine ssh node-1 docker swarm init --advertise-addr $IP
+
+# export JOIN_TOKEN=$(docker-machine ssh node-1 \ docker swarm join-token worker -q)
+
+#  for NODE in `seq 2 5`; do
+NODE_NAME="node-${NODE}"
+docker-machine ssh $NODE_NAME docker swarm join \
+--token $JOIN_TOKEN $IP:2377
+done
+
+# docker-machine ssh node-1 docker node promote node-2 node-3
+
+$ docker-machine ssh node-1 docker node ls

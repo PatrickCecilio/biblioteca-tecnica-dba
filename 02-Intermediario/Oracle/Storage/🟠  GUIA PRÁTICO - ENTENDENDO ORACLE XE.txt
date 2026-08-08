@@ -1,0 +1,19 @@
+Máximo 12 GB de dados no TOTAL (somando TODAS as tablespaces)
+
+Máximo 2 CPUs
+
+Máximo 2 GB de RAM usada pelo Oracle
+
+Máximo 3 PDBs ativos (CDB mode)
+
+se passar de 12 GB internos, o banco fica assim:
+
+não permite criação de objetos
+
+não permite inserts
+
+começa a gerar erros ao alocar extents
+
+pode travar processos de catálogo
+
+pode impedir startup se ultrapassar o limite

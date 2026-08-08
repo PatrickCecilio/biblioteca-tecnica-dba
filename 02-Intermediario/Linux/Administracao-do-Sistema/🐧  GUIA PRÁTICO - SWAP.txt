@@ -1,0 +1,78 @@
+Vamos ver o tamanho atual do swap
+free
+ou
+free -m
+ou
+swapon -s
+
+Vamos Criar um arquivo para ser utilizado como swap no tamanho desejado.
+Aqui vamos utilizar o comando dd e criar um arquivo com o nome “meuswap” no diretório /root.
+Vou criar um arquivo de 11G.
+
+dd if=/dev/zero of=/root/meuswap bs=1024 count=$((11*1024*1024))
+
+obs: vai demorar alguns minutos para este arquivo de 11gb ser criado e preenchido
+inicialnente com zeros.
+
+Vamos restringir as permissões para que apenas o root possa ler e escrever no arquivo,
+evitando possíveis problemas de segurança.
+
+sudo chmod 600 /root/meuswap
+
+Agora vamos definir esse arquivo para ser utilizado como swap.
+
+sudo mkswap meuswap
+
+sudo mkswap meuswap
+mkswap: meuswap: warning: wiping old swap signature.
+Setting up swapspace version 1, size = 11 GiB
+no label, UUID=a11382a9-40f0-42e7-802f-f0a7e1928195
+
+A mensagem que você está recebendo indica que o comando mkswap foi executado com
+sucesso, configurando o arquivo meuswap como uma área de swap de 11GB. A mensagem de
+aviso sobre a "old swap signature" é apenas informativa e pode ser ignorada
+se você estiver ciente de que está reformatando o arquivo de swap.
+
+
+Configurar o proprietario correto do file swap. Dessa forma garantimos que somente
+o root poderá ler/escrever nesse arquivo de swap.
+
+chown root:root /root/meuswap
+
+Finalmente, vamos ativar esse arquivo como espaço de swap.
+
+swapon meuswap
+
+free
+
+Por último, mas não menos importante, vamos tornar essa partição de swap ativa ao
+e permanente ao reinicializarmos o sistema.
+
+Para isso, vamos alterar o arquivo /etc/fstab. Basta abrir com o seu editor preferido
+e adicionar a linha abaixo.
+
+sudo nano /etc/fstab
+
+# substitua o swap anterior por esta linha
+/root/meuswap swap swap defaults 0 0
+
+SALVE O ARQUIVO FSTAB
+
+Recarregue as configurações do systemd para garantir que ele reconheça as alterações:
+
+sudo systemctl daemon-reload
+
+Desativar o Swap Antigo e Ativar o Novo:
+Se o swap antigo ainda estiver ativo, desative-o e ative o novo arquivo de swap:
+
+sudo swapoff /dev/mapper/ol-swap
+sudo swapon /root/meuswap
+
+Verificar o Swap Ativo:
+Verifique se o novo arquivo de swap está ativo:
+
+sudo swapon --show
+
+ou
+
+free -h

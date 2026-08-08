@@ -1,0 +1,8 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+ALTER USER udbd03 IDENTIFIED BY "4232OD" ACCOUNT UNLOCK;
+
+CREATE TABLE UDBD03.MP_CUSTOM_METRICS_EXP_BKP AS
+SELECT * FROM UDBD03.MP_CUSTOM_METRICS_EXP;
+
+TRUNCATE TABLE UDBD03.MP_CUSTOM_METRICS_EXP;

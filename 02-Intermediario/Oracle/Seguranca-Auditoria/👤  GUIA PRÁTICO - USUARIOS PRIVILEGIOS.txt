@@ -1,0 +1,47 @@
+# GUIA PRÁTICO ORACLE
+
+## Criação de Usuários e Concessão de Privilégios
+
+### 1. Criar usuário com Tablespace dedicado
+
+```sql
+CREATE USER <USERNAME>
+IDENTIFIED BY "<PASSWORD>"
+DEFAULT TABLESPACE <TABLESPACE_NAME>
+TEMPORARY TABLESPACE TEMP
+QUOTA UNLIMITED ON <TABLESPACE_NAME>;
+```
+
+---
+
+### 2. Conceder privilégios ao usuário
+
+```sql
+GRANT
+    CREATE SESSION,
+    CREATE TABLE,
+    CREATE VIEW,
+    CREATE SEQUENCE,
+    CREATE PROCEDURE,
+    CREATE TRIGGER
+TO <USERNAME>;
+```
+
+---
+
+### 3. Criar usuário administrativo
+
+```sql
+CREATE USER <ADMIN_USERNAME>
+IDENTIFIED BY "<PASSWORD>"
+DEFAULT TABLESPACE <TABLESPACE_NAME>
+TEMPORARY TABLESPACE TEMP;
+```
+
+---
+
+### 4. Conceder role DBA
+
+```sql
+GRANT DBA TO <ADMIN_USERNAME>;
+```

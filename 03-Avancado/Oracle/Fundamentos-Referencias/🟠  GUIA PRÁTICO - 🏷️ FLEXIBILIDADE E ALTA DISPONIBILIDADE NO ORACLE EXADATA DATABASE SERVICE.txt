@@ -1,0 +1,33 @@
+Flexibilidade e Alta Disponibilidade no Oracle Exadata Database Service
+
+O Exadata Database Service na OCI não se destaca só pelo hardware. Ele facilita muito o trabalho do administrador com automação, opções de licenciamento e recursos de alta disponibilidade. Entender como esses elementos se encaixam ajuda a tirar o melhor proveito da plataforma.
+
+1. Licenciamento mais flexível
+
+Um dos diferenciais do Exadata Cloud Service é a liberdade para alternar entre Bring Your Own License (BYOL) e License Included. Essa troca pode ser feita online e sem limite.
+
+Na prática, isso dá espaço para ajustes rápidos. Uma empresa pode usar suas licenças no dia a dia e mudar para License Included em momentos de pico, quando precisa aumentar o número de OCPUs. Assim que a demanda cai, é só voltar ao modelo anterior, tudo sem interrupção ou burocracia.
+
+2. Patching com o menor downtime possível
+
+Em ambientes críticos, cada minuto conta. Por isso, quando a meta é reduzir ao máximo o tempo de parada, a melhor abordagem não é aplicar o patch diretamente no Oracle Home atual, e sim migrar o banco para um novo Oracle Home já atualizado.
+
+A lógica é simples: você prepara o novo home antes, com todo o patch necessário. O downtime se limita ao momento de parar o banco no home antigo e iniciá-lo no novo. É bem mais rápido que atualizar binários enquanto o ambiente está ativo.
+
+Também vale reforçar um ponto que costuma gerar dúvida: não é preciso desligar o Clusterware para atualizar Grid Infrastructure ou Database Homes. A arquitetura do Exadata foi pensada para updates em modo rolling, com os nós sendo atualizados um por vez sem tirar o cluster do ar.
+
+3. Data Guard simples e automatizado
+
+Para continuidade de negócios e recuperação de desastres, o serviço facilita muito a configuração do Oracle Data Guard. O que antes exigia vários passos manuais agora pode ser feito com uma chamada de API ou um clique no console.
+
+Além disso, o serviço incentiva o uso do Active Data Guard. Em vez de manter um standby parado esperando uma falha, você pode usar esse banco para consultas e relatórios. Em configurações mais avançadas, é possível até redirecionar algumas operações de escrita. Assim, o ambiente de DR deixa de ser um recurso ocioso e passa a gerar valor no dia a dia.
+
+Resumo rápido para a prova
+
+Licenciamento: troca online e ilimitada entre BYOL e License Included.
+
+Patching: usar um novo DB Home reduz drasticamente o downtime.
+
+Clusterware: não precisa desligar para atualizar.
+
+Data Guard: configuração simples e Active Data Guard disponível para leitura e, em alguns casos, escrita.

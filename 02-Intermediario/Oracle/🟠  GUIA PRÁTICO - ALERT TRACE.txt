@@ -1,0 +1,7 @@
+find <ORACLE_BASE>/diag/rdbms/<DB_NAME>/<SID>/alert -type f -name 'log_*.xml' -mtime +<RETENTION_DAYS> -print
+
+find <ORACLE_BASE>/diag/rdbms/<DB_NAME>/<SID>/trace -type f ( -name '*.trc' -o -name '*.trm' ) -mtime +<RETENTION_DAYS> -print
+
+find <ORACLE_BASE>/diag/tnslsnr/<HOSTNAME>/<LISTENER_NAME>/alert -type f -name 'log_*.xml' -mtime +<RETENTION_DAYS> -print
+
+find <ORACLE_BASE>/diag/tnslsnr/<HOSTNAME>/<LISTENER_NAME>/trace -type f -name 'listener.log*' -mtime +<RETENTION_DAYS> -print

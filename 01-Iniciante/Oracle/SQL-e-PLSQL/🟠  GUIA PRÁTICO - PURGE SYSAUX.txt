@@ -1,0 +1,18 @@
+select TASK_NAME,parameter_name, parameter_value FROM DBA_ADVISOR_PARAMETERS WHERE task_name='AUTO_STATS_ADVISOR_TASK' and PARAMETER_NAME='EXECUTION_DAYS_TO_EXPIRE';
+EXEC DBMS_ADVISOR.SET_TASK_PARAMETER(task_name=> 'AUTO_STATS_ADVISOR_TASK', parameter=> 'EXECUTION_DAYS_TO_EXPIRE', value => 1);
+
+exec prvt_advisor.delete_expired_tasks;
+
+exec dbms_pdb.exec_as_oracle_script('alter table WRI$_ADV_OBJECTS move parallel 2');
+alter index WRI$_ADV_OBJECTS_PK rebuild;
+alter index WRI$_ADV_OBJECTS_IDX_01 rebuild;
+alter index WRI$_ADV_OBJECTS_IDX_02 rebuild;
+
+
+------------------------------------------------------
+
+select dbms_stats.get_stats_history_retention from dual;
+
+exec dbms_stats.alter_stats_history_retention(10);
+exec DBMS_STATS.PURGE_STATS(SYSDATE-10);
+select dbms_stats.get_stats_history_availability from dual;

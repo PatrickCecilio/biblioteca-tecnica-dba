@@ -1,0 +1,146 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+================================================================================
+📘 PLANO DE ATIVIDADES
+REORGANIZAÇÃO DE DATAFILES E RECRIAÇÃO DA BASE DE DADOS
+================================================================================
+Objetivo:
+Reorganizar a estrutura física da base de dados, otimizando datafiles,
+reduzindo desperdício de espaço e garantindo uma recriação controlada
+e segura do ambiente.
+================================================================================
+
+
+================================================================================
+🔎 1) ANÁLISE E REDIMENSIONAMENTO DOS DATAFILES
+================================================================================
+
+ATIVIDADES:
+--------------------------------------------------------------------------------
+- Levantamento do espaço TOTAL, USADO e LIVRE dos datafiles.
+- Identificação de datafiles elegíveis para resize.
+- Análise de risco antes da redução ou expansão.
+
+EXECUÇÃO:
+--------------------------------------------------------------------------------
+- Executar consultas de uso por tablespace e datafile.
+- Garantir que o espaço utilizado seja inferior ao novo tamanho planejado.
+- Realizar resize respeitando margens de segurança.
+
+================================================================================
+📦 2) EXPORTAÇÃO DA BASE DE DADOS
+================================================================================
+
+ATIVIDADES:
+--------------------------------------------------------------------------------
+- Execução de exportação completa da base via Data Pump (expdp).
+- Geração de arquivos DMP e LOG.
+- Validação do sucesso do export.
+
+VALIDAÇÕES OBRIGATÓRIAS:
+--------------------------------------------------------------------------------
+- Verificar logs sem erros críticos.
+- Conferir quantidade de objetos exportados.
+- Confirmar tamanho e integridade do dump.
+
+BOA PRÁTICA:
+--------------------------------------------------------------------------------
+✔️ Garantir que o dump esteja armazenado em local seguro
+   e, se possível, com cópia externa (backup).
+
+
+================================================================================
+🗑️ 3) REMOÇÃO DA BASE DE DADOS EXISTENTE
+================================================================================
+
+ATIVIDADES:
+--------------------------------------------------------------------------------
+- Encerramento controlado da instância (shutdown).
+- Remoção da base de dados atual.
+- Preservação dos arquivos de backup.
+
+CUIDADOS CRÍTICOS:
+--------------------------------------------------------------------------------
+🚨 Etapa altamente destrutiva.
+🚨 Executar somente após validação do backup.
+🚨 Confirmar autorização formal antes da execução.
+
+POLÍTICA DE RETENÇÃO:
+--------------------------------------------------------------------------------
+- Limpeza dos datafiles antigos conforme política definida
+  (retenção, descarte ou arquivamento).
+
+
+================================================================================
+🆕 4) CRIAÇÃO DE NOVA BASE COM DATAFILES OTIMIZADOS
+================================================================================
+
+ATIVIDADES:
+--------------------------------------------------------------------------------
+- Criação da nova base de dados.
+- Reorganização lógica e física dos tablespaces.
+- Definição de datafiles com tamanhos iniciais reduzidos.
+
+CONFIGURAÇÕES IMPORTANTES:
+--------------------------------------------------------------------------------
+- AUTOEXTEND habilitado conforme boas práticas.
+- Limites de crescimento definidos (MAXSIZE).
+- Distribuição adequada entre tablespaces.
+
+OBJETIVO:
+--------------------------------------------------------------------------------
+✔️ Evitar desperdício de espaço.
+✔️ Facilitar crescimento controlado da base.
+
+
+================================================================================
+📥 5) IMPORTAÇÃO DA BASE DE DADOS
+================================================================================
+
+ATIVIDADES:
+--------------------------------------------------------------------------------
+- Execução do import da base via Data Pump (impdp).
+- Monitoramento do progresso do processo.
+- Tratamento de erros durante a importação.
+
+VALIDAÇÕES PÓS-IMPORTAÇÃO:
+--------------------------------------------------------------------------------
+- Conferir quantidade de objetos importados.
+- Verificar usuários, schemas e privilégios.
+- Identificar objetos inválidos.
+- Validar constraints, índices e relacionamentos.
+
+
+================================================================================
+✅ 6) VALIDAÇÃO FINAL
+================================================================================
+
+ATIVIDADES:
+--------------------------------------------------------------------------------
+- Execução de testes funcionais básicos da aplicação.
+- Validação inicial de performance.
+- Conferência do uso de espaço em tablespaces e datafiles.
+
+ENCERRAMENTO:
+--------------------------------------------------------------------------------
+✔️ Ambiente validado.
+✔️ Estrutura otimizada.
+✔️ Liberação para uso produtivo.
+
+
+================================================================================
+✔️ CHECKLIST OPERACIONAL
+================================================================================
+
+[ ] Análise de espaço concluída
+[ ] Datafiles redimensionados com segurança
+[ ] Exportação validada com sucesso
+[ ] Backup confirmado antes da exclusão
+[ ] Nova base criada com estrutura otimizada
+[ ] Importação finalizada sem erros críticos
+[ ] Validações funcionais realizadas
+[ ] Ambiente liberado para produção
+
+================================================================================
+📄 FIM DO DOCUMENTO
+================================================================================

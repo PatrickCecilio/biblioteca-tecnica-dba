@@ -1,0 +1,11 @@
+Conexão ao MySQL DB System na OCI: entendendo o papel do bastion host
+
+No Oracle Cloud Infrastructure (OCI), a rede é construída para manter segurança e isolamento. Por isso, é comum que o MySQL Database System fique em uma sub-rede privada, sem acesso direto pela internet. Isso protege o banco, mas também exige um caminho seguro para que administradores possam acessá-lo. É aí que entra o bastion host, também chamado de jump box.
+
+A forma correta de se conectar ao MySQL nesse cenário é usar o cliente MySQL instalado em uma instância Linux que esteja na mesma Virtual Cloud Network (VCN) do banco. O fluxo é simples: primeiro você faz uma conexão SSH do seu computador para o bastion host. Depois que estiver dentro da instância, executa o cliente MySQL e abre uma sessão direta com o banco privado.
+
+Esse método mantém todo o tráfego dentro da infraestrutura segura da OCI e evita qualquer exposição desnecessária. Também dispensa VPN ou FastConnect quando o objetivo é apenas fazer manutenção ou consultas administrativas.
+
+Soluções que parecem mais práticas, como instalar o cliente MySQL na sua máquina local, não funcionam se o banco está numa sub-rede privada, já que não há rota direta até ele. E apenas conectar via SSH ao bastion host também não resolve; o SSH serve só para chegar ao ambiente seguro. A conexão ao MySQL acontece de fato quando o cliente é executado dentro da instância Linux.
+
+No fim, esse fluxo reflete boas práticas de segurança e arquitetura em ambientes corporativos na nuvem Oracle. Ele garante acesso controlado e protege os dados armazenados no MySQL DB System.

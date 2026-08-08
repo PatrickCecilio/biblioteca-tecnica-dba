@@ -1,0 +1,15 @@
+// Aula 7 - Lidando com os logs no Docker
+
+$ docker container logs trivia
+
+# docker container logs --tail 5 trivia
+
+$ docker container logs --tail 5 --follow trivia
+
+# docker container run --name test -it \
+--log-driver none \
+busybox sh -c 'for N in 1 2 3; do echo "Hello $N"; done'
+
+$ docker container logs test
+
+$ docker container rm test

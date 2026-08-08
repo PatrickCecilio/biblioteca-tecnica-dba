@@ -1,0 +1,80 @@
+# GUIA PRÁTICO ORACLE
+
+## Diagnóstico de Falhas no Startup Automático com Systemd e SELinux
+
+### 1. Validar as variáveis do ambiente Oracle
+
+```bash
+echo $ORACLE_HOME
+echo $ORACLE_SID
+echo $PATH
+echo $ORACLE_BASE
+echo $ORACLE_HOSTNAME
+```
+
+---
+
+### 2. Validar o Listener
+
+```bash
+lsnrctl status
+```
+
+---
+
+### 3. Validar o status da instância
+
+```bash
+sqlplus / as sysdba
+```
+
+```sql
+SELECT status
+FROM v$instance;
+```
+
+---
+
+### 4. Validar as PDBs
+
+```sql
+SHOW PDBS;
+```
+
+Essas verificações são utilizadas no material para confirmar se o banco realmente subiu após a inicialização do sistema.
+
+---
+
+### 5. Verificar erros do Systemd
+
+Executar como `root`:
+
+```bash
+sudo journalctl -xe
+```
+
+---
+
+### 6. Verificar bloqueios registrados pelo SELinux
+
+```bash
+sudo ausearch -m avc -ts recent
+```
+
+---
+
+### 7. Analisar os erros encontrados
+
+Verificar principalmente mensagens relacionadas a:
+
+```text
+oracle
+lsnrctl
+systemd
+permission
+denied
+SELinux
+AVC
+```
+
+No laboratório original, a análise do `journalctl` identificou problemas de permissão e políticas do SELinux impedindo o Systemd de executar o `lsnrctl`.

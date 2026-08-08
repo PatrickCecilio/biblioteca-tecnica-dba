@@ -1,0 +1,15 @@
+1. Consultas e verificações no SQL*Plus
+-- Verifica o estado de todos os destinos de archive log
+SHOW PARAMETER log_archive_dest_state;
+
+-- Visualiza os destinos de archive log configurados e seus erros
+COL DESTINATION FOR A40
+COL ERROR FOR A60
+SELECT DEST_ID, STATUS, TARGET, DESTINATION, ERROR
+FROM   V$ARCHIVE_DEST
+WHERE  STATUS <> 'INACTIVE';
+
+-- Ver se há archive log pendente
+SELECT THREAD#, LOW_SEQUENCE#, HIGH_SEQUENCE#
+FROM   V$ARCHIVE_DEST_STATUS
+WHERE  STATUS='VALID';

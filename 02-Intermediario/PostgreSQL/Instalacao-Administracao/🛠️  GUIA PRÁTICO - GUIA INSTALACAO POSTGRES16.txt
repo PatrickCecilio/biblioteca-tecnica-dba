@@ -1,0 +1,70 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+Guia de Instalação do PostgreSQL 16
+==================================
+
+1. Atualização dos Pacotes
+--------------------------
+sudo yum update -y
+sudo yum upgrade -y
+
+2. Desativar Firewall
+---------------------
+sudo systemctl stop firewalld
+sudo systemctl disable firewalld
+sudo systemctl status firewalld
+
+reboot
+
+3. Instalar Dependências Perl
+-----------------------------
+Instalar o pacote perl-IPC-Run via EPEL:
+    sudo dnf install -y epel-release
+
+Instalar o Perl diretamente a partir do CPAN:
+    sudo yum install -y perl-App-cpanminus
+    sudo cpanm IPC::Run
+
+4. Repositório PostgreSQL 16
+----------------------------
+Instalar o repositório oficial PostgreSQL 16 (EL8):
+    sudo yum install -y
+
+Desabilitar a modularidade e habilitar a versão 16:
+    sudo dnf module reset postgresql -y
+    sudo dnf module enable postgresql:16 -y
+    sudo dnf module disable postgresql:16 -y
+
+5. Instalar PostgreSQL 16
+-------------------------
+sudo dnf install postgresql16 postgresql16-server postgresql16-contrib -y
+
+6. Inicializar Banco de Dados
+-----------------------------
+sudo /usr/pgsql-16/bin/postgresql-16-setup initdb
+
+7. Gerenciar Serviço PostgreSQL
+-------------------------------
+Verificar status:
+    sudo systemctl status postgresql-16
+
+Iniciar serviço:
+    sudo systemctl start postgresql-16
+
+Habilitar inicialização automática:
+    sudo systemctl enable postgresql-16
+
+Verificar status detalhado:
+    sudo systemctl status postgresql-16.service
+
+8. Acessar PostgreSQL
+---------------------
+Acessar com usuário postgres:
+    sudo -u postgres psql
+
+Alterar senha do usuário postgres:
+    ALTER USER postgres PASSWORD '@240506P';
+
+9. Verificar Versão do Cliente
+------------------------------
+psql --version

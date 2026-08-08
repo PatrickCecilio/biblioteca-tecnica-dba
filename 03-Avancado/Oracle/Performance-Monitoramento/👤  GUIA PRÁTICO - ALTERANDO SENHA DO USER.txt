@@ -1,0 +1,13 @@
+ALTER USER C##ZABBIX IDENTIFIED BY Oracle2024#;
+
+SELECT username
+FROM dba_users
+ORDER BY username;
+
+
+SELECT username
+FROM user_users;
+
+SELECT username, account_status, created, default_tablespace, temporary_tablespace
+FROM dba_users
+ORDER BY username;

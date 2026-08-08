@@ -1,0 +1,24 @@
+// Aula 6 - Comandos Exec e Attaching em um contêiner em execução
+
+$ docker container exec -i -t trivia /bin/sh
+
+/app # ps
+
+$ docker container exec trivia ps
+
+$ docker container exec -it \
+-e MY_VAR="Hello World" \
+trivia /bin/sh
+/app echo $MY_VAR
+
+$ docker container attach trivia
+
+$ docker run -d --name nginx -p 8080:80 nginx:alpine
+
+$ curl -4 localhost:8080
+
+$ docker container attach nginx
+
+$ for n in {1..10}; do curl -4 localhost:8080; done
+
+$ docker container rm nginx

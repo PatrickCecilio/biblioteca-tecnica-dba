@@ -1,0 +1,5 @@
+adrci exec="show homes"
+
+adrci exec="set homepath <ADR_HOME>; show alert -tail 100 -term"
+
+find <ORACLE_BASE>/diag -type f ( -name '*.trc' -o -name '*.trm' ) -mtime -1 -print

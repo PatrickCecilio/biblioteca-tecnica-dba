@@ -1,0 +1,45 @@
+# GUIA PRÁTICO ORACLE
+
+## Limpeza de Audit, Alert e Trace
+
+### 1. Limpar arquivos de Audit
+
+```bash
+find <ORACLE_BASE>/admin/<DB_NAME>/adump \
+-name "*.aud" \
+-mtime +1 \
+-exec rm -f {} \;
+```
+
+---
+
+### 2. Limpar arquivos XML do Alert
+
+```bash
+find <ORACLE_BASE>/diag/rdbms/<DB_NAME>/<ORACLE_SID>/alert \
+-name "*.xml" \
+-mtime +1 \
+-exec rm -f {} \;
+```
+
+---
+
+### 3. Limpar arquivos de Incident
+
+```bash
+find <ORACLE_BASE>/diag/rdbms/<DB_NAME>/<ORACLE_SID>/incident \
+-name "*.tr[cm]" \
+-mtime +1 \
+-exec rm -f {} \;
+```
+
+---
+
+### 4. Limpar arquivos de Trace
+
+```bash
+find <ORACLE_BASE>/diag/rdbms/<DB_NAME>/<ORACLE_SID>/trace \
+-name "*.tr[cm]" \
+-mtime +1 \
+-exec rm -f {} \;
+```

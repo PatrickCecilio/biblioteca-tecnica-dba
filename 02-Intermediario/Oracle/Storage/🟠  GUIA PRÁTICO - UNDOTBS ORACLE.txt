@@ -1,0 +1,12 @@
+SHOW PARAMETER undo_tablespace;
+
+SHOW PARAMETER undo_retention;
+
+SELECT tablespace_name, status, contents, retention
+FROM dba_tablespaces
+WHERE contents = 'UNDO';
+
+SELECT begin_time, end_time, tuned_undoretention, maxquerylen, ssolderrcnt, nospaceerrcnt
+FROM v$undostat
+ORDER BY begin_time DESC
+FETCH FIRST 24 ROWS ONLY;

@@ -1,0 +1,7 @@
+SELECT occupant_name, schema_name, space_usage_kbytes / 1024 AS space_usage_mb
+FROM v$sysaux_occupants
+ORDER BY space_usage_kbytes DESC;
+
+SELECT tablespace_name, used_space, tablespace_size, used_percent
+FROM dba_tablespace_usage_metrics
+WHERE tablespace_name = 'SYSAUX';

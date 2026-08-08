@@ -1,0 +1,227 @@
+================================================================================
+🛠️  GUIA PRÁTICO — CRIAÇÃO DE STANDBY (DATA GUARD) VIA RMAN DUPLICATE
+================================================================================
+
+🎯 OBJETIVO
+--------------------------------------------------------------------------------
+Criar um banco STANDBY físico (Data Guard) a partir de um backup da produção,
+configurar PRIMARY e STANDBY, e validar o envio/aplicação dos archives.
+
+================================================================================
+📌 1. PRÉ-REQUISITOS
+================================================================================
+
+🔐 ACESSOS E PERMISSÕES
+  - Usuário oracle no PRIMARY e STANDBY
+  - Acesso SYSDBA
+  - Permissão para uso do RMAN
+
+💾 ARQUIVOS NECESSÁRIOS
+  - Backup da produção copiado para o servidor STANDBY:
+      /bkp_prod/MCE/
+  - Arquivo de senha (orapw) do PRIMARY existente no STANDBY:
+      orapwMCE
+
+🌐 REDE E TNS
+  - Entradas TNS válidas:
+      PRIMARY = MCE
+      STANDBY = MCEC
+  - Ambos os hosts devem se comunicar via listener
+
+🧩 ESTRUTURA ESPERADA
+  - ORACLE_HOME configurado corretamente
+  - Diretórios de dados criados no STANDBY
+  - Usuário SYS com mesma senha em ambos os bancos
+
+================================================================================
+⚙️ 2. CONFIGURAÇÃO INICIAL
+================================================================================
+
+🔧 ETAPA 1 — Copiar backup para o servidor STANDBY
+--------------------------------------------------------------------------------
+Verifique se os arquivos existem e estão íntegros:
+
+$ ls -lh /bkp_prod/MCE/
+
+💡 Falta de qualquer arquivo causará falha no DUPLICATE.
+
+--------------------------------------------------------------------------------
+🔧 ETAPA 2 — Criar script RMAN de DUPLICATE
+--------------------------------------------------------------------------------
+No STANDBY, crie o script:
+  duplicate_standby.sh
+
+Conteúdo do arquivo:
+--------------------------------------------------------------------------------
+$ORACLE_HOME/bin/rman target=sys/SENHA_SYS@MCE auxiliary / <<EOF
+
+run {
+  allocate channel dev11 device type disk;
+  allocate channel dev12 device type disk;
+  allocate channel dev13 device type disk;
+
+  allocate auxiliary channel dev21 device type disk;
+  allocate auxiliary channel dev22 device type disk;
+  allocate auxiliary channel dev23 device type disk;
+
+  duplicate target database for standby
+  backup location '/bkp_prod/MCE/'
+  nofilenamecheck;
+
+  release channel dev11;
+  release channel dev12;
+  release channel dev13;
+  release channel dev21;
+  release channel dev22;
+  release channel dev23;
+}
+exit;
+EOF
+--------------------------------------------------------------------------------
+
+📘 Funções:
+  • target=sys@MCE  → conecta ao PRIMARY
+  • auxiliary /     → conecta localmente no STANDBY
+  • duplicate for standby → cria o standby via backup
+  • nofilenamecheck → necessário se diretórios diferirem
+
+================================================================================
+▶️ 3. EXECUÇÃO
+================================================================================
+
+🔥 ETAPA 3 — Executar o DUPLICATE com nohup
+--------------------------------------------------------------------------------
+No STANDBY:
+
+$ nohup ./duplicate_standby.sh > duplicate.log 2>&1 &
+$ tail -f duplicate.log
+
+💬 Pode levar minutos ou horas dependendo do tamanho do banco.
+
+--------------------------------------------------------------------------------
+🔧 ETAPA 4 — Configurar parâmetros no PRIMARY
+--------------------------------------------------------------------------------
+SQL> ALTER SYSTEM SET LOG_ARCHIVE_CONFIG='DG_CONFIG=(MCE,MCEC)' sid='*';
+SQL> ALTER SYSTEM SET LOG_ARCHIVE_DEST_2=
+     'SERVICE=MCEC LGWR ASYNC VALID_FOR=(ONLINE_LOGFILES,PRIMARY_ROLE) DB_UNIQUE_NAME=MCEC' sid='*';
+SQL> ALTER SYSTEM SET LOG_ARCHIVE_MAX_PROCESSES=5 sid='*';
+SQL> ALTER SYSTEM SET FAL_SERVER='MCE' sid='*';
+SQL> ALTER SYSTEM SET FAL_CLIENT='MCEC' sid='*';
+
+📘 Funções:
+  - LOG_ARCHIVE_CONFIG → define os bancos do Data Guard
+  - DEST_2 → envia logs ao STANDBY
+  - FAL_SERVER / FAL_CLIENT → corrige gaps de archive
+
+--------------------------------------------------------------------------------
+🔧 ETAPA 5 — Copiar senha (orapw)
+--------------------------------------------------------------------------------
+PRIMARY:
+$ cp $ORACLE_HOME/dbs/orapwMCE /path/para/copiar
+$ scp orapwMCE oracle@dg_server:$ORACLE_HOME/dbs/
+
+⚠️ PRIMARY RAC:
+  orapwdMCE1 / orapwdMCE2  (por nó)
+⚙️ STANDBY:
+  somente orapwdMCE
+
+--------------------------------------------------------------------------------
+🔧 ETAPA 6 — Startar o STANDBY em MOUNT
+--------------------------------------------------------------------------------
+SQL> STARTUP MOUNT;
+
+💡 Se aparecer "already started", ignore — não é erro.
+
+--------------------------------------------------------------------------------
+🔧 ETAPA 7 — Iniciar recuperação (Real-Time Apply)
+--------------------------------------------------------------------------------
+SQL> ALTER DATABASE RECOVER MANAGED STANDBY DATABASE
+     USING CURRENT LOGFILE DISCONNECT FROM SESSION;
+
+📘 Ativa o real-time apply — aplica logs assim que chegam.
+
+================================================================================
+⚠️ 4. PROBLEMAS COMUNS E SOLUÇÕES
+================================================================================
+
+❗ CASO 1 — ORAPW dentro do ASM
+--------------------------------------------------------------------------------
+Mover o arquivo para fora do ASM:
+
+$ asmcmd pwcopy +DATA/orapwMCE /u01/app/oracle/product/19c/dbhome_1/dbs/orapwMCE
+
+Verificar:
+$ srvctl config database -d MCE
+
+Modificar se necessário:
+$ srvctl modify database -d MCE -pwfile
+
+--------------------------------------------------------------------------------
+❗ CASO 2 — Falha no recover de archives
+--------------------------------------------------------------------------------
+STANDBY:
+SQL> ALTER DATABASE RECOVER MANAGED STANDBY DATABASE CANCEL;
+
+PRIMARY (via RMAN):
+RMAN> connect target sys/<senha>@MCE;
+RMAN> connect auxiliary sys/<senha>@MCEC;
+
+RMAN> run {
+          set until time "to_date('12/06/2018 10:30:00','dd/mm/yyyy hh24:mi:ss')";
+          recover standby clone database;
+        }
+
+Depois no STANDBY:
+SQL> ALTER DATABASE RECOVER MANAGED STANDBY DATABASE USING CURRENT LOGFILE DISCONNECT FROM SESSION;
+
+--------------------------------------------------------------------------------
+❗ CASO 3 — GAP de Archive
+--------------------------------------------------------------------------------
+Mensagem:
+  "Media Recovery Waiting for thread 1 sequence X (in transit)"
+
+Recuperar manualmente:
+RMAN> restore archivelog from sequence 67118 until sequence 67123 thread 1;
+
+================================================================================
+✔️ 5. VALIDAÇÃO FINAL
+================================================================================
+
+🔎 TESTE DE ENVIO DE ARCHIVE
+--------------------------------------------------------------------------------
+PRIMARY:
+SQL> ALTER SYSTEM SWITCH LOGFILE;
+
+STANDBY (alert.log):
+  Media Recovery Log +RECO_DATA/MCEC/ARCHIVELOG/...thread_1_seq_40794...
+  Media Recovery Log +RECO_DATA/MCEC/ARCHIVELOG/...thread_1_seq_40795...
+
+📈 SUCESSO:
+  • Archives chegam sem erro
+  • Recovery aplica imediatamente
+  • Nenhum GAP detectado
+
+================================================================================
+🧾 CHECKLIST FINAL
+================================================================================
+| ETAPA                                      |  OK |
+| ------------------------------------------ | :-: |
+| Backup da produção copiado p/ STANDBY      |  ⬜  |
+| Script RMAN criado e revisado              |  ⬜  |
+| DUPLICATE executado com sucesso            |  ⬜  |
+| Parâmetros configurados no PRIMARY         |  ⬜  |
+| orapw copiado corretamente                 |  ⬜  |
+| STANDBY iniciado em MOUNT                  |  ⬜  |
+| Recuperação configurada                    |  ⬜  |
+| Teste de SWITCH LOGFILE validado           |  ⬜  |
+| Nenhum GAP de archive                      |  ⬜  |
+
+================================================================================
+🏁 RESULTADO FINAL
+================================================================================
+✅ Banco STANDBY criado e sincronizado via Data Guard
+✅ Logs aplicados em tempo real (Real-Time Apply ativo)
+✅ Estrutura pronta para failover/switchover controlado
+✅ Procedimento documentado e replicável por DBAs júnior/sênior
+
+================================================================================

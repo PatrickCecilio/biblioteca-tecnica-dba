@@ -1,0 +1,28 @@
+Passo a Passo
+
+1. Crie um usuário específico (caso ainda não exista):
+   Por exemplo, para criar um usuário chamado `protegido`:
+   comando.:
+   sudo adduser protegido
+
+
+2. Altere a propriedade da pasta:
+   Defina que o usuário `protegido` é o dono da pasta. Supondo que a pasta seja `/caminho/da/pasta`:
+   comando
+   sudo chown protegido:protegido /caminho/da/pasta
+   ```
+
+3. Defina as permissões para restringir o acesso:**
+   Para que apenas o proprietário (neste caso, `protegido`) tenha acesso (leitura, escrita e execução), use:
+   ```bash
+   sudo chmod 700 /caminho/da/pasta
+   ```
+   - 7: Permite ao dono ler, escrever e executar.
+   - 0: Impede o acesso ao grupo.
+   - 0: Impede o acesso aos demais usuários.
+
+ O que isso significa na prática
+
+- Acesso Exclusivo: Apenas o usuário `protegido` poderá acessar e modificar os conteúdos dessa pasta.
+- Segurança: Mesmo que outros usuários estejam no sistema, eles não terão permissão para listar, ler ou alterar os arquivos dentro da pasta.
+- Nota: O usuário root, por padrão, sempre pode acessar qualquer pasta, mas isso é esperado em sistemas Linux.

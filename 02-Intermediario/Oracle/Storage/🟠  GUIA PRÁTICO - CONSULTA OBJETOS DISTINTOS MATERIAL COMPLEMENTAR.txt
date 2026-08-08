@@ -1,0 +1,13 @@
+SELECT DISTINCT
+       t.tablespace_name,
+       t.owner
+FROM dba_tables t
+WHERE t.tablespace_name IN (
+    'INFOSAUDE_DATA',
+    'DW_SALUX',
+    'DA_SALUX',
+    'CUSTOS',
+    'SISPRODD',
+    'SISPROCTB',
+)
+ORDER BY t.tablespace_name, t.owner;

@@ -1,0 +1,412 @@
+==============================================================================
+PROCEDIMENTO DE CRIAÇÃO DE ÍNDICE, MOVE DE TABELA E REBUILD DE INDEX
+==============================================================================
+1. VALIDAÇÃO DO PDB PROD
+==============================================================================
+
+Antes de iniciar a atividade, foi validado que o PDB PROD estava aberto em modo READ WRITE.
+
+Comando executado:
+
+show pdbs;
+
+Resultado obtido:
+
+CON_ID CON_NAME                       OPEN MODE  RESTRICTED
+
+---
+
+3      PROD                           READ WRITE NO
+
+Conclusão:
+
+O PDB PROD estava aberto corretamente e disponível para execução das atividades.
+
+==============================================================================
+2. CRIAÇÃO DO ÍNDICE NA TABELA CCM_PROD.T1
+==========================================
+
+Foi criado um índice na coluna OBJECT_ID da tabela CCM_PROD.T1, utilizando inicialmente a tablespace CCM_TBS.
+
+Comando executado:
+
+create index CCM_PROD.IDX_T1_OBJECT_ID
+on CCM_PROD.t1(object_id)
+tablespace CCM_TBS;
+
+Resultado obtido:
+
+Index created.
+
+Conclusão:
+
+O índice IDX_T1_OBJECT_ID foi criado com sucesso na tabela CCM_PROD.T1.
+
+==============================================================================
+3. VALIDAÇÃO DO ÍNDICE CRIADO
+=============================
+
+Foi executada a consulta abaixo para validar o índice criado:
+
+set lines 200
+col owner format a15
+col index_name format a30
+col table_name format a20
+col tablespace_name format a20
+col status format a15
+
+select owner,
+index_name,
+table_name,
+tablespace_name,
+status
+from dba_indexes
+where owner = 'CCM_PROD'
+and table_name = 'T1';
+
+Resultado obtido:
+
+OWNER           INDEX_NAME                     TABLE_NAME           TABLESPACE_NAME      STATUS
+
+---
+
+CCM_PROD        IDX_T1_OBJECT_ID               T1                   CCM_TBS              VALID
+
+Conclusão:
+
+O índice foi criado na tablespace CCM_TBS e estava com status VALID.
+
+==============================================================================
+4. CRIAÇÃO DA TABLESPACE AUXILIAR CCM_AUX_TBS
+=============================================
+
+Foi criada uma nova tablespace auxiliar para receber a tabela CCM_PROD.T1.
+
+Comando executado:
+
+create tablespace CCM_AUX_TBS
+datafile '/u01/oradata/CDBPROD/PROD/ccm_aux_tbs01.dbf'
+size 100M
+AUTOEXTEND ON
+NEXT 100M
+MAXSIZE UNLIMITED;
+
+Resultado obtido:
+
+Tablespace created.
+
+Conclusão:
+
+A tablespace CCM_AUX_TBS foi criada com sucesso.
+
+==============================================================================
+5. VALIDAÇÃO DA TABLESPACE AUXILIAR
+===================================
+
+Foi executada a consulta abaixo para validar a tablespace criada:
+
+select tablespace_name,
+status,
+contents
+from dba_tablespaces
+where tablespace_name = 'CCM_AUX_TBS';
+
+Resultado obtido:
+
+TABLESPACE_NAME      STATUS          CONTENTS
+
+---
+
+CCM_AUX_TBS          ONLINE          PERMANENT
+
+Conclusão:
+
+A tablespace CCM_AUX_TBS estava ONLINE e configurada como PERMANENT.
+
+==============================================================================
+6. PRIMEIRA TENTATIVA DE MOVE DA TABELA
+=======================================
+
+Foi executado o comando para mover a tabela CCM_PROD.T1 para a tablespace CCM_AUX_TBS:
+
+alter table CCM_PROD.t1
+move tablespace CCM_AUX_TBS;
+
+Erro apresentado:
+
+ORA-01950: no privileges on tablespace 'CCM_AUX_TBS'
+
+Causa:
+
+O usuário CCM_PROD era o dono da tabela, porém ainda não possuía quota na tablespace de destino CCM_AUX_TBS.
+
+Mesmo a operação sendo executada como SYSDBA, o Oracle exige que o usuário proprietário do segmento possua permissão de quota na tablespace onde o objeto será armazenado.
+
+Conclusão:
+
+Foi necessário conceder quota ao usuário CCM_PROD na tablespace CCM_AUX_TBS.
+
+==============================================================================
+7. CONCESSÃO DE QUOTA NA TABLESPACE CCM_AUX_TBS
+===============================================
+
+Foi concedida quota ilimitada ao usuário CCM_PROD na tablespace CCM_AUX_TBS.
+
+Comando executado:
+
+alter user CCM_PROD quota unlimited on CCM_AUX_TBS;
+
+Resultado obtido:
+
+User altered.
+
+Conclusão:
+
+O usuário CCM_PROD passou a ter permissão para alocar segmentos na tablespace CCM_AUX_TBS.
+
+==============================================================================
+8. MOVE DA TABELA CCM_PROD.T1 PARA CCM_AUX_TBS
+==============================================
+
+Após conceder a quota, o comando de move da tabela foi executado novamente.
+
+Comando executado:
+
+alter table CCM_PROD.t1
+move tablespace CCM_AUX_TBS;
+
+Resultado obtido:
+
+Table altered.
+
+Conclusão:
+
+A tabela CCM_PROD.T1 foi movida com sucesso para a tablespace CCM_AUX_TBS.
+
+==============================================================================
+9. VALIDAÇÃO DA TABLESPACE DA TABELA APÓS O MOVE
+================================================
+
+Foi executada a consulta abaixo para confirmar a nova localização da tabela:
+
+select owner,
+table_name,
+tablespace_name
+from dba_tables
+where owner = 'CCM_PROD'
+and table_name = 'T1';
+
+Resultado obtido:
+
+OWNER           TABLE_NAME           TABLESPACE_NAME
+
+---
+
+CCM_PROD        T1                   CCM_AUX_TBS
+
+Conclusão:
+
+A tabela CCM_PROD.T1 passou a estar armazenada na tablespace CCM_AUX_TBS.
+
+==============================================================================
+10. VALIDAÇÃO DO STATUS DO ÍNDICE APÓS O MOVE DA TABELA
+=======================================================
+
+Após o move da tabela, foi validado o status do índice:
+
+select owner,
+index_name,
+table_name,
+tablespace_name,
+status
+from dba_indexes
+where owner = 'CCM_PROD'
+and table_name = 'T1';
+
+Resultado obtido:
+
+OWNER           INDEX_NAME                     TABLE_NAME           TABLESPACE_NAME      STATUS
+
+---
+
+CCM_PROD        IDX_T1_OBJECT_ID               T1                   CCM_TBS              UNUSABLE
+
+Conclusão:
+
+Após o ALTER TABLE MOVE, o índice IDX_T1_OBJECT_ID ficou com status UNUSABLE.
+
+Esse comportamento é esperado, pois o move da tabela recria o segmento da tabela em outra tablespace, invalidando o índice existente.
+
+==============================================================================
+11. CRIAÇÃO DA TABLESPACE CCM_IDX_TBS PARA ÍNDICE
+=================================================
+
+Foi criada uma nova tablespace específica para armazenar o índice reconstruído.
+
+Comando executado:
+
+create tablespace CCM_IDX_TBS
+datafile '/u01/oradata/CDBPROD/PROD/ccm_idx_tbs01.dbf'
+size 100M
+autoextend on
+next 100M
+maxsize unlimited;
+
+Resultado obtido:
+
+Tablespace created.
+
+Conclusão:
+
+A tablespace CCM_IDX_TBS foi criada com sucesso para receber o índice.
+
+==============================================================================
+12. CONCESSÃO DE QUOTA NA TABLESPACE CCM_IDX_TBS
+================================================
+
+Foi concedida quota ilimitada ao usuário CCM_PROD na tablespace CCM_IDX_TBS.
+
+Comando executado:
+
+alter user CCM_PROD quota unlimited on CCM_IDX_TBS;
+
+Resultado obtido:
+
+User altered.
+
+Conclusão:
+
+O usuário CCM_PROD passou a ter permissão para alocar o índice na tablespace CCM_IDX_TBS.
+
+==============================================================================
+13. REBUILD DO ÍNDICE NA TABLESPACE CCM_IDX_TBS
+===============================================
+
+Foi executado o rebuild do índice IDX_T1_OBJECT_ID, movendo-o para a tablespace CCM_IDX_TBS.
+
+Comando executado:
+
+alter index CCM_PROD.IDX_T1_OBJECT_ID
+rebuild tablespace CCM_IDX_TBS;
+
+Resultado obtido:
+
+Index altered.
+
+Conclusão:
+
+O índice IDX_T1_OBJECT_ID foi reconstruído com sucesso na tablespace CCM_IDX_TBS.
+
+==============================================================================
+14. VALIDAÇÃO FINAL DA TABELA
+=============================
+
+Foi validado novamente o local da tabela CCM_PROD.T1:
+
+select owner,
+table_name,
+tablespace_name
+from dba_tables
+where owner = 'CCM_PROD'
+and table_name = 'T1';
+
+Resultado obtido:
+
+OWNER           TABLE_NAME           TABLESPACE_NAME
+
+---
+
+CCM_PROD        T1                   CCM_AUX_TBS
+
+Conclusão:
+
+A tabela CCM_PROD.T1 permaneceu corretamente armazenada na tablespace CCM_AUX_TBS.
+
+==============================================================================
+15. VALIDAÇÃO FINAL DO ÍNDICE
+=============================
+
+Foi validado novamente o índice da tabela:
+
+select owner,
+index_name,
+table_name,
+tablespace_name,
+status
+from dba_indexes
+where owner = 'CCM_PROD'
+and table_name = 'T1';
+
+Resultado obtido:
+
+OWNER           INDEX_NAME                     TABLE_NAME           TABLESPACE_NAME      STATUS
+
+---
+
+CCM_PROD        IDX_T1_OBJECT_ID               T1                   CCM_IDX_TBS          VALID
+
+Conclusão:
+
+O índice IDX_T1_OBJECT_ID passou a estar armazenado na tablespace CCM_IDX_TBS e voltou ao status VALID após o rebuild.
+
+==============================================================================
+16. VALIDAÇÃO FINAL DOS REGISTROS DA TABELA
+===========================================
+
+Foi validada a quantidade de registros da tabela CCM_PROD.T1:
+
+select count(*) as total_registros
+from CCM_PROD.t1;
+
+Resultado obtido:
+
+## TOTAL_REGISTROS
+
+55410
+
+Conclusão:
+
+A tabela CCM_PROD.T1 permaneceu íntegra após o move da tabela e o rebuild do índice, mantendo 55410 registros.
+
+==============================================================================
+17. RESUMO DA ATIVIDADE EXECUTADA
+=================================
+
+Durante a atividade, foram realizadas as seguintes ações:
+
+1. Validação do PDB PROD em READ WRITE.
+2. Criação do índice CCM_PROD.IDX_T1_OBJECT_ID na tabela CCM_PROD.T1.
+3. Validação do índice criado na tablespace CCM_TBS com status VALID.
+4. Criação da tablespace auxiliar CCM_AUX_TBS.
+5. Validação da tablespace CCM_AUX_TBS como ONLINE e PERMANENT.
+6. Tentativa inicial de move da tabela para CCM_AUX_TBS.
+7. Identificação do erro ORA-01950 por ausência de quota na tablespace.
+8. Concessão de quota unlimited para CCM_PROD na tablespace CCM_AUX_TBS.
+9. Move da tabela CCM_PROD.T1 para CCM_AUX_TBS.
+10. Validação da tabela na nova tablespace CCM_AUX_TBS.
+11. Identificação do índice IDX_T1_OBJECT_ID com status UNUSABLE após o move.
+12. Criação da tablespace CCM_IDX_TBS para armazenar o índice.
+13. Concessão de quota unlimited para CCM_PROD na tablespace CCM_IDX_TBS.
+14. Rebuild do índice IDX_T1_OBJECT_ID na tablespace CCM_IDX_TBS.
+15. Validação do índice com status VALID.
+16. Validação da integridade da tabela com 55410 registros.
+
+==============================================================================
+18. STATUS FINAL VALIDADO
+=========================
+
+PDB: PROD
+Tabela: CCM_PROD.T1
+Tablespace final da tabela: CCM_AUX_TBS
+Índice: CCM_PROD.IDX_T1_OBJECT_ID
+Tablespace final do índice: CCM_IDX_TBS
+Status final do índice: VALID
+Total de registros da tabela: 55410
+
+Resultado final:
+
+Atividade concluída com sucesso.
+
+==============================================================================
+FIM DO PROCEDIMENTO — CRIAÇÃO DE ÍNDICE, MOVE DE TABELA E REBUILD DE INDEX
+==========================================================================

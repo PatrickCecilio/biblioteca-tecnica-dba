@@ -1,0 +1,27 @@
+ABRIR E SALVAR O ESTADO DE UMA PDB
+
+Objetivo
+Abrir uma pluggable database (PDB) e preservar o estado para as próximas inicializações da CDB.
+
+Pré-requisitos
+- Acesso local autorizado ao servidor.
+- Usuário do sistema operacional pertencente ao grupo administrativo do Oracle.
+- Nome correto da PDB.
+
+Procedimento
+
+sqlplus / as sysdba
+
+STARTUP;
+SHOW PDBS;
+
+ALTER PLUGGABLE DATABASE <NOME_PDB> OPEN READ WRITE;
+ALTER PLUGGABLE DATABASE <NOME_PDB> SAVE STATE;
+
+SHOW PDBS;
+
+Validação
+- A coluna OPEN MODE deve exibir READ WRITE para a PDB.
+- Após reiniciar a CDB em laboratório, confirme que a PDB abre automaticamente.
+
+ATENÇÃO: substitua <NOME_PDB> pelo nome validado no ambiente. Não armazene senhas no arquivo.

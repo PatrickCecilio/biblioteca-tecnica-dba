@@ -1,0 +1,21 @@
+-- Ativar FORCE LOGGING
+ALTER DATABASE FORCE LOGGING;
+
+-- Verificar parâmetros de archive log
+SHOW PARAMETER log_archive;
+
+-- Adicionar arquivos de redo para standby
+ALTER DATABASE ADD STANDBY LOGFILE GROUP 10 '/u01/oracle/oradata/ORCL/srl10.log' SIZE 50M;
+-- Repita para os outros grupos
+
+-- Configurar destinos de archive log para Data Guard
+ALTER SYSTEM SET log_archive_dest_1='LOCATION=/u01/oracle/archivelogs' SCOPE=BOTH;
+ALTER SYSTEM SET log_archive_config='DG_CONFIG=(ORCL,ORCLDG)';
+ALTER SYSTEM SET log_archive_dest_2='SERVICE=ORCLDG LGWR ASYNC VALID_FOR=(ONLINE_LOGFILES,PRIMARY_ROLE) DB_UNIQUE_NAME=ORCLDG';
+
+-- Configurar FAL (Fetch Archive Log)
+ALTER SYSTEM SET fal_server=ORCL;
+ALTER SYSTEM SET fal_client=ORCLDG;
+
+# Criar init para standby baseado no init do primário
+cp /app/oracle/product/21c/dbhome_1/dbs/initORCL.ora initORCLDG.ora

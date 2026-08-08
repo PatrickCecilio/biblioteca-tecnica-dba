@@ -1,0 +1,37 @@
+Governança, segurança e escalabilidade no Exadata dentro do OCI
+
+Em ambientes de alta performance como o Exadata, três pontos fazem diferença no dia a dia: como você organiza os recursos, como controla o tráfego de rede e como cresce a infraestrutura sem parar o ambiente. No OCI, isso passa por Compartments, Network Security Groups (NSGs) e pelos recursos de scaling. Entender como cada um funciona ajuda arquitetos e DBAs a evitar surpresas.
+
+1. Mobilidade de recursos e Compartments
+
+Os Compartments servem como “gavetas” lógicas para separar recursos, controlar acesso e manter ambientes como Produção e Homologação isolados. Uma dúvida comum aparece quando alguém precisa mover um VM Cluster para outro compartimento.
+
+Quando esse movimento acontece, o OCI leva junto tudo que depende diretamente desse cluster: os Database Homes e os próprios bancos. A camada lógica segue unida, o que evita ruptura da aplicação.
+
+Já a infraestrutura física (o rack Exadata) é um recurso separado. Ela pode ficar em outro compartimento por motivos de governança ou organização interna, enquanto o VM Cluster pode ser movido conforme a necessidade do projeto. Na prática, o rack permanece onde está; quem se move é a camada lógica que roda por cima dele.
+
+2. Segurança granular com Network Security Groups (NSGs)
+
+As antigas Security Lists trabalham no nível da sub-rede inteira. Os NSGs vieram para resolver justamente essa limitação. Eles aplicam regras diretamente nas VNICs, o que permite controlar o tráfego de forma muito mais precisa.
+
+Dois pontos importantes:
+
+Regras por tipo de tráfego:
+Um NSG pode atuar tanto na Client Network quanto na Backup Network. Isso permite criar políticas separadas para uso diário e para backup sem precisar criar novas sub-redes só para isso.
+
+Foco na VNIC, não na sub-rede:
+Dentro de uma mesma sub-rede, você pode ter bancos com regras completamente diferentes. Basta aplicar NSGs distintos nas VNICs deles. Algo impossível de fazer apenas com Security Lists.
+
+3. Escalabilidade elástica do Exadata
+
+Os modelos mais novos do Exadata (X8M em diante) eliminam a limitação das formas fixas (Quarter, Half, Full). Hoje, a escalabilidade é elástica.
+
+Se você precisa de mais CPU, memória ou storage, pode adicionar Compute Servers ou Storage Servers de forma online, sem interrupção. Isso permite que a infraestrutura cresça de acordo com a demanda do banco, evitando migrações complexas e mantendo o ambiente disponível.
+
+Resumo rápido
+
+Mover VM Cluster: o cluster vai junto com os Database Homes e com os bancos.
+
+NSGs: aplicados na VNIC; úteis tanto na Client quanto na Backup Network.
+
+Escalabilidade: racks X8M/X9M permitem adicionar servidores individualmente e online.

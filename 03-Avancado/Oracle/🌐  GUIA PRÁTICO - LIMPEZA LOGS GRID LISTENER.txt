@@ -1,0 +1,5 @@
+find <GRID_BASE>/diag/tnslsnr/<HOSTNAME>/<LISTENER_NAME>/alert -type f -name '*.xml' -mtime +<RETENTION_DAYS> -print
+
+find <GRID_BASE>/diag/tnslsnr/<HOSTNAME>/<LISTENER_NAME>/incident -type f -mtime +<RETENTION_DAYS> -print
+
+find <GRID_BASE>/diag/tnslsnr/<HOSTNAME>/<LISTENER_NAME>/trace -type f ( -name '*.trc' -o -name '*.trm' -o -name 'listener.log*' ) -mtime +<RETENTION_DAYS> -print

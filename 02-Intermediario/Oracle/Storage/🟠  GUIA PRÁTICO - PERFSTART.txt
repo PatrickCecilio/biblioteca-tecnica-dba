@@ -1,0 +1,18 @@
+sqlplus / as sysdba
+
+ALTER SESSION SET CONTAINER=<PDB_NAME>;
+
+SHOW CON_NAME;
+
+SELECT tablespace_name, status, contents
+FROM dba_tablespaces
+WHERE tablespace_name = 'PERFSTAT';
+
+EXEC statspack.snap;
+
+SELECT snap_id, snap_time, snap_level
+FROM stats$snapshot
+ORDER BY snap_id DESC
+FETCH FIRST 20 ROWS ONLY;
+
+@?/rdbms/admin/spreport.sql

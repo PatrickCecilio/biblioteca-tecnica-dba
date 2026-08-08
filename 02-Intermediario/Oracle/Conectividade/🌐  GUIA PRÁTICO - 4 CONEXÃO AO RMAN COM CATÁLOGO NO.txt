@@ -1,0 +1,3 @@
+4. Conexão ao RMAN com catálogo no ZDLRA
+# Conexão direta ao banco + catálogo no Recovery Appliance
+rman target / catalog <usuário_cat>/<senha>@<tns_ra>

@@ -1,0 +1,70 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+su - oracle
+
+lsnrctl status
+
+cat ~/.bash_profile
+
+sqlplus / as sysdba
+
+ARCHIVE LOG LIST;
+
+SHUTDOWN IMMEDIATE;
+
+STARTUP MOUNT;
+
+ALTER DATABASE ARCHIVELOG;
+
+ALTER DATABASE OPEN;
+
+ARCHIVE LOG LIST;
+
+EXIT
+
+su - root
+
+cd /opt/oracle/product/23ai/dbhomeFree/dbs
+
+ls
+
+cd
+
+sudo mkdir -p /opt/oracle/product/23ai/dbhomeFree/dbs/arch
+sudo chown oracle:oinstall /opt/oracle/product/23ai/dbhomeFree/dbs/arch
+sudo chmod 775 /opt/oracle/product/23ai/dbhomeFree/dbs/arch
+
+sqlplus sys as sysdba
+
+ALTER SYSTEM SET LOG_ARCHIVE_DEST_1='LOCATION=/opt/oracle/product/23ai/dbhomeFree/dbs/arch' SCOPE=SPFILE;
+
+SHUTDOWN IMMEDIATE;
+STARTUP;
+
+ARCHIVE LOG LIST;
+
+EXIT;
+
+su - oracle
+
+rman target /
+
+CONFIGURE RETENTION POLICY TO REDUNDANCY 1;
+
+CONFIGURE BACKUP OPTIMIZATION ON;
+
+CONFIGURE DEFAULT DEVICE TYPE TO DISK;
+
+CONFIGURE CONTROLFILE AUTOBACKUP ON;
+
+CONFIGURE DEVICE TYPE DISK PARALLELISM 2;
+
+CONFIGURE COMPRESSION ALGORITHM 'BASIC' AS OF RELEASE 'DEFAULT';
+
+BACKUP CURRENT CONTROLFILE;
+
+LIST BACKUP;
+
+REPORT OBSOLETE;
+
+CONFIGURE CHANNEL DEVICE TYPE DISK FORMAT '/u01/oracle/backups/%U' MAXPIECESIZE 2G;

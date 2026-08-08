@@ -1,0 +1,20 @@
+sqlplus / as sysdba
+
+SHOW PARAMETER db_recovery_file_dest;
+
+SHOW PARAMETER db_recovery_file_dest_size;
+
+SELECT name, space_limit, space_used, space_reclaimable, number_of_files
+FROM v$recovery_file_dest;
+
+SELECT file_type, percent_space_used, percent_space_reclaimable, number_of_files
+FROM v$flash_recovery_area_usage
+ORDER BY file_type;
+
+ARCHIVE LOG LIST;
+
+rman target /
+
+CROSSCHECK ARCHIVELOG ALL;
+
+LIST ARCHIVELOG ALL;

@@ -1,0 +1,97 @@
+# GUIA PRÁTICO ORACLE
+
+## Criação de Usuário para Monitoramento Zabbix
+
+### 1. Criar o usuário
+
+```sql
+CREATE USER "C##ZABBIX"
+IDENTIFIED BY "<SENHA>"
+DEFAULT TABLESPACE "USERS"
+TEMPORARY TABLESPACE "TEMP"
+PROFILE "<PROFILE>";
+```
+
+---
+
+### 2. Conceder roles
+
+```sql
+GRANT "CONNECT" TO "C##ZABBIX";
+```
+
+```sql
+GRANT "RESOURCE" TO "C##ZABBIX";
+```
+
+```sql
+GRANT "SELECT_CATALOG_ROLE" TO "C##ZABBIX";
+```
+
+```sql
+ALTER USER "C##ZABBIX" DEFAULT ROLE ALL;
+```
+
+---
+
+### 3. Conceder CREATE SESSION
+
+```sql
+GRANT CREATE SESSION TO "C##ZABBIX";
+```
+
+---
+
+### 4. Conceder acesso às views de monitoramento
+
+```sql
+GRANT SELECT ON "SYS"."V_$PGASTAT" TO "C##ZABBIX";
+```
+
+```sql
+GRANT SELECT ON "SYS"."V_$LOG" TO "C##ZABBIX";
+```
+
+```sql
+GRANT SELECT ON "SYS"."V_$PROCESS" TO "C##ZABBIX";
+```
+
+```sql
+GRANT SELECT ON "SYS"."V_$SESSION" TO "C##ZABBIX";
+```
+
+```sql
+GRANT SELECT ON "SYS"."V_$OSSTAT" TO "C##ZABBIX";
+```
+
+```sql
+GRANT SELECT ON "SYS"."V_$RESTORE_POINT" TO "C##ZABBIX";
+```
+
+```sql
+GRANT SELECT ON "SYS"."V_$SYSTEM_PARAMETER" TO "C##ZABBIX";
+```
+
+```sql
+GRANT SELECT ON "SYS"."V_$SGASTAT" TO "C##ZABBIX";
+```
+
+```sql
+GRANT SELECT ON "SYS"."V_$DATAFILE" TO "C##ZABBIX";
+```
+
+```sql
+GRANT SELECT ON "SYS"."V_$SYSMETRIC" TO "C##ZABBIX";
+```
+
+```sql
+GRANT SELECT ON "SYS"."V_$RECOVERY_FILE_DEST" TO "C##ZABBIX";
+```
+
+```sql
+GRANT SELECT ON "SYS"."V_$ACTIVE_SESSION_HISTORY" TO "C##ZABBIX";
+```
+
+```sql
+GRANT SELECT ON "SYS"."DBA_USERS" TO "C##ZABBIX";
+```

@@ -1,0 +1,18 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+segurança na autenticação remota
+
+vim /etc/ssh/sshd_config
+opcional1: sudo yum install policycoreutils-python-utils
+opcional2: sudo yum -y install policycoreutils-python
+sudo semanage port -a -t ssh_port_t -p tcp 22000
+sudo firewall-cmd --permanent --zone=public --add-port=22000/tcp
+sudo firewall-cmd --reload
+
+sudo systemctl restart sshd.service
+vim /etc/ssh/sshd_config
+reboot
+Authentic
+yes permitir
+no negar
+prohibit-password permissão só a chave ssh

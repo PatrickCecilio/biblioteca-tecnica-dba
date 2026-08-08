@@ -1,0 +1,21 @@
+# GUIA PRÁTICO ORACLE
+
+## Identificar Sessões Bloqueadas e Bloqueadoras
+
+### 1. Consultar sessões em bloqueio
+
+```sql
+SELECT
+    w.sid AS waiting_sid,
+    w.serial# AS waiting_serial,
+    w.username AS waiting_user,
+    b.sid AS blocking_sid,
+    b.serial# AS blocking_serial,
+    b.username AS blocking_user,
+    w.event,
+    w.seconds_in_wait
+FROM v$session w
+JOIN v$session b
+    ON w.blocking_session = b.sid
+ORDER BY w.seconds_in_wait DESC;
+```

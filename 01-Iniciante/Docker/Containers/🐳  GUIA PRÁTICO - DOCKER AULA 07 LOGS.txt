@@ -1,0 +1,7 @@
+docker container logs trivia
+
+docker container logs --tail 5 --follow trivia
+
+docker container logs test
+
+docker container rm test

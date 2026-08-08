@@ -1,0 +1,38 @@
+# GUIIA PRÁTICO POSTGRESQL
+
+## Criação de Usuário e Banco de Dados
+
+### 1. Criar o usuário
+
+```sql
+CREATE ROLE "<USER_NAME>"
+WITH LOGIN PASSWORD '<PASSWORD>';
+```
+
+---
+
+### 2. Criar o banco
+
+```sql
+CREATE DATABASE "<DATABASE_NAME>"
+OWNER "<USER_NAME>";
+```
+
+---
+
+### 3. Conceder permissões
+
+```sql
+GRANT CONNECT, TEMPORARY
+ON DATABASE "<DATABASE_NAME>"
+TO "<USER_NAME>";
+```
+
+---
+
+### 4. Alterar a senha do usuário
+
+```sql
+ALTER ROLE "<USER_NAME>"
+WITH PASSWORD '<NEW_PASSWORD>';
+```

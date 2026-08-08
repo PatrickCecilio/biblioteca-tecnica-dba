@@ -1,0 +1,21 @@
+SELECT *
+FROM TIPO_PLANO_MARGEM_VENDA
+FETCH FIRST 1000 ROWS ONLY;
+
+SELECT owner, synonym_name, table_owner, table_name
+FROM dba_synonyms
+WHERE synonym_name = 'PK_TP_MARGEM_VENDA';
+
+SELECT owner, table_name, constraint_type
+FROM all_constraints
+WHERE constraint_name = 'PK_TP_MARGEM_VENDA';
+
+SELECT owner, object_type
+FROM all_objects
+WHERE object_name = 'TIPO_PLANO_MARGEM_VENDA';
+
+SELECT *
+FROM TIPO_PLANO_MARGEM_VENDA;
+
+SELECT COUNT(*)
+FROM <SCHEMA_NAME>.tipo_plano_margem_venda;

@@ -1,0 +1,13 @@
+sqlplus / as sysdba
+
+EXEC dbms_monitor.serv_mod_act_trace_enable(service_name => '<SERVICE_NAME>', module_name => '<MODULE_NAME>');
+
+EXEC dbms_monitor.serv_mod_act_trace_disable(service_name => '<SERVICE_NAME>', module_name => '<MODULE_NAME>');
+
+EXIT;
+
+cd <ORACLE_BASE>/diag/rdbms/<DB_NAME>/<SID>/trace
+
+trcsess output=<MERGED_TRACE_FILE>.trc service=<SERVICE_NAME> module=<MODULE_NAME>
+
+tkprof <MERGED_TRACE_FILE>.trc <TKPROF_OUTPUT>.txt sys=no waits=yes sort=exeela,fchela

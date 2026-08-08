@@ -1,0 +1,13 @@
+SELECT dbusername,
+       to_char(event_timestamp, 'DD/MM/YYYY HH24:MI:SS') AS data_hora,
+       object_schema,
+       object_name,
+       action_name,
+       sql_text
+FROM   unified_audit_trail
+WHERE  dbusername = 'INFOSAUDE'
+AND    event_timestamp BETWEEN trunc(sysdate-1)
+                          AND sysdate
+ORDER BY event_timestamp;
+
+INFOSAUDE	28/11/2025 12:59:45	INFOSAUDE	SINAIS_VITAIS	ALTER TABLE	alter table infosaude.sinais_vitais add vl_aspiracao varchar2(50)

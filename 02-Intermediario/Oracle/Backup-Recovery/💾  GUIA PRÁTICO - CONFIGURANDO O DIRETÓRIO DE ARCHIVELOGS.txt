@@ -1,0 +1,5 @@
+ALTER SYSTEM SET log_archive_dest_1='LOCATION=/u01/oracle/archivelogs' SCOPE=BOTH;
+
+Crie o diretório:
+mkdir -p /u01/oracle/archivelogs
+chown oracle:oinstall /u01/oracle/archivelogs

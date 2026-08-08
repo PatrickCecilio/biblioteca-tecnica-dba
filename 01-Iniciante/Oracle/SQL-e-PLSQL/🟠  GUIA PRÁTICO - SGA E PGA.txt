@@ -1,0 +1,55 @@
+select name, value/1024/1024 VALUE_MB
+ from v$parameter
+ where name in ('memory_max_target','memory_target','sga_max_size','sga_target','pga_aggregate_limit','pga_aggregate_target')
+ order by 1;
+
+---------------------------------------------------------------------------------------------------------------------------------
+
+SELECT
+    s.sid,
+    s.serial#,
+    s.username,
+    s.machine,
+    s.program,
+    ROUND(p.value / 1024 / 1024, 2) AS pga_mb,
+    s.last_call_et AS seconds_inactive,
+    s.sql_id
+FROM v$session s
+JOIN v$sesstat p ON p.sid = s.sid
+JOIN v$statname n ON n.statistic# = p.statistic#
+                 AND n.name = 'session pga memory'
+WHERE
+    s.type = 'USER'
+    AND (
+           p.value > 50 * 1024 * 1024       -- > 50MB
+        OR s.last_call_et > 600             -- > 10 min inativo
+    )
+ORDER BY p.value DESC, s.last_call_et DESC;
+
+
+--------------------------------------------------------------------------------------------------------------------------------------
+
+SELECT
+    COUNT(*) AS total_sessoes,
+    s.machine,
+    s.process AS host_process_id,
+    s.program,
+    CASE
+        WHEN COUNT(*) >= 2 THEN 'ALERTA: possivel vazamento'
+        ELSE 'OK'
+    END AS status_sessoes,
+    s.username,
+    s.osuser,
+    s.module,
+    s.action
+FROM v$session s
+WHERE s.type = 'USER'
+GROUP BY
+    s.machine,
+    s.process,
+    s.program,
+    s.username,
+    s.osuser,
+    s.module,
+    s.action
+ORDER BY total_sessoes DESC;

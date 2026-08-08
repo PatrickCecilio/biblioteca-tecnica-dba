@@ -1,0 +1,98 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+# GUIA PRÁTICO ORACLE
+
+## Ajuste e Validação do LOG_BUFFER
+
+### 1. Conectar como SYSDBA
+
+```bash
+sqlplus / as sysdba
+```
+
+---
+
+### 2. Verificar o valor atual do LOG_BUFFER
+
+```sql
+SHOW PARAMETER log_buffer;
+```
+
+---
+
+### 3. Verificar Wait Events relacionados a Buffer
+
+```sql
+SELECT
+    event,
+    total_waits,
+    time_waited
+FROM v$session_event
+WHERE event LIKE '%buffer%'
+ORDER BY total_waits DESC;
+```
+
+---
+
+### 4. Verificar todos os Wait Events
+
+```sql
+SELECT
+    event,
+    total_waits,
+    time_waited
+FROM v$session_event
+ORDER BY total_waits DESC;
+```
+
+---
+
+### 5. Alterar o LOG_BUFFER
+
+```sql
+ALTER SYSTEM SET log_buffer=<LOG_BUFFER_SIZE>
+SCOPE=SPFILE;
+```
+
+---
+
+### 6. Reiniciar o banco
+
+```sql
+SHUTDOWN IMMEDIATE;
+```
+
+```sql
+STARTUP;
+```
+
+---
+
+### 7. Validar o estado do banco
+
+```sql
+SELECT open_mode
+FROM v$database;
+```
+
+---
+
+### 8. Validar o novo valor do LOG_BUFFER
+
+```sql
+SHOW PARAMETER log_buffer;
+```
+
+---
+
+### 9. Verificar estatísticas relacionadas ao Redo
+
+```sql
+SELECT
+    SUBSTR(name,1,30),
+    value
+FROM v$sysstat
+WHERE name = 'redo log space requests'
+   OR name = 'redo buffer allocation retries'
+   OR name = 'redo log space wait time';
+```

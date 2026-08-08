@@ -1,0 +1,17 @@
+sqlplus / as sysdba
+
+ALTER SESSION SET CONTAINER=<PDB_NAME>;
+
+SHOW CON_NAME;
+
+SELECT tablespace_name, status, contents
+FROM dba_tablespaces
+WHERE tablespace_name = 'PERFSTAT';
+
+EXEC statspack.snap;
+
+SELECT snap_id, snap_level, TO_CHAR(snap_time, 'DD/MM/YYYY HH24:MI:SS') AS snap_time
+FROM stats$snapshot
+ORDER BY snap_id DESC;
+
+@?/rdbms/admin/spreport.sql

@@ -1,0 +1,278 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+================================================================================
+                         GUIA PRÁTICO – ORA-27104
+================================================================================
+ Ajuste de SGA com HugePages
+ Oracle Database 19c | Norma 80/80–20
+================================================================================
+1. ESTRUTURA DO MATERIAL
+================================================================================
+
+1. Pré-requisitos
+2. Diagnóstico
+3. Dimensionamento (Norma 80/80–20)
+4. Configuração do Linux (HugePages)
+5. Configuração do Oracle
+6. Execução
+7. Validação Final
+8. Checklist de Execução
+
+================================================================================
+2. DIAGNÓSTICO
+================================================================================
+
+------------------------------------------------------------------------------
+2.1 Memória física do servidor
+------------------------------------------------------------------------------
+
+Comandos:
+
+$ cat /proc/meminfo
+$ free -h
+
+Resumo do ambiente real:
+
+- Memória física total : ~10 GB
+- Memória disponível  : ~7,3 GB
+- Swap                : 0 (correto)
+- HugePages           : NÃO configuradas
+
+------------------------------------------------------------------------------
+2.2 Memória configurada no Oracle
+------------------------------------------------------------------------------
+
+SQL:
+
+SELECT name, value/1024/1024 VALUE_MB
+FROM v$parameter
+WHERE name IN (
+  'memory_target',
+  'memory_max_target',
+  'sga_target',
+  'sga_max_size',
+  'pga_aggregate_target'
+)
+ORDER BY 1;
+
+Situação inicial:
+
+- SGA : 1,5 GB
+- PGA : 512 MB
+
+CONCLUSÃO
+---------
+Ambiente funcional, porém:
+- Fora da norma 80/80–20
+- Sem HugePages
+- Sujeito a erro ORA-27104
+
+================================================================================
+3. DIMENSIONAMENTO – NORMA 80/80–20
+================================================================================
+
+------------------------------------------------------------------------------
+3.1 Regra aplicada
+------------------------------------------------------------------------------
+
+- 80% da memória do servidor → Oracle
+- Dentro do Oracle:
+  - 80% → SGA
+  - 20% → PGA
+
+------------------------------------------------------------------------------
+3.2 Cálculo aplicado ao servidor
+------------------------------------------------------------------------------
+
+Memória total do servidor:
+  10 GB
+
+Memória destinada ao Oracle (80%):
+  10 x 0,80 = 8,0 GB
+
+Divisão interna:
+
+SGA (80% do Oracle):
+  8,0 x 0,80 = 6,4 GB
+
+PGA (20% do Oracle):
+  8,0 x 0,20 = 1,6 GB
+
+Valores finais adotados:
+
+------------------------------------------------
+| Componente     | Valor                     |
+------------------------------------------------
+| SGA            | 6,4 GB                    |
+| PGA            | 1,6 GB                    |
+| Oracle Total   | 8,0 GB                    |
+------------------------------------------------
+
+================================================================================
+4. CONFIGURAÇÃO DO LINUX – HUGEPAGES
+================================================================================
+
+------------------------------------------------------------------------------
+4.1 Conceito
+------------------------------------------------------------------------------
+
+HugePages:
+
+- Reservam memória EXCLUSIVA para a SGA
+- Eliminam fragmentação
+- Evitam ORA-27104
+- Melhoram performance
+- Recomendação oficial Oracle para produção
+
+------------------------------------------------------------------------------
+4.2 Cálculo de HugePages
+------------------------------------------------------------------------------
+
+- Hugepagesize : 2 MB
+- SGA          : 6400 MB
+
+Cálculo:
+  6400 / 2 = 3200 HugePages
+
+Boa prática:
+  Reservar margem
+
+Valor configurado:
+  3300 HugePages
+
+------------------------------------------------------------------------------
+4.3 Configuração no Linux
+------------------------------------------------------------------------------
+
+Como root:
+
+Editar arquivo:
+  /etc/sysctl.conf
+
+Adicionar/ajustar:
+
+  vm.nr_hugepages = 3300
+
+Aplicar:
+
+sysctl -p
+
+Validar:
+
+grep Huge /proc/meminfo
+
+Resultado esperado:
+
+HugePages_Total: 3300
+HugePages_Free : 3300
+Hugepagesize   : 2048 kB
+
+OBSERVAÇÃO
+----------
+Com HugePages NÃO é necessário ajustar:
+- kernel.shmmax
+- kernel.shmall
+
+================================================================================
+5. CONFIGURAÇÃO DO ORACLE
+================================================================================
+
+------------------------------------------------------------------------------
+5.1 Garantir AMM desativado
+------------------------------------------------------------------------------
+
+ALTER SYSTEM SET memory_target=0 SCOPE=SPFILE;
+ALTER SYSTEM SET memory_max_target=0 SCOPE=SPFILE;
+
+------------------------------------------------------------------------------
+5.2 Ajustar SGA
+------------------------------------------------------------------------------
+
+ALTER SYSTEM SET sga_target=6400M SCOPE=SPFILE;
+ALTER SYSTEM SET sga_max_size=6400M SCOPE=SPFILE;
+
+------------------------------------------------------------------------------
+5.3 Ajustar PGA
+------------------------------------------------------------------------------
+
+ALTER SYSTEM SET pga_aggregate_target=1600M SCOPE=SPFILE;
+
+DICA
+----
+pga_aggregate_limit pode ser mantido em ~2x a PGA
+para evitar runaway sessions.
+
+================================================================================
+6. EXECUÇÃO
+================================================================================
+
+Reiniciar o banco para aplicar as alterações:
+
+SHUTDOWN IMMEDIATE;
+STARTUP;
+
+================================================================================
+7. VALIDAÇÃO FINAL
+================================================================================
+
+------------------------------------------------------------------------------
+7.1 Validar HugePages no Linux
+------------------------------------------------------------------------------
+
+grep Huge /proc/meminfo
+
+Esperado:
+
+HugePages_Total: 3300
+HugePages_Rsvd : ~3200
+HugePages_Free : baixo
+
+Interpretação:
+- HugePages reservadas
+- SGA utilizando memória exclusiva
+- Configuração correta
+
+------------------------------------------------------------------------------
+7.2 Validar parâmetros no Oracle
+------------------------------------------------------------------------------
+
+SHOW PARAMETER sga;
+SHOW PARAMETER pga;
+SHOW PARAMETER spfile;
+
+================================================================================
+8. OBSERVAÇÕES IMPORTANTES
+================================================================================
+
+ATENÇÃO
+-------
+- Nunca use HugePages com memory_target
+- Não configure HugePages acima da memória física
+- Sempre reinicie o banco após ajustes de HugePages
+- HugePages exigem SGA FIXA.
+- Ambientes utilizando AMM (memory_target) NÃO são compatíveis.
+
+DICA DE DBA SÊNIOR
+-----------------
+Ambientes que crescem sem HugePages
+quase sempre quebram com ORA-27104.
+
+================================================================================
+9. MENTALIDADE FINAL DE DBA
+================================================================================
+
+Sempre que encontrar:
+
+  ORA-27104
+
+Traduza imediatamente para:
+
+  "O Oracle não conseguiu alocar a SGA no Kernel Linux."
+
+E pense primeiro em:
+
+  HugePages + dimensionamento correto.
+
+================================================================================
+FIM DO GUIA
+================================================================================

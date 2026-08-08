@@ -1,0 +1,42 @@
+Acessar o banco:
+psql
+
+lista os banco postgres
+\l
+
+Acessar o banco:
+\c NOME_DO_BANCO
+
+Ver schemas:
+\dn
+
+Todas (todos schemas):
+\dt *.*
+
+Só do public:
+\dt public.*
+
+psql -p 5432 -U postgres -c "SELECT
+  t.spcname AS tablespace,
+  pg_size_pretty(SUM(pg_total_relation_size(c.oid))) AS total_usado,
+  SUM(pg_total_relation_size(c.oid)) AS total_bytes
+FROM pg_class c
+JOIN pg_tablespace t ON t.oid = c.reltablespace
+WHERE t.spcname = 'sade_data'
+GROUP BY t.spcname;
+"
+
+Verifique a versão do psql:
+psql --version
+
+Validar integridade do .tar.gz (gzip)
+gzip -t /pgbackup/backup/dump/dumps_20260114_141643.tar.gz \
+  && echo "OK: gzip íntegro" || echo "ERRO: gzip corrompido"
+
+Ver o que tem dentro do pacote (não extrai)
+tar -tzf /pgbackup/backup/dump/dumps_20260114_141643.tar.gz | head -50
+
+Validar que o(s) .dump é(são) legível(is) pelo pg_restore
+tar -xzf /pgbackup/backup/dump/dumps_20260114_141643.tar.gz -C /tmp ./postgres.dump
+pg_restore -l /tmp/postgres.dump | head -40
+rm -f /tmp/postgres.dump

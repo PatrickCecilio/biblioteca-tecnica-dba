@@ -1,0 +1,53 @@
+ENGENHARIA DE SOFTWARE 1
+A Ciência da Construção do Invisível
+Professor: Alexandre Campos
+
+Rede de computadores
+       e
+Sistema distribuídos
+
+Código amador vs Software Profissional
+
+Amador
+° Uso pessoal e único
+° Desenvolvedor é o único usuário
+° Funciona na minha maquina
+
+Profissional
+° Usado e mantido por equipes
+° Evolutivo (sobrevive por anos)
+° Crítico para o negócio
+
+Software profissional é feito para ser usado e mudado por outros. - Ian Sommerville
+
+        O limite da Intuição
+
+° O desenvolvimento artesanal não escala.
+
+° Engenharia = Aplicação prática do pensamento cientifico.
+
+° Objetivo: Especialistas em aprendizado e gestão da complexidade.
+
+A Natureza do Monstro
+
+Abstrato:
+Não limitado por leis físicas.
+
+Intangível:
+Invisível até que falhe.
+
+Complexidade:
+O artefato mais complexo construído pela humanidade.
+
+Mito da Gestão
+Adiciona pessoas a um projeto atrasado o atrasa ainda mais
+
+mito do cliente
+
+Uma descrição vaga é suficiente
+(realidade ambiguidade para gerar o fracasso.)
+
+Mito do Praticante
+
+Entregar rápido é o que importa.
+Realidade: divida técnica mata a (velocidade a velocidade futura)

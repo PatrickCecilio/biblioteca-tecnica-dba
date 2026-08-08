@@ -1,0 +1,41 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+# GUIA PRÁTICO ORACLE
+
+## Operações DDL em Tabelas
+
+### 1. Criar uma tabela
+
+```sql id="0zzl8m"
+CREATE TABLE <TABLE_NAME> (
+    id   NUMBER,
+    nome VARCHAR2(50)
+);
+```
+
+---
+
+### 2. Adicionar uma nova coluna
+
+```sql id="0s5n8g"
+ALTER TABLE <TABLE_NAME>
+ADD (
+    descricao VARCHAR2(100)
+);
+```
+
+---
+
+### 3. Remover todos os registros da tabela
+
+```sql id="7pkjll"
+TRUNCATE TABLE <TABLE_NAME>;
+```
+
+---
+
+### 4. Remover a tabela
+
+```sql id="0z0bpp"
+DROP TABLE <TABLE_NAME>;
+```

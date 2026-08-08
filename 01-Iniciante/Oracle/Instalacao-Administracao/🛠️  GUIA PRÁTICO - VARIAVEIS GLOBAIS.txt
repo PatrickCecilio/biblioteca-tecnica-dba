@@ -1,0 +1,7 @@
+sudo install -m 0644 /dev/null /etc/profile.d/oracle.sh
+
+sudo sh -c "printf '%s\n' 'export ORACLE_BASE=<ORACLE_BASE>' 'export ORACLE_HOME=<ORACLE_HOME>' 'export ORACLE_SID='<ORACLE_SID>' 'export ORACLE_HOSTNAME=<ORACLE_HOSTNAME>' 'export PATH=\$ORACLE_HOME/bin:\$PATH' > /etc/profile.d/oracle.sh"
+
+source /etc/profile.d/oracle.sh
+
+printf '%s\n' "$ORACLE_BASE" "$ORACLE_HOME" "$ORACLE_SID" "$ORACLE_HOSTNAME" "$PATH"

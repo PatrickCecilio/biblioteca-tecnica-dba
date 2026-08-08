@@ -1,0 +1,60 @@
+rman target /
+
+rma>BACKUP INCREMENTAL LEVEL 0 DATABASE;
+
+list backup of database summary;
+
+alter session set container = ORCLPDB
+
+show con_name
+
+create user SUPERVISORNV1 identified by dbaocm
+
+grant connect, resource to SUPERVISORNV1;
+
+conn SUPERVISORNV1/dbaocm@ORCLPDB
+
+create table test (no number(10),name varchar2(20));
+
+insert into test values (1, "um")
+insert into test values (1, "um")
+insert into test values (1, "um")
+insert into test values (1, "um")
+insert into test values (1, "um")
+
+commit;
+
+backup incremental level 1 database plus archivelog;
+
+
+sqlplus / as sysdba
+
+
+show parameter db_recovery_file
+
+alter system set db_recovery_file_dest_size=10G scope=both;
+alter system set db_recovery_file_dest='/u01/fast_recovery_area' scope=both;
+
+alter system set log_archive_dest_1='locatiov=USE_DB_RECOVERY_FILE_DEST' scope=both;
+
+show parameter db_recovery file
+
+rman> CONFIGURE COMPRESSION ALGORITHM 'MEDIUM';
+
+SHOW ALL
+
+BACKUP AS COMPRESSED BACKUPSET DATABASE PLUS ARCHIVELOG;
+
+SET ENCRYPTION IDENTIFIED BY welcome1 ONLY ON FOR ALL TABLESPACES;
+
+BACKUP DATABASE PLUS ARCHIVELOG;
+
+run
+{allocate channel ch1 type Disk maxpiecesize= 500m FORMAT '/u02/fast_recovery_area/db_%t_set%s_piece%p_dbid%I.rman';
+
+BACKUP SECTION SIZE 50M TABLESPACE ORCLPDB:TBL01, ORCLPDB:TBL02, ORCLPDB:TBL03;
+
+ls -ltrh /u02/fast_recovery_area/ORCL/2ABDA4E7D98409A8E0630C01A8C021E9/backupset/2025_01_06/
+
+SET LINES 200 PAGES 20000
+select  segment_name, bytes/1024/1024 from dba_segments where tablespace_name in('TBL01', 'TBL02', 'TBL03') ORDER BY 1;

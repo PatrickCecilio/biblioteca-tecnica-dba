@@ -1,0 +1,171 @@
+===============================================================================
+🧠 ATIVIDADE PRÁTICA – DIAGNÓSTICO DE SQL “COMEDOR DE CPU” (ORACLE 19c)
+===============================================================================
+Tema      : Como descobrir qual SQL está consumindo muita CPU
+Foco      : CPU alta + evidência de plano ruim (Execution Plan)
+Objetivo  : Identificar a sessão, o SQL, o impacto e decidir a ação correta
+-------------------------------------------------------------------------------
+
+📌 CENÁRIO
+----------
+O time reportou: "O banco está lento e a CPU está em 90%+."
+Você precisa descobrir:
+  [1] Quem está queimando CPU
+  [2] Qual SQL é o culpado
+  [3] Se o plano está errado (e o que ajustar)
+
+===============================================================================
+🧩 PARTE 1 — QUEM ESTÁ GASTANDO CPU (SESSÃO + SQL + IMPACTO)
+===============================================================================
+
+ Query de investigação (sessão + processo + SQL):
+
+ SELECT s.sid,
+           s.serial#,
+           s.username,
+           s.status,
+           s.machine,
+           s.program,
+           p.spid AS os_pid,
+           ROUND(v.value/100,2) AS cpu_segundos
+     FROM   v$session s
+     JOIN   v$process p ON p.addr = s.paddr
+     JOIN   v$sesstat v ON v.sid = s.sid
+     JOIN   v$statname n ON n.statistic# = v.statistic#
+     WHERE  n.name = 'CPU used by this session'
+     ORDER BY v.value DESC
+     FETCH FIRST 10 ROWS ONLY;
+
+
+Resultado retornado (exemplo):
+---------------------------------------------------------------------------
+| SID | SQL_ID        | CPU_S | ELAPSED_S | EXECUTIONS | SQL_TEXT        |
+|-----|--------------|-------|-----------|-----------|-----------------|
+| 101 | f7v2q3h6d8x0r | 42.3  | 45.1      | 3         | SELECT ... CPF  |
+---------------------------------------------------------------------------
+
+ INTERPRETAÇÃO GUIADA
+-----------------------
+• EXECUTIONS = 3 (baixo)
+• CPU_S = 42.3s (alto)
+• ELAPSED_S ~ CPU_S (bem próximo)
+
+👉 Isso sugere:
+  - Cada execução está MUITO cara (alto custo por execução)
+  - Não parece ser "espera externa" dominando (I/O pesado costuma inflar elapsed)
+
+===============================================================================
+❓ PERGUNTA 1
+===============================================================================
+O que esse dado te sugere?
+
+ (A) A consulta é leve, mas roda muitas vezes
+ (B) A consulta é pesada e consome muita CPU em poucas execuções
+ (C) A consulta está com espera de I/O
+
+✅ Resposta esperada: (B)
+
+Regra de ouro:
+----------------
+Se EXECUTIONS é baixo e CPU_TIME é alto → custo por execução está explodindo.
+
+===============================================================================
+🚀 PARTE 2 — CONFIRMAR SE O PLANO DE EXECUÇÃO ESTÁ “ERRADO”
+===============================================================================
+
+   Você inspeciona o plano com estatística real (ALLSTATS LAST):
+
+  SELECT * FROM TABLE(
+    DBMS_XPLAN.DISPLAY_CURSOR('f7v2q3h6d8x0r', NULL, 'ALLSTATS LAST')
+  );
+
+ Achado no plano:
+  "TABLE ACCESS FULL" na tabela CLIENTES
+
+ INTERPRETAÇÃO GUIADA
+-----------------------
+TABLE ACCESS FULL = varredura completa da tabela.
+Se o filtro é CPF (alta seletividade), o esperado seria:
+  - INDEX RANGE SCAN (ou UNIQUE SCAN) + TABLE ACCESS BY INDEX ROWID
+Se está lendo tudo:
+  - pode não existir índice útil
+  - ou o filtro está “inutilizando” o índice (função/expressão)
+  - ou estatísticas ruins fizeram o otimizador escolher errado
+
+===============================================================================
+❓ PERGUNTA 2
+===============================================================================
+O que você concluiria?
+
+ (A) A consulta está usando índice corretamente
+ (B) A consulta está fazendo leitura completa da tabela
+ (C) O Oracle não tem estatísticas de execução
+
+✅ Resposta esperada: (B)
+
+===============================================================================
+🛠️ CHECK DE CAUSA RAIZ (RÁPIDO E OPERACIONAL)
+===============================================================================
+
+ 1) Existe índice no CPF?
+  -- (exemplo) ver índices relacionados
+  SELECT index_name, column_name
+  FROM   dba_ind_columns
+  WHERE  table_name = 'CLIENTES'
+  AND    column_name = 'CPF';
+
+ 2) O WHERE permite uso de índice?
+  ⚠️ Anti-padrões comuns que "matam" índice:
+   - WHERE TO_CHAR(cpf) = '...'
+   - WHERE UPPER(cpf) = '...'
+   - WHERE cpf LIKE '%123'     (leading wildcard)
+   - WHERE NVL(cpf,'x') = '...'
+
+ Padrão bom:
+   WHERE cpf = :b1
+
+ 3) Estatísticas estão atualizadas?
+  SELECT last_analyzed
+  FROM   dba_tables
+  WHERE  owner = '<OWNER>'
+  AND    table_name = 'CLIENTES';
+
+  -- se estiver velho ou NULL:
+  EXEC DBMS_STATS.GATHER_TABLE_STATS('<OWNER>', 'CLIENTES');
+
+===============================================================================
+🎯 AÇÃO RECOMENDADA (DECISÃO PRÁTICA)
+===============================================================================
+
+Se CPF é filtro seletivo e há acesso FULL:
+  [✔] Criar/validar índice no CPF
+  [✔] Ajustar WHERE para permitir índice (remover funções)
+  [✔] Garantir stats atualizadas (DBMS_STATS)
+  [✔] Confirmar melhora via ALLSTATS LAST (Rows/Buffer Gets)
+
+📌 Extra (produção):
+-------------------
+Se o SQL está “queimando” CPU agora:
+  - Avalie SQL Monitor (licença permitting) / v$sqlstats / ASH
+  - Verifique se há regressão de plano (baseline, profile, stats changes)
+
+===============================================================================
+✅ MINI-CHECKLIST (FECHAMENTO)
+===============================================================================
+ [ ] Identifiquei SID/SERIAL e SQL_ID
+ [ ] Comparei CPU_S vs ELAPSED_S
+ [ ] Verifiquei EXECUTIONS (custo por execução)
+ [ ] Validei o plano com ALLSTATS LAST
+ [ ] Confirmei se existe índice no predicado
+ [ ] Validei se o WHERE permite índice
+ [ ] Chequei estatísticas (last_analyzed)
+ [ ] Defini ação: índice / rewrite / stats / baseline
+
+===============================================================================
+🏁 PRÓXIMO NÍVEL (SE QUISER PRATICAR MAIS)
+===============================================================================
+Posso montar um próximo caso com:
+  (1) CPU alta por SORT/HASH JOIN + TEMP (direct path read temp)
+  (2) Regressão de plano (mudou de INDEX para FULL)
+  (3) CPU alta por parse (library cache / hard parse)
+===============================================================================

@@ -1,0 +1,21 @@
+# informações básicas do SO
+uname -a > $LOGDIR/os_uname.txt
+cat /etc/os-release > $LOGDIR/os_release.txt
+uptime >> $LOGDIR/🛠️  GUIA PRÁTICO - OS SUMMARY.txt
+who -r >> $LOGDIR/🛠️  GUIA PRÁTICO - OS SUMMARY.txt
+
+# disco / mounts / memória
+df -h > $LOGDIR/df_h.txt
+mount | egrep -i 'nfs|/u01|/backup|/oradata' > $LOGDIR/mounts.txt
+free -m > $LOGDIR/free_m.txt
+lsblk > $LOGDIR/lsblk.txt
+
+# rede / portas (procure 1521, 5500, 2483 etc)
+ss -ltnp > $LOGDIR/🛠️  GUIA PRÁTICO - SS LISTENING.txt
+netstat -tulpen > $LOGDIR/🛠️  GUIA PRÁTICO - NETSTAT LIST.txt
+
+# processos oracle & tns
+ps -ef | egrep 'ora_|pmon|tns|tnslsnr' > $LOGDIR/os_oracle_procs.txt
+
+# variáveis de ambiente ORACLE (só funciona depois de . oraenv)
+env | egrep -i 'ORACLE|TNS' > $LOGDIR/🟠  GUIA PRÁTICO - OS ENV BEFORE ORAENV.txt

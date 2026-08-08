@@ -1,0 +1,9 @@
+SELECT sid, serial#, username, status, machine, program, sql_id
+FROM v$session
+WHERE username = UPPER('<USERNAME>')
+ORDER BY status, sid;
+
+SELECT sql_id, sql_fulltext
+FROM v$sql
+WHERE parsing_schema_name = UPPER('<SCHEMA_NAME>')
+ORDER BY last_active_time DESC;

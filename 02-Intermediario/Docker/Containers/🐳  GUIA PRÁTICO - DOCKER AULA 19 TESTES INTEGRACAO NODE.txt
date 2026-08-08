@@ -1,0 +1,54 @@
+mkdir ~/fod/integration-test-node && \
+cd ~/fod/integration-test-node
+
+mkdir tests api database
+
+CREATE TABLE hobbies(
+	hobby_id serial PRIMARY KEY,
+	hobby VARCHAR (255) UNIQUE NOT NULL
+);
+
+insert into hobbies(hobby) values('swimming');
+insert into hobbies(hobby) values('diving');
+insert into hobbies(hobby) values('jogging');
+insert into hobbies(hobby) values('dancing');
+insert into hobbies(hobby) values('cooking');
+
+docker volume create pg-data
+
+cd ~/fod/integration-test-node
+
+docker container run -d \
+
+docker container logs postgres
+
+cd ~/fod/integration-test-node/api
+
+cd ~/fod/integration-test-node/tests && \
+
+{
+}
+
+RUN npm install
+
+FROM node:alpine
+WORKDIR /usr/src/app
+COPY package.json ./
+RUN npm install
+
+docker image build -t api-node api
+docker image build -t tests-node tests
+
+docker network create test-net
+
+docker container run --rm -d \
+
+docker container run --rm -d \
+
+echo "Sleeping for 5 sec..."
+
+docker container run --rm -it \
+
+docker container rm -f postgres api
+docker network rm test-net
+docker volume rm pg-data

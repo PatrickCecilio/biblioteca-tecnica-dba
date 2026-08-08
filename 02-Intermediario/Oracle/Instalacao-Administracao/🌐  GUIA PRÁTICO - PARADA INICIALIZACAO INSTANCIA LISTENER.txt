@@ -1,0 +1,150 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+# GUIA PRÁTICO ORACLE
+
+## Parada e Inicialização Manual de Instâncias e Listener
+
+### 1. Acessar o usuário Oracle
+
+```bash
+su - <ORACLE_OS_USER>
+```
+
+---
+
+### 2. Carregar o ambiente da instância
+
+```bash
+. oraenv
+```
+
+Informar:
+
+```text
+<ORACLE_SID>
+```
+
+---
+
+### 3. Conectar ao banco como SYSDBA
+
+```bash
+sqlplus / as sysdba
+```
+
+---
+
+### 4. Parar a instância
+
+```sql
+SHUTDOWN IMMEDIATE;
+```
+
+---
+
+### 5. Repetir para outra instância
+
+```bash
+. oraenv
+```
+
+Informar:
+
+```text
+<ORACLE_SID>
+```
+
+Conectar:
+
+```bash
+sqlplus / as sysdba
+```
+
+Executar:
+
+```sql
+SHUTDOWN IMMEDIATE;
+```
+
+Repita o procedimento para cada instância que precisa ser parada.
+
+---
+
+# INICIALIZAÇÃO
+
+### 6. Carregar o ambiente da instância
+
+```bash
+. oraenv
+```
+
+Informar:
+
+```text
+<ORACLE_SID>
+```
+
+---
+
+### 7. Conectar como SYSDBA
+
+```bash
+sqlplus / as sysdba
+```
+
+---
+
+### 8. Inicializar a instância
+
+```sql
+STARTUP;
+```
+
+---
+
+### 9. Iniciar o Listener padrão
+
+```bash
+lsnrctl start
+```
+
+Ou, quando existir um Listener específico:
+
+```bash
+lsnrctl start <LISTENER_NAME>
+```
+
+---
+
+### 10. Validar o Listener
+
+```bash
+lsnrctl status <LISTENER_NAME>
+```
+
+---
+
+### 11. Validar o estado do banco
+
+```bash
+sqlplus / as sysdba
+```
+
+```sql
+SELECT open_mode
+FROM v$database;
+```
+
+Para um banco aberto normalmente, o resultado esperado é:
+
+```text
+READ WRITE
+```
+
+---
+
+### 12. Verificar processos de Listener no servidor
+
+```bash
+ps -ef | grep tns
+```

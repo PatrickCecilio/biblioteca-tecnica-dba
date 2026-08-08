@@ -1,0 +1,49 @@
+# GUIA PRÁTICO ORACLE
+
+## Fixar NLS_DATE_FORMAT via Trigger no PDB
+
+### 1. Alterar para o PDB
+
+```sql
+ALTER SESSION SET CONTAINER = <PDB_NAME>;
+```
+
+---
+
+### 2. Validar o container
+
+```sql
+SHOW CON_NAME;
+```
+
+---
+
+### 3. Criar a trigger
+
+```sql
+CREATE OR REPLACE TRIGGER TRG_FIX_NLS_FORMAT
+AFTER LOGON ON DATABASE
+BEGIN
+    EXECUTE IMMEDIATE
+        'ALTER SESSION SET NLS_DATE_FORMAT = ''DD/MM/RRRR HH24:MI:SS''';
+END;
+/
+```
+
+---
+
+### 4. Reconectar no PDB
+
+```sql
+CONN <USUARIO>/<SENHA>@<SERVICE_NAME>
+```
+
+---
+
+### 5. Validar o NLS_DATE_FORMAT
+
+```sql
+SELECT value
+FROM v$nls_parameters
+WHERE parameter = 'NLS_DATE_FORMAT';
+```

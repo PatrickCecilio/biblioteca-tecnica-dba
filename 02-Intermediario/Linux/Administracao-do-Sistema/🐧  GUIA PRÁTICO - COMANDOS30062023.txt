@@ -1,0 +1,140 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+--------------------------------------------------------------------------------
+-- 1. Adição de Datafiles no Tablespace INFOSAUDE_DATA
+--------------------------------------------------------------------------------
+ALTER TABLESPACE INFOSAUDE_DATA
+  ADD DATAFILE '/u01/app/oracle/oradata/HPSCZS/INFOSAUDE_DATA05.DBF'
+    SIZE 5G;
+
+ALTER TABLESPACE INFOSAUDE_DATA
+  ADD DATAFILE '/u03/oradata/HPSCZS/INFOSAUDE_DATA05.DBF'
+    SIZE 1G
+    AUTOEXTEND ON
+      NEXT 100M
+      MAXSIZE 5G;
+
+--------------------------------------------------------------------------------
+-- 2. Monitoramento de Sessões Inativas (por máquina)
+--------------------------------------------------------------------------------
+SELECT
+    MACHINE,
+    COUNT(*) AS QTD_SESSOES_INATIVAS
+FROM
+    V$SESSION
+WHERE
+    STATUS = 'INACTIVE'
+GROUP BY
+    MACHINE
+ORDER BY
+    QTD_SESSOES_INATIVAS DESC;
+
+--------------------------------------------------------------------------------
+-- 3. Detalhamento de Sessões Inativas de uma Máquina Específica
+--------------------------------------------------------------------------------
+-- Substitua 'FMTHVD\SALUX237921' pela máquina desejada
+SELECT
+    s.sid,
+    s.serial#,
+    s.status,
+    s.username,
+    s.osuser,
+    s.program,
+    s.machine,
+    s.module,
+    s.action,
+    s.logon_time,
+    s.last_call_et,
+    q.sql_text
+FROM
+    v$session s
+LEFT JOIN
+    v$sql q
+  ON
+    s.sql_id = q.sql_id
+WHERE
+    s.status  = 'INACTIVE'
+  AND
+    s.machine = 'FMTHVD\SALUX237921';
+
+--------------------------------------------------------------------------------
+-- 4. Criação de Datafile no Tablespace ODBD01I
+--------------------------------------------------------------------------------
+ALTER TABLESPACE ODBD01I
+  ADD DATAFILE 'F:\DBDF\ORACLE\ODBD01\ODBD01_I41.DBF'
+    SIZE 1G
+    AUTOEXTEND ON
+      NEXT 1G
+      MAXSIZE 30G;
+
+--------------------------------------------------------------------------------
+-- 5. Verificação de Objetos Inválidos
+--------------------------------------------------------------------------------
+-- Listar objetos inválidos no esquema UDBD03
+SELECT
+    object_type,
+    object_name
+FROM
+    dba_objects
+WHERE
+    owner  = 'INFOSAUDE'
+  AND
+    status = 'INVALID';
+
+-- Contagem de objetos inválidos (status 4=INVALID, 5=ERROR, 6=UNUSABLE)
+SELECT
+    COUNT(*) AS invalid_objs
+FROM
+    obj$
+WHERE
+    status IN (4, 5, 6);
+
+--------------------------------------------------------------------------------
+-- 6. Estatísticas de Recompilação (UTL_RECOMP)
+--------------------------------------------------------------------------------
+-- Quantos objetos já foram recompilados
+SELECT
+    COUNT(*) AS compiled_objs
+FROM
+    UTL_RECOMP_COMPILED;
+
+--------------------------------------------------------------------------------
+-- 7. Status de Jobs Scheduler UTL_RECOMP_SLAVE
+--------------------------------------------------------------------------------
+-- Todos os jobs agendados
+SELECT
+    job_name,
+    state
+FROM
+    dba_scheduler_jobs
+WHERE
+    job_name LIKE 'UTL_RECOMP_SLAVE_%';
+
+-- Jobs atualmente em execução
+SELECT
+    job_name
+FROM
+    dba_scheduler_running_jobs
+WHERE
+    job_name LIKE 'UTL_RECOMP_SLAVE_%';
+
+--------------------------------------------------------------------------------
+-- 8. Gestão de Usuário e Backup de Dados
+--------------------------------------------------------------------------------
+-- Desbloquear e alterar senha do usuário UDBD03
+ALTER USER udbd03
+  IDENTIFIED BY "4232OD"
+  ACCOUNT UNLOCK;
+
+-- Criar backup da tabela MP_CUSTOM_METRICS_EXP
+CREATE TABLE UDBD03.MP_CUSTOM_METRICS_EXP_BKP AS
+SELECT * FROM UDBD03.MP_CUSTOM_METRICS_EXP;
+
+-- Limpar (truncate) a tabela original
+TRUNCATE TABLE UDBD03.MP_CUSTOM_METRICS_EXP;
+
+--------------------------------------------------------------------------------
+-- 9. Recompilação de Objetos Inválidos (script oficial)
+--------------------------------------------------------------------------------
+-- Executar o script de recompilação em massa
+@%ORACLE_HOME%\rdbms\admin\utlrp.sql

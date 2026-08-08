@@ -1,0 +1,31 @@
+SET LINESIZE 200
+COL username FORMAT A20
+COL program FORMAT A40
+COL open_cursor_count FORMAT 9999
+
+SELECT se.sid,
+se.serial#,
+se.username,
+se.program,
+COUNT(*) AS open_cursor_count
+FROM   v$open_cursor oc
+JOIN   v$session se ON se.sid = oc.sid
+GROUP  BY se.sid, se.serial#, se.username, se.program
+ORDER  BY COUNT(*) DESC;
+
+SELECT oc.sid,
+oc.sql_id,
+oc.sql_text
+FROM   v$open_cursor oc
+WHERE  oc.sid = 396;
+
+SELECT MAX(s.value) AS max_opened_cursors_current
+FROM   v$sesstat s
+JOIN   v$statname n ON n.statistic# = s.statistic#
+WHERE  n.name = 'opened cursors current';
+
+SHOW PARAMETER open_cursors;
+
+ALTER SYSTEM SET open_cursors = 300 SCOPE=BOTH;
+
+ALTER SYSTEM SET open_cursors = 300 SCOPE=MEMORY;

@@ -1,0 +1,10 @@
+LOCALIZAR ALERT LOG E CONFIGURAÇÃO DE REDE
+
+printf '%s
+' "$ORACLE_BASE" "$ORACLE_HOME" "$ORACLE_SID"
+ls -ld "$ORACLE_BASE/diag/rdbms"
+ls -la "$ORACLE_HOME/network/admin"
+
+adrci exec="show homes"
+
+Validação: selecione o ADR home correspondente ao DB_UNIQUE_NAME e ao SID antes de consultar alert e traces.

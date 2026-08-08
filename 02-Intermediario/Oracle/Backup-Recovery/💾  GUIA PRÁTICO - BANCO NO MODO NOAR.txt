@@ -1,0 +1,36 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+sqlplus / as sysdba
+
+ARCHIVE LOG LIST;
+
+SHUTDOWN IMMEDIATE;
+
+STARTUP MOUNT;
+
+ALTER DATABASE ARCHIVELOG;
+
+ALTER DATABASE OPEN;
+
+SELECT log_mode FROM v$database;
+
+SHOW PARAMETER db_recovery_file_dest;
+
+SHOW PARAMETER db_recovery_file_dest_size;
+
+ALTER SYSTEM SET db_recovery_file_dest_size=<FRA_SIZE> SCOPE=BOTH;
+
+ALTER SYSTEM SET db_recovery_file_dest='<FRA_PATH>' SCOPE=BOTH;
+
+SELECT name, space_limit, space_used, space_reclaimable
+FROM v$recovery_file_dest;
+
+EXIT;
+
+rman target /
+
+BACKUP DATABASE PLUS ARCHIVELOG;
+
+LIST BACKUP SUMMARY;
+
+EXIT;

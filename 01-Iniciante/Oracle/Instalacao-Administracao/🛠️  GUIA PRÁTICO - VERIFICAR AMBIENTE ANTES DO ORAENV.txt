@@ -1,0 +1,7 @@
+VERIFICAR O AMBIENTE ANTES DO ORAENV
+
+env | sort
+printf '%s
+' "$ORACLE_BASE" "$ORACLE_HOME" "$ORACLE_SID" "$PATH"
+
+Validação: registre os valores atuais antes de executar . oraenv e compare-os depois da seleção do SID.

@@ -1,0 +1,15 @@
+docker container exec -i -t trivia /bin/sh
+
+docker container exec trivia ps
+
+docker container exec -it \
+
+docker container attach trivia
+
+docker run -d --name nginx -p 8080:80 nginx:alpine
+
+curl -4 localhost:8080
+
+docker container attach nginx
+
+docker container rm nginx

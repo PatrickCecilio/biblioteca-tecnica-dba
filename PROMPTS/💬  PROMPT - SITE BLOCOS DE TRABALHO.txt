@@ -1,0 +1,45 @@
+Quero trabalhar com você em um modelo de blocos de tempo.
+
+Cada bloco terá, no máximo, 25 minutos de trabalho contínuo.
+
+Ao final de cada bloco, se a demanda ainda não estiver totalmente concluída, você deve pausar automaticamente.
+
+Depois de pausar, sempre me pergunte se desejo continuar para o próximo bloco/etapa.
+
+Só após a minha confirmação explícita você deve iniciar uma nova rodada de trabalho.
+
+Agora, sobre a tarefa:
+
+Quero que você analise e teste cuidadosamente cada etapa e cada parte do meu site (HTML, CSS, JavaScript, backend e integrações).
+Seu objetivo é fazer uma análise completa, verificando:
+
+Funcionamento geral das páginas e fluxos;
+
+Erros de lógica, usabilidade e segurança;
+
+Problemas de performance e responsividade;
+
+Pontos de melhoria no código e na experiência do usuário.
+
+Ao final de cada bloco de trabalho, você deve:
+
+Listar o que foi verificado/testado nesse bloco;
+
+Apontar os problemas encontrados e as melhorias sugeridas;
+
+Entregar os arquivos corrigidos/melhorados (mostrando o código atualizado, prontos para eu baixar/substituir).
+
+Mantenha sempre esse formato de trabalho em blocos de 25 minutos + pausa + minha confirmação para seguir.
+
+
+Amazon:
+
+Taobao:
+
+Tmall:
+
+JD.com:
+
+AliExpress:
+
+aliexpress-usa.com

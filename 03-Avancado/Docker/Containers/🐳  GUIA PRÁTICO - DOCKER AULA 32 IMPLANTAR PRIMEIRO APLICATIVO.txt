@@ -1,0 +1,9 @@
+docker network create --driver overlay <NETWORK_NAME>
+
+docker service create --name <SERVICE_NAME> --network <NETWORK_NAME> --publish published=<HOST_PORT>,target=<CONTAINER_PORT> --replicas <REPLICA_COUNT> <IMAGE_NAME>:<IMAGE_TAG>
+
+docker service ls
+
+docker service ps <SERVICE_NAME>
+
+docker service logs <SERVICE_NAME>

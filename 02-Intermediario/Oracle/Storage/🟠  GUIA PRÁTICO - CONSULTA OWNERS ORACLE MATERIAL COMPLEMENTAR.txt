@@ -1,0 +1,9 @@
+SQL> SELECT DISTINCT owner
+FROM dba_segments
+WHERE tablespace_name = 'INFOSAUDE_DATA', 'PONTO'
+ORDER BY owner;
+  2    3    4
+OWNER
+--------------------------------------------------------------------------------------------------------------------------------
+INFOSAUDE
+INTEGRACAO

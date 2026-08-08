@@ -1,0 +1,9 @@
+printf '%s\n' 'texto' > <OUTPUT_FILE>
+
+printf '%s\n' 'texto' >> <OUTPUT_FILE>
+
+command 2> <ERROR_LOG>
+
+command < <INPUT_FILE>
+
+command | grep '<PATTERN>'

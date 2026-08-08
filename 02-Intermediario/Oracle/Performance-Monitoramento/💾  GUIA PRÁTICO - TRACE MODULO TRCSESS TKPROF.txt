@@ -1,0 +1,89 @@
+# GUIA PRÁTICO ORACLE
+
+## Trace por Módulo com TRCSESS e TKPROF
+
+### 1. Verificar service e módulo
+
+```sql
+SELECT DISTINCT service_name, module
+FROM v$session
+WHERE service_name IS NOT NULL
+   OR module IS NOT NULL
+ORDER BY service_name, module;
+```
+
+---
+
+### 2. Habilitar trace por módulo
+
+```sql
+EXEC dbms_monitor.serv_mod_act_trace_enable(
+  service_name => '<SERVICE_NAME>',
+  module_name  => '<MODULE_NAME>'
+);
+```
+
+---
+
+### 3. Definir o módulo na sessão
+
+```sql
+EXEC dbms_application_info.set_module('<MODULE_NAME>', '');
+```
+
+---
+
+### 4. Executar as operações que serão analisadas
+
+```sql
+<SQL_A_SER_ANALISADO>
+```
+
+---
+
+### 5. Desabilitar o trace
+
+```sql
+EXEC dbms_monitor.serv_mod_act_trace_disable(
+  service_name => '<SERVICE_NAME>',
+  module_name  => '<MODULE_NAME>'
+);
+```
+
+---
+
+### 6. Consolidar os arquivos de trace
+
+```bash
+trcsess output=<TRACE_CONSOLIDADO>.trc service=<SERVICE_NAME> module=<MODULE_NAME>
+```
+
+---
+
+### 7. Gerar relatório com TKPROF
+
+```bash
+tkprof <TRACE_CONSOLIDADO>.trc <RELATORIO>.txt sys=n waits=y sort=exeqry
+```
+
+---
+
+### 8. Habilitar estatísticas por módulo
+
+```sql
+EXEC dbms_monitor.serv_mod_act_stat_enable(
+  service_name => '<SERVICE_NAME>',
+  module_name  => '<MODULE_NAME>'
+);
+```
+
+---
+
+### 9. Consultar estatísticas
+
+```sql
+SELECT *
+FROM v$serv_mod_act_stats
+WHERE service_name = '<SERVICE_NAME>'
+  AND module_name  = '<MODULE_NAME>';
+```

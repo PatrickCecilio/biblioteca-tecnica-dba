@@ -1,0 +1,92 @@
+Passo 1: Preparação do Ambiente
+
+Antes de rodar o script, você precisa garantir que o seu ambiente está pronto.
+
+1. Verifique se o seu sistema é compatível:
+   O script foi feito para distribuições baseadas em Debian (como Ubuntu, Debian, Kali Linux, etc.). Se você estiver usando outra distribuição, o script pode não funcionar como esperado.
+
+2. Tenha o acesso root:
+   O script precisa ser executado com privilégios de superusuário (root) para poder realizar a instalação de pacotes e executar os testes. Caso não tenha permissões de root, você precisará da senha de administrador.
+
+Passo 2: Criar o Arquivo de Script
+
+1.Abra o terminal no seu sistema Linux.
+
+2. Crie um arquivo de script:
+   Execute o comando para criar um novo arquivo de script:
+   bash
+   nano pentest_script.sh
+
+   Isso abrirá o editor de texto `nano`.
+
+3. Cole o código do script:
+   Copie o código completo que forneci anteriormente e cole dentro do arquivo que você criou no `nano`. Para colar no `nano`, basta usar o botão direito do mouse ou a combinação de teclas     Shift + Ctrl + V.
+
+4. Salve o arquivo:
+   Após colar o código, pressione Ctrl + O para salvar o arquivo e depois Enter para confirmar o nome. Para sair do `nano`, pressione Ctrl + X.
+
+ Passo 3: Dar Permissões de Execução
+
+Agora que você tem o arquivo, precisa dar permissão de execução para que ele possa ser executado como um script.
+
+Execute o seguinte comando no terminal:
+bash
+chmod +x pentest_script.sh
+
+
+Passo 4: Executar o Script
+
+1. Execute o script como root:
+   Para rodar o script, use o comando `sudo` (para garantir que o script tenha permissões de root):
+
+   bash
+   sudo ./pentest_script.sh
+
+
+   O "sudo" solicitará sua senha de administrador para permitir a execução do script com permissões elevadas.
+
+Passo 5: Interação com o Script
+
+Depois de executar o comando acima, o script será iniciado e você verá o menu de opções no terminal. O script irá pedir para escolher uma das opções:
+
+bash
+Escolha uma opção:
+1) Realizar reconhecimento do alvo
+2) Analisar vulnerabilidades no sistema local
+3) Sair
+
+
+Aqui está o que você pode fazer:
+
+1. Realizar reconhecimento do alvo:
+   - O script pedirá o IP ou domínio do alvo (o endereço da máquina ou servidor que você quer testar).
+   - Ele realizará um ping para testar a conectividade e, em seguida, irá rodar o `nmap` para identificar o sistema operacional, serviços e portas abertas, além de rodar o "nikto" para verificar vulnerabilidades em servidores web.
+
+2. Analisar vulnerabilidades no sistema local:
+   - O script executará uma análise no próprio sistema usando o Lynis, que verifica possíveis falhas de segurança no sistema.
+
+3. Sair:
+   - Caso você queira sair do script, basta escolher a opção 3 para encerrar a execução.
+
+ Passo 6: Verificar os Resultados
+
+Os resultados dos testes serão salvos em arquivos de log no mesmo diretório onde o script foi executado. Os arquivos terão o formato:
+
+- `nmap_os_services_<timestamp>.txt`
+- `nmap_open_ports_<timestamp>.txt`
+- `nikto_scan_<timestamp>.txt`
+- `lynis_scan_<timestamp>.txt`
+
+Esses arquivos contêm as informações e os resultados dos testes realizados. O timestamp ajuda a identificar em qual momento cada análise foi executada.
+
+Passo 7: Interpretando os Resultados
+
+- nmap: O `nmap` vai mostrar informações sobre o sistema operacional e os serviços detectados no alvo, além de verificar as portas abertas.
+- nikto: O `nikto` verifica vulnerabilidades comuns em servidores web (como servidores HTTP). Ele gera um relatório com potenciais riscos.
+- lynis: O `lynis` fornece uma análise de segurança do próprio sistema local, como configurações de segurança, permissões de arquivos e outros pontos críticos.
+
+Dicas Finais
+
+- Certifique-se de ter autorização para realizar testes de penetração em qualquer alvo. Testar sem permissão pode ser ilegal.
+- Mantenha o script atualizado para acompanhar novas versões das ferramentas que ele usa (como o `nmap`, `nikto` e `lynis`).
+- Revise os relatórios com atenção para entender as vulnerabilidades encontradas.

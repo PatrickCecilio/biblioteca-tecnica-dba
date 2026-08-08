@@ -1,0 +1,28 @@
+mkdir -p ~/fod/node && cd ~/fod/node
+
+vim index.js
+
+vim Dockerfile
+
+RUN npm install
+COPY . .
+CMD node index.js
+
+docker image build -t sample-app .
+
+docker container run --rm -it \
+--name my-sample-app \
+-p 3300:3300 \
+sample-app
+
+vim index.js
+
+...
+
+const hobbies = [
+'Swimming', 'Diving', 'Jogging', 'Cooking', 'Singing'
+];
+
+docker image build -t sample-app .
+
+docker container run --rm -it --name my-sample-app -p 3300:3300 sample-app

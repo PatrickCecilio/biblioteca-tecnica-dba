@@ -1,0 +1,48 @@
+USER
+45513899000
+SENHA
+Lustra2025#
+sysman
+TJ#emcc2468
+
+senha do moba; Lustra2024#
+senha dos Excc: r4cl3tjr0
+site
+================AMBIENTE=======================
+
+PASSO1
+Clonar o documento
+
+Passo2
+acessar o CloudControl
+1º Backup atuais
+2º Bancos Protegidos
+3º Locais de Armazenamentos
+================SISTEMA=======================
+
+Passo 3
+acessar o Excc01db01
+comando.:
+sudo su - grid
+
+comando.:
+asmcmd lsdg
+
+Passo 4
+Acessar exacc02db01
+
+Comando.:
+. CDBADM.env
+
+Comando.:
+sqlplus / as sysdba @c1
+=====================caso o banco esteja fora de ar===========================
+. CDBNOME_DO_BANCO
+
+SQLPLUS / AS SYSDBA
+
+STARTUP NOMOUNT;
+
+ALTER DATABASE OPEN READ ONLY;
+
+env | grep

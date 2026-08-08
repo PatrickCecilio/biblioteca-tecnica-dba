@@ -1,0 +1,308 @@
+#!/bin/bash
+
+set -Eeuo pipefail
+IFS=$'\n\t'
+
+declare -gr LOGDIR="/var/log/pentest"
+declare -gr REPORT_DIR="${LOGDIR}/reports"
+declare -gr WORDLIST_DIR="${LOGDIR}/wordlists"
+declare -gr FORENSIC_DIR="${LOGDIR}/forensics"
+declare -gr TOOLS_DIR="/opt/pentest_tools"
+declare -gr TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+declare -gr KERNEL_VERSION=$(uname -r)
+declare -gi MAX_THREADS=500
+declare -gi REQUEST_TIMEOUT=30
+declare -gi VERBOSE=0
+
+declare -gr RED='\033[0;31m'
+declare -gr GREEN='\033[0;32m'
+declare -gr YELLOW='\033[1;33m'
+declare -gr NC='\033[0m'
+
+cleanup() {
+    log "INFO" "Iniciando limpeza de recursos..."
+    pkill -P $$ 2>/dev/null || true
+    find "${LOGDIR}" -name "*.tmp" -delete
+    log "INFO" "Limpeza concluída com sucesso"
+}
+
+init_directories() {
+    mkdir -p "${LOGDIR}" "${REPORT_DIR}" "${WORDLIST_DIR}" "${FORENSIC_DIR}" "${TOOLS_DIR}"
+}
+
+trap 'cleanup; exit 1' ERR SIGINT SIGTERM
+
+log() {
+    local level=$1
+    local message=$2
+    local timestamp
+    timestamp=$(date +'%Y-%m-%dT%H:%M:%S%:z')
+    local log_file="${LOGDIR}/pentest_${TIMESTAMP}.json"
+
+    case $level in
+        "ERROR") echo -e "${RED}${timestamp} [${level}] ${message}${NC}" ;;
+        "WARN")  echo -e "${YELLOW}${timestamp} [${level}] ${message}${NC}" ;;
+        *)       echo -e "${GREEN}${timestamp} [${level}] ${message}${NC}" ;;
+    esac
+
+    jq -n \
+        --arg ts "${timestamp}" \
+        --arg lvl "${level}" \
+        --arg msg "${message}" \
+        --arg mod "${FUNCNAME[1]}" \
+        --arg pid "$$" \
+        --arg mem "$(ps -o rss= -p $$ | awk '{printf "%.2fMB", $1/1024}')" \
+        '{
+            timestamp: $ts,
+            level: $lvl,
+            module: $mod,
+            pid: $pid,
+            memory: $mem,
+            message: $msg
+        }' >> "${log_file}"
+}
+
+validate_kernel() {
+    local supported_kernels=(
+        "5.15.0-206.153.7.el8uek.x86_64"
+        "5.15.0-304.171.4.3.el8uek.x86_64"
+        "4.18.0-544.206.153.7.1.el8uek.x86_64"
+    )
+
+    if ! printf '%s\n' "${supported_kernels[@]}" | grep -qFx "${KERNEL_VERSION}"; then
+        log "ERROR" "Kernel não suportado: ${KERNEL_VERSION}"
+        log "INFO" "Kernels suportados:"
+        printf ' - %s\n' "${supported_kernels[@]}"
+        exit 1
+    fi
+}
+
+check_root() {
+    [[ $EUID -ne 0 ]] && log "ERROR" "Este script requer privilégios root!"
+}
+
+check_resources() {
+    local min_mem=2048  # 2GB
+    local min_disk=1024 # 1GB
+    local mem_available
+    mem_available=$(free -m | awk '/Mem:/ {print $7}')
+    local disk_available
+    disk_available=$(df -m / | awk 'NR==2 {print $4}')
+
+    (( mem_available < min_mem )) && log "ERROR" "Memória insuficiente. Necessário: ${min_mem}MB, Disponível: ${mem_available}MB"
+    (( disk_available < min_disk )) && log "ERROR" "Espaço em disco insuficiente. Necessário: ${min_disk}MB, Disponível: ${disk_available}MB"
+}
+
+install_dependencies() {
+    log "INFO" "Instalando dependências do sistema..."
+
+    dnf install -y epel-release || log "ERROR" "Falha ao instalar EPEL"
+    dnf config-manager --enable ol8_appstream || log "ERROR" "Falha ao habilitar repositório"
+
+    declare -a packages=(
+        git curl wget nmap hydra perl ruby
+        python3-devel gcc-c++ make libffi-devel
+        postgresql-server postgresql-devel jq
+        libyaml-devel zlib-devel openssl-devel
+    )
+
+    for pkg in "${packages[@]}"; do
+        dnf install -y "${pkg}" &
+    done
+    wait
+
+    for pkg in "${packages[@]}"; do
+        rpm -q "${pkg}" || log "ERROR" "Falha ao instalar: ${pkg}"
+    done
+}
+
+install_nikto() {
+    log "INFO" "Configurando Nikto..."
+    local nikto_dir="${TOOLS_DIR}/nikto"
+
+    if [[ -d "${nikto_dir}" ]]; then
+        git -C "${nikto_dir}" pull || log "ERROR" "Falha ao atualizar Nikto"
+    else
+        git clone  "${nikto_dir}" || log "ERROR" "Falha ao clonar Nikto"
+    fi
+
+    ln -sf "${nikto_dir}/program/nikto.pl" "/usr/local/bin/nikto"
+}
+
+install_metasploit() {
+    if ! command -v msfconsole &>/dev/null; then
+        log "INFO" "Instalando Metasploit Framework..."
+        curl -sSL  > /tmp/msfinstall
+        chmod +x /tmp/msfinstall
+        /tmp/msfinstall || log "ERROR" "Falha na instalação do Metasploit"
+        msfdb init || log "ERROR" "Falha ao inicializar Metasploit DB"
+    fi
+}
+
+run_safe() {
+    local timeout=$1
+    local cpulimit=$2
+    shift 2
+
+    timeout "${timeout}" "$@" &
+    local pid=$!
+
+    if command -v cpulimit &>/dev/null; then
+        cpulimit -l "${cpulimit}" -p "${pid}" -b >/dev/null 2>&1
+    fi
+
+    wait "${pid}"
+    return $?
+}
+
+reconnaissance() {
+    local target=$1
+    log "INFO" "Iniciando reconhecimento em: ${target}"
+
+    validate_target "${target}"
+    local report_prefix="${REPORT_DIR}/recon_${TIMESTAMP}"
+
+    run_safe 30m 50 nmap -sV -O -T4 "${target}" -oX "${report_prefix}_quick.xml"
+
+    run_safe 2h 50 nmap -p- -T4 "${target}" -oX "${report_prefix}_full.xml"
+
+    run_safe 1h 70 nikto -h "${target}" -output "${report_prefix}_nikto.html"
+
+    log "INFO" "Reconhecimento concluído. Relatórios: ${report_prefix}_*"
+}
+
+validate_target() {
+    local target=$1
+    local pattern='^([0-9]{1,3}\.){3}[0-9]{1,3}(:[0-9]+)?$|^https?://[a-zA-Z0-9.-]+(:[0-9]+)?(/.*)?$'
+
+    [[ ! "${target}" =~ ${pattern} ]] && log "ERROR" "Formato de alvo inválido: ${target}"
+
+    if [[ "${target}" =~ ^http ]]; then
+        local domain=$(awk -F/ '{print $3}' <<< "${target}")
+        if ! dig +short "${domain}" | grep -qP '^\d+\.\d+\.\d+\.\d+$'; then
+            log "ERROR" "Falha na resolução DNS: ${domain}"
+        fi
+    fi
+}
+
+brute_force() {
+    local target=$1
+    local service=$2
+    local userlist=${3:-"${WORDLIST_DIR}/users.txt"}
+    local passlist=${4:-"${WORDLIST_DIR}/passwords.txt"}
+
+    [[ ! -f "${userlist}" ]] && log "ERROR" "Userlist não encontrada: ${userlist}"
+    [[ ! -f "${passlist}" ]] && log "ERROR" "Passlist não encontrada: ${passlist}"
+
+    validate_target "${target}"
+
+    if ! hydra -U | grep -q "${service}"; then
+        log "ERROR" "Serviço não suportado pelo Hydra: ${service}"
+    fi
+
+    local report_prefix="${REPORT_DIR}/bruteforce_${TIMESTAMP}"
+    hydra -L "${userlist}" -P "${passlist}" \
+        -t "${MAX_THREADS}" -W "${REQUEST_TIMEOUT}" \
+        "${target}" "${service}" \
+        -o "${report_prefix}.json" -J
+
+    log "INFO" "Ataque de força bruta concluído. Relatório: ${report_prefix}.json"
+}
+
+show_usage() {
+    cat <<EOF
+Uso: $0 [OPÇÕES]
+Opções:
+  --install       Instalar dependências e ferramentas
+  --recon <ALVO>  Executar reconhecimento completo
+  --brute <ALVO> <SERVIÇO>  Ataque de força bruta
+  --verbose       Modo detalhado
+  --help          Mostrar ajuda
+EOF
+}
+
+menu() {
+    clear
+    echo "============================================"
+    echo "  Pentest Automation Suite - Menu Interativo"
+    echo "============================================"
+    echo "1) Instalar Dependências e Ferramentas"
+    echo "2) Executar Reconhecimento"
+    echo "3) Executar Ataque de Força Bruta"
+    echo "4) Sair"
+    echo "============================================"
+    read -p "Selecione uma opção: " op
+
+    case $op in
+        1)
+            install_dependencies
+            install_nikto
+            install_metasploit
+            ;;
+        2)
+            read -p "Digite o alvo para reconhecimento (ex: <IP_ADDRESS>): " target
+            reconnaissance "$target"
+            ;;
+        3)
+            read -p "Digite o alvo (ex: <IP_ADDRESS>): " target
+            read -p "Digite o serviço (ex: ssh): " service
+            brute_force "$target" "$service"
+            ;;
+        4)
+            echo "Saindo..."
+            exit 0
+            ;;
+        *)
+            echo "Opção inválida!"
+            sleep 2
+            menu
+            ;;
+    esac
+}
+
+main() {
+    init_directories
+    check_root
+    validate_kernel
+    check_resources
+
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            --install)
+                install_dependencies
+                install_nikto
+                install_metasploit
+                shift
+                ;;
+            --recon)
+                [[ -z $2 ]] && log "ERROR" "Alvo não especificado"
+                reconnaissance "$2"
+                shift 2
+                ;;
+            --brute)
+                [[ -z $3 ]] && log "ERROR" "Parâmetros insuficientes"
+                brute_force "$2" "$3"
+                shift 3
+                ;;
+            --verbose)
+                VERBOSE=1
+                shift
+                ;;
+            --help)
+                show_usage
+                exit 0
+                ;;
+            *)
+                log "ERROR" "Opção inválida: $1"
+                show_usage
+                exit 1
+                ;;
+        esac
+    done
+}
+
+if [ "$#" -eq 0 ]; then
+    menu
+else
+    main "$@"
+fi

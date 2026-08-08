@@ -1,0 +1,56 @@
+-----CONSULTAS-STATUS-DO-USUARIO----------
+
+SELECT USERNAME, ACCOUNT_STATUS, EXPIRY_DATE
+FROM DBA_USERS
+WHERE USERNAME = 'USER';
+
+-----CONSULTAR-USUARIOS------------
+
+select username from dba_users;
+
+
+-----CONSULTAS-USUARIO-ESPECIFICO-----------
+
+select username from dba_users where username = 'usuario';
+
+
+-----CONSULTAS-TABELA-ESPECIFICA-----------
+
+SELECT table_name
+FROM dba_tables
+WHERE owner = 'TABELA'
+ORDER BY table_name;
+
+-----CONSULTA-TABLESPACES------------
+
+SELECT tablespace_name FROM dba_tablespaces;
+
+
+-----CONSULTA-TABELAS-DE-SCHEMA----------
+
+SELECT
+  owner,
+  table_name,
+  tablespace_name,
+  status
+FROM dba_tables
+WHERE tablespace_name = 'GOKU'
+ORDER BY owner, table_name;
+
+---------------------------------------------------------------------
+CREATE ROLE consulta_infosaude;
+
+-- Conceda acesso de leitura (SELECT) nas tabelas necessárias
+GRANT SELECT ON INFOSAÚDE_SCHEMA.tabela1 TO consulta_infosaude;
+GRANT SELECT ON USUARIO.tabela2 TO consulta_infosaude;
+-- (adicione mais conforme necessário)
+
+GRANT ROLE_INFOSAUDE TO rick;
+GRANT ROLE_INFOSAUDE TO denilson;
+
+ALTER USER rick DEFAULT ROLE ROLE_INFOSAUDE;
+ALTER USER denilson DEFAULT ROLE ROLE_INFOSAUDE;
+
+
+ALTER USER rick DEFAULT ROLE ROLE_INFOSAUDE;
+ALTER USER denilson DEFAULT ROLE ROLE_INFOSAUDE;

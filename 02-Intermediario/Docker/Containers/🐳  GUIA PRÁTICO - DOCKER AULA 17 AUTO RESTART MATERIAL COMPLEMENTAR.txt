@@ -1,0 +1,30 @@
+// Aula 17 - Trabalhando com Auto-restarting
+
+$ npm install -g nodemon
+
+# nodemon
+
+# vim index.js
+
+...
+
+app.get('/colors', (req,res)=>{
+	res.send(['red','green','blue']);
+})
+
+# vim Dockerfile-dev
+
+FROM node:latest
+RUN npm install -g nodemon
+WORKDIR /app
+COPY package.json ./
+RUN npm install
+COPY . .
+CMD nodemon
+
+$ docker image build --file Dockerfile-dev -t sample-app-dev .
+
+$ docker container run --rm -it \
+-v $(pwd):/app \
+-p 3300:3300 \
+sample-app-dev

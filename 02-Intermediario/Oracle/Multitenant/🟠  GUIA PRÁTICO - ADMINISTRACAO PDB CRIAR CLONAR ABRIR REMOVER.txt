@@ -1,0 +1,131 @@
+# GUIA PRÁTICO ORACLE
+
+## Administração de PDBs — Criar, Clonar, Abrir e Remover
+
+### 1. Conectar ao CDB
+
+```bash
+sqlplus / as sysdba
+```
+
+---
+
+### 2. Validar o Container atual
+
+```sql
+SHOW CON_NAME;
+```
+
+```sql
+SHOW PDBS;
+```
+
+---
+
+### 3. Configurar destino padrão dos Datafiles
+
+```sql
+ALTER SYSTEM SET db_create_file_dest='<PDB_DATA_PATH>'
+SCOPE=BOTH;
+```
+
+### 4. Validar o destino
+
+```sql
+SHOW PARAMETER db_create_file_dest;
+```
+
+---
+
+### 5. Criar uma PDB
+
+```sql
+CREATE PLUGGABLE DATABASE <PDB_NAME>
+ADMIN USER <ADMIN_USER>
+IDENTIFIED BY "<PASSWORD>"
+STORAGE (MAXSIZE <MAXSIZE>);
+```
+
+### 6. Validar a criação
+
+```sql
+SELECT name
+FROM v$pdbs;
+```
+
+---
+
+### 7. Abrir a PDB
+
+```sql
+ALTER PLUGGABLE DATABASE <PDB_NAME> OPEN;
+```
+
+### 8. Validar o estado
+
+```sql
+SHOW PDBS;
+```
+
+---
+
+### 9. Alterar a sessão para a PDB
+
+```sql
+ALTER SESSION SET CONTAINER=<PDB_NAME>;
+```
+
+### 10. Validar o Container
+
+```sql
+SHOW CON_NAME;
+```
+
+---
+
+### 11. Clonar uma PDB existente
+
+```sql
+CREATE PLUGGABLE DATABASE <CLONE_PDB_NAME>
+FROM <SOURCE_PDB_NAME>;
+```
+
+### 12. Validar o Clone
+
+```sql
+SELECT name
+FROM v$pdbs;
+```
+
+---
+
+### 13. Fechar uma PDB
+
+```sql
+ALTER PLUGGABLE DATABASE <PDB_NAME> CLOSE;
+```
+
+### 14. Validar o fechamento
+
+```sql
+SELECT
+    name,
+    open_mode
+FROM v$pdbs
+WHERE name = UPPER('<PDB_NAME>');
+```
+
+---
+
+### 15. Remover a PDB e seus Datafiles
+
+```sql
+DROP PLUGGABLE DATABASE <PDB_NAME>
+INCLUDING DATAFILES;
+```
+
+### 16. Validar a remoção
+
+```sql
+SHOW PDBS;
+```

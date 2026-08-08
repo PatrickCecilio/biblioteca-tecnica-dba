@@ -1,0 +1,8 @@
+RUN npm install -g nodemon
+WORKDIR /app
+COPY package.json ./
+RUN npm install
+
+docker image build --file Dockerfile-dev -t sample-app-dev .
+
+docker container run --rm -it \

@@ -1,0 +1,23 @@
+-- Criação de usuário e privilégios\CREATE USER aluno IDENTIFIED BY aluno123;
+GRANT CONNECT, RESOURCE TO aluno;
+
+-- Criação de CDB user (C##)
+CREATE USER C##sombra IDENTIFIED BY sombra123 CONTAINER=ALL;
+GRANT CONNECT, RESOURCE TO C##sombra CONTAINER=ALL;
+
+-- Criação de tabela e inserção
+CREATE TABLE sombra123 (
+    id NUMBER,
+    nome VARCHAR2(100)
+);
+INSERT INTO sombra123 VALUES (1, 'João');
+COMMIT;
+
+-- Seleções e formatação de saída
+SET LINESIZE 200;
+SET PAGESIZE 50;
+COL nome FOR A30;
+
+SELECT a.nome, b.salario
+FROM empregados a
+JOIN folha_pagamento b ON a.id = b.empregado_id;

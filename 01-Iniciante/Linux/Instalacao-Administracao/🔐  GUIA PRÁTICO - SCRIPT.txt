@@ -1,0 +1,126 @@
+#!/bin/bash
+
+if [ "$EUID" -ne 0 ]; then
+  echo "Por favor, execute como root."
+  exit 1
+fi
+
+verificar_dependencias() {
+  dependencias=(nmap nikto lynis curl)
+
+  for dep in "${dependencias[@]}"; do
+    if ! command -v $dep &>/dev/null; then
+      echo "$dep não está instalado. Instalando..."
+      if [ -f /etc/debian_version ]; then
+        apt-get install -y $dep
+      elif [ -f /etc/redhat-release ]; then
+        dnf install -y $dep
+      else
+        echo "Sistema não suportado para instalação automática."
+        exit 1
+      fi
+    else
+      echo "$dep já está instalado."
+    fi
+  done
+}
+
+verificar_distro() {
+  if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    echo "Distribuição detectada: $NAME $VERSION"
+    if [[ "$NAME" != "Ubuntu" && "$NAME" != "Debian" && "$NAME" != "Oracle Linux Server" ]]; then
+      echo "Este script foi testado apenas em distribuições baseadas no Debian e Oracle Linux."
+      exit 1
+    fi
+  fi
+}
+
+instalar_dependencias() {
+  echo "Instalando dependências necessárias..."
+  if [ -f /etc/debian_version ]; then
+    apt-get update || { echo "Falha ao atualizar repositórios."; exit 1; }
+  elif [ -f /etc/redhat-release ]; then
+    dnf update -y || { echo "Falha ao atualizar repositórios."; exit 1; }
+  fi
+  verificar_dependencias
+  echo "Dependências instaladas."
+}
+
+pingar_alvo() {
+  echo "Testando conectividade com o alvo..."
+  ping -c 4 $target
+  if [ $? -ne 0 ]; then
+    echo "Falha na conectividade com o alvo: $target"
+    exit 1
+  fi
+}
+
+reconhecimento() {
+  echo "Digite o endereço IP ou domínio do alvo:"
+  read target
+  pingar_alvo
+  echo "Iniciando reconhecimento do alvo: $target"
+
+  echo "Testando conectividade com o alvo..."
+  ping -c 4 $target
+
+  echo "Identificando sistema operacional e serviços..."
+  timestamp=$(date "+%Y%m%d_%H%M%S")
+  nmap -O -sV $target -oN "nmap_os_services_$timestamp.txt"
+
+  echo "Verificando portas abertas..."
+  nmap -p- $target -oN "nmap_open_ports_$timestamp.txt"
+
+  echo "Verificando vulnerabilidades em serviços web..."
+  nikto -h $target -output "nikto_scan_$timestamp.txt"
+
+  echo "Reconhecimento concluído. Resultados salvos em:"
+  echo "- nmap_os_services_$timestamp.txt"
+  echo "- nmap_open_ports_$timestamp.txt"
+  echo "- nikto_scan_$timestamp.txt"
+}
+
+analisar_vulnerabilidades_locais() {
+  echo "Iniciando análise de vulnerabilidades no sistema local..."
+
+  echo "Executando varredura com Lynis..."
+  timestamp=$(date "+%Y%m%d_%H%M%S")
+  lynis audit system --quick --quiet --no-colors --logfile "lynis_scan_$timestamp.txt"
+
+  echo "Análise local concluída. Resultados salvos em:"
+  echo "- lynis_scan_$timestamp.txt"
+}
+
+menu_principal() {
+  echo "Escolha uma opção:"
+  echo "1) Realizar reconhecimento do alvo"
+  echo "2) Analisar vulnerabilidades no sistema local"
+  echo "3) Sair"
+  read opcao
+
+  case $opcao in
+    1)
+      reconhecimento
+      menu_principal
+      ;;
+    2)
+      analisar_vulnerabilidades_locais
+      menu_principal
+      ;;
+    3)
+      echo "Saindo..."
+      exit 0
+      ;;
+    *)
+      echo "Opção inválida."
+      menu_principal
+      ;;
+  esac
+}
+
+verificar_distro
+
+instalar_dependencias
+
+menu_principal

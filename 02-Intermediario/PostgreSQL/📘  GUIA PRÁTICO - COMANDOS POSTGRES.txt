@@ -1,0 +1,9 @@
+gzip -t '<BACKUP_ARCHIVE>.tar.gz'
+
+tar -tzf '<BACKUP_ARCHIVE>.tar.gz'
+
+mkdir -p '<RESTORE_WORKDIR>'
+
+tar -xzf '<BACKUP_ARCHIVE>.tar.gz' -C '<RESTORE_WORKDIR>'
+
+pg_restore --list '<RESTORE_WORKDIR>/<DUMP_FILE>.dump'

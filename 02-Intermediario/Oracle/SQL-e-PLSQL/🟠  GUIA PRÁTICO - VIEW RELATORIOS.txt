@@ -1,0 +1,37 @@
+# GUIA PRÁTICO ORACLE
+
+## Criação de View para Relatórios
+
+### 1. Criar a View
+
+```sql
+CREATE VIEW <VIEW_NAME> AS
+SELECT
+    c.nome,
+    COUNT(p.id_pedido) AS total_pedidos,
+    SUM(p.valor)       AS total_gasto
+FROM <CLIENT_TABLE> c
+LEFT JOIN <ORDER_TABLE> p
+       ON c.id_cliente = p.id_cliente
+GROUP BY c.nome;
+```
+
+---
+
+### 2. Consultar a View
+
+```sql
+SELECT *
+FROM <VIEW_NAME>;
+```
+
+---
+
+### 3. Validar a criação da View
+
+```sql
+SELECT
+    view_name
+FROM user_views
+WHERE view_name = UPPER('<VIEW_NAME>');
+```

@@ -1,0 +1,23 @@
+ip addr show
+
+ip route show
+
+top
+
+df -hT
+
+ps -ef | grep '[p]mon'
+
+systemctl status zabbix-agent2
+
+journalctl -u zabbix-agent2 -n 100 --no-pager
+
+tail -n 100 <ORACLE_ALERT_LOG>
+
+find <ORACLE_BASE>/diag -type f ( -name '*.trc' -o -name '*.trm' ) -mtime +<RETENTION_DAYS> -print
+
+find /var/log -type f -name '*.log' -print
+
+rclone lsd <REMOTE_NAME>:
+
+rclone ls <REMOTE_NAME>:<BUCKET_NAME>

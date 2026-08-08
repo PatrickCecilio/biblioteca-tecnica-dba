@@ -1,0 +1,11 @@
+// Aula 13 - Definindo volumes em imagens
+
+# docker image pull mongo
+
+$ docker image inspect \
+--format='{{json .ContainerConfig.Volumes}}' \
+mongo | jq .
+
+$ docker run --name my-mongo -d mongo
+
+$ docker inspect --format '{{json .Mounts}}' my-mongo | jq .

@@ -1,0 +1,9 @@
+LISTAR DISPOSITIVOS DE BLOCO
+
+Objetivo: identificar discos, partições, sistemas de arquivos e pontos de montagem.
+
+lsblk
+lsblk -f
+lsblk -o NAME,MAJ:MIN,RM,SIZE,RO,TYPE,FSTYPE,MOUNTPOINTS
+
+Validação: confirme o dispositivo e o ponto de montagem antes de qualquer operação de storage.

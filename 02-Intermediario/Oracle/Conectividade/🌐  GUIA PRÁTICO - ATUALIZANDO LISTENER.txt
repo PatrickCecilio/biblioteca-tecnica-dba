@@ -1,0 +1,13 @@
+lsnrctl status
+
+sqlplus / as sysdba
+
+SHOW PARAMETER local_listener;
+
+ALTER SYSTEM SET local_listener='<LISTENER_ALIAS>' SCOPE=BOTH;
+
+ALTER SYSTEM REGISTER;
+
+lsnrctl services
+
+tnsping <SERVICE_NAME>

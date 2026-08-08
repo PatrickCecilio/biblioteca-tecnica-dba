@@ -1,0 +1,153 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+---------------Como ver a rede do contêiner
+ip addr
+ip route
+
+---------------processos/rede
+top
+mrt google.com
+---------------disco
+df -h
+---------------banco
+ps -ef | grep pmon
+
+---------------zabbix
+systemctl restart zabbix-agent2
+journalctl -u zabbix-agent2 -f
+zabbix_server -R config_cache_reload
+tail -f /var/log/zabbix/zabbix_server.log
+systemctl status zabbix-agent
+tail -f /var/log/zabbix/zabbix_agentd.log  # ou zabbix_agent2.log
+zabbix_get -s <IP_DO_HOST> -k system.uptime
+
+---------------
+tail -f alert.log
+find /opt/oracle/diag/... -mtime +5 -exec rm -f {} \;
+find -mtime +90 -exec rm -rf {} \;
+find /var/log -type f -name "*.log"
+
+================================================================================
+        📘 GUIA DE COMANDOS ESSENCIAIS PARA DBA  📘
+================================================================================
+
+
+📂 1. COMANDOS PARA VERIFICAR USO DE ESPAÇO EM DISCO
+--------------------------------------------------------------------------------
+
+📌 du -kh --max-depth=1 /
+Descrição: Mostra o espaço utilizado pelas pastas do diretório atual
+           SEM listar subdiretórios internos.
+Uso típico: Analisar rapidamente quais diretórios consomem mais espaço.
+
+---
+
+📌 du -h *
+Descrição: Lista o espaço utilizado pelos diretórios e subdiretórios
+           a partir do local onde você está.
+Uso típico: Expandir análise de consumo por pasta.
+
+---
+
+📌 df -h
+Descrição: Exibe o uso de disco dos filesystems da máquina.
+Uso típico: Verificar espaço livre e ocupado em cada partição.
+
+---
+
+📌 ls -lt
+Descrição: Ordena arquivos e diretórios da pasta atual do mais antigo
+           para o mais novo (ordem cronológica decrescente).
+Uso típico: Rastrear arquivos recém-gerados, logs, dumps, etc.
+
+---
+
+📌 ls -ltr
+Descrição: Ordena arquivos e diretórios da pasta atual do mais novo
+           para o mais antigo (ordem cronológica crescente).
+Uso típico: Rastrear arquivos recém-gerados, logs, dumps, etc.
+
+================================================================================
+🖥️ 2. COMANDOS DE PROCESSOS, RECURSOS E MEMÓRIA
+--------------------------------------------------------------------------------
+
+📌 ps -ef | grep pmon
+Descrição: Verifica se o processo PMON está ativo (indicando que a instância
+           do Oracle está no ar).
+Uso típico: Diagnóstico rápido da instância.
+
+---
+
+📌 top
+Descrição: Monitor de recursos (CPU, memória, processos).
+Uso típico: Verificar carga e processos que mais consomem recursos.
+
+---
+
+📌 free -m  ou free -g
+Descrição: Exibe memória total, usada e livre (em MB ou GB).
+Uso típico: Avaliar gargalos de RAM e uso de swap.
+
+================================================================================
+🗄️ 3. COMANDOS ESSENCIAIS DO ORACLE
+--------------------------------------------------------------------------------
+
+📌 . oraenv
+Descrição: Seta a variável ORACLE_SID e o ambiente Oracle/ASM.
+Uso típico: Alterar para o ambiente desejado antes de rodar comandos.
+
+---
+
+📌 sqlplus / as sysdba
+Descrição: Login no banco como SYSDBA.
+Uso típico: Administração completa da instância.
+
+---
+
+📌 asmcmd
+Descrição: Acessa o prompt do ASM.
+Observação: O ambiente deve estar setado para +ASM via ". oraenv".
+
+---
+
+📌 lsnrctl start
+📌 lsnrctl status
+📌 lsnrctl stop
+Descrição: Comandos para iniciar, verificar status ou parar o Listener.
+Uso típico: Diagnóstico ou manutenção.
+
+================================================================================
+📁 4. COMANDOS DE ARQUIVOS E DIRETÓRIOS
+--------------------------------------------------------------------------------
+
+📌 cp arquivo1 arquivo2
+Descrição: Copia um arquivo.
+           O nome pode ser modificado no arquivo2.
+
+---
+
+📌 mv arquivo1 arquivo2
+Descrição: Move ou renomeia o arquivo.
+
+---
+
+📌 rm arquivo1
+Descrição: Remove um arquivo específico.
+
+---
+
+📌 rm -rf pasta
+Descrição: Remove uma pasta e todos seus subdiretórios.
+Atenção: Comando destrutivo. Usar com extremo cuidado.
+
+---
+
+📌 chown -R owner:grupo caminho
+Descrição: Altera dono e grupo de arquivos/pastas.
+           -R inclui subdiretórios.
+
+---
+
+📌 chmod -R permissao caminho
+Descrição: Altera permissões de arquivos e pastas.
+           -R inclui subdiretórios.

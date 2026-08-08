@@ -1,0 +1,88 @@
+SELECT
+    name AS Arquivo,
+    type_desc AS Tipo,
+    size * 8 / 1024 AS TamanhoMB,
+    physical_name AS Caminho
+FROM sys.database_files;
+
+jiva	ROWS	160000	C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\DATA\PADRAO01.mdf
+jiva_log	LOG	22017	C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\DATA\PADRAO_01.LDF
+jiva2	ROWS	170000	C:\Program Files\Microsoft SQL Server\MSSQL15.MSSQLSERVER\MSSQL\DATA\PADRAO02.mdf
+
+=============================================================================================================================
+
+SELECT TOP 20
+    s.name AS SchemaName,
+    t.name AS TableName,
+    p.rows AS RowCounts,
+    CAST(SUM(a.total_pages) * 8 / 1024.0 AS DECIMAL(10,2)) AS TotalMB,
+    CAST(SUM(a.used_pages) * 8 / 1024.0 AS DECIMAL(10,2)) AS UsedMB,
+    CAST((SUM(a.total_pages) - SUM(a.used_pages)) * 8 / 1024.0 AS DECIMAL(10,2)) AS FreeMB
+FROM sys.tables t
+INNER JOIN sys.indexes i
+    ON t.object_id = i.object_id
+INNER JOIN sys.partitions p
+    ON i.object_id = p.object_id
+    AND i.index_id = p.index_id
+INNER JOIN sys.allocation_units a
+    ON p.partition_id = a.container_id
+INNER JOIN sys.schemas s
+    ON t.schema_id = s.schema_id
+WHERE t.is_ms_shipped = 0
+GROUP BY s.name, t.name, p.rows
+ORDER BY TotalMB DESC;
+
+SANKHYA	TSIATA	595728	134941.52	132519.98	2421.54
+SANKHYA	TMDAMG	629328	79558.30	79548.95	9.35
+SANKHYA	TGFLIV_EXC	14379543	20316.92	20284.05	32.87
+SANKHYA	TGFITE	5791803	13786.77	13733.95	52.81
+SANKHYA	TGFNFE	540614	12068.45	12060.08	8.37
+SANKHYA	TGFDIN	12645775	10197.65	10183.63	14.02
+SANKHYA	TGFCAB	1195613	5436.81	5334.01	102.80
+SANKHYA	TSISEREVT	5454597	2872.50	2865.50	7.00
+SANKHYA	TCBLAN	5029905	2629.21	2618.23	10.98
+SANKHYA	TGFFIN	840670	2578.70	2484.80	93.91
+SANKHYA	TMDFMG	276615	2266.66	2247.20	19.45
+SANKHYA	TGFMGC	6875246	2035.00	1343.38	691.62
+SANKHYA	TGFLIV	2570235	1586.57	1466.70	119.88
+SANKHYA	TGFMDELOG	158692	1281.52	1272.06	9.45
+SANKHYA	TGFDFEER	171491	1257.98	1250.66	7.31
+SANKHYA	TSIPARLGT	2247079	993.75	989.84	3.91
+SANKHYA	TCBINT	4941081	739.62	738.09	1.53
+SANKHYA	TGFPDF	2235	618.18	609.10	9.08
+SANKHYA	BK1_TGFITE	462240	602.16	602.08	0.08
+SANKHYA	TFSFILE	38203	515.91	480.81	35.10
+
+
+========================================================================================================
+SELECT TOP 20
+    t.NAME AS Tabela,
+    SUM(a.total_pages) * 8 / 1024 AS TotalMB
+FROM sys.tables t
+JOIN sys.indexes i ON t.object_id = i.object_id
+JOIN sys.partitions p ON i.object_id = p.object_id AND i.index_id = p.index_id
+JOIN sys.allocation_units a ON p.partition_id = a.container_id
+GROUP BY t.NAME
+ORDER BY TotalMB DESC;
+
+
+TSIATA	134941
+TMDAMG	79558
+TGFLIV_EXC	20316
+TGFITE	13786
+TGFNFE	12068
+TGFDIN	10197
+TGFCAB	5436
+TSISEREVT	2872
+TCBLAN	2629
+TGFFIN	2578
+TMDFMG	2266
+TGFMGC	2035
+TGFLIV	1586
+TGFMDELOG	1281
+TGFDFEER	1257
+TSIPARLGT	993
+TCBINT	739
+TGFPDF	618
+BK1_TGFITE	602
+TFSFILE	515

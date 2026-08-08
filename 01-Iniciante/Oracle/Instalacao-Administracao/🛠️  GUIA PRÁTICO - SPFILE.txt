@@ -1,0 +1,6 @@
+CREATE SPFILE='/home/oracle/spfile_test.ora'
+FROM PFILE='/home/oracle/init_test.ora';
+
+CREATE PFILE='/home/oracle/init_test.ora' FROM SPFILE;
+
+STARTUP SPFILE='/home/oracle/spfile_test.ora';

@@ -1,0 +1,101 @@
+PERFORMANCE
+
+Melhorar o desempenho de um banco de dados Oracle requer algumas práticas gerais de otimização.
+
+Aqui estão algumas estratégias que podem ser aplicadas para melhorar a performance de um banco de
+dados, independentemente da tecnologia específica ou do incremento de mais capacidade fisica do
+servidor, como mais memória fisica RAM, adicionar cpus e adicionar discos mais rápidos:
+
+1- Estrutura de Tabelas Eficiente:
+
+Projete as tabelas de forma eficiente, evitando redundância de dados e normalizando quando
+necessário.
+
+2- Consultas Otimizadas:
+
+Escreva consultas SQL eficientes. Evite o uso excessivo de "SELECT *", order by, funções de usuários,
+ conversões de dados, excesso de joins e especifique apenas as colunas necessárias.
+
+3- Partitioning:
+
+Se possível, e se for realmente necessário, use particionamento para dividir grandes tabelas
+(tabelas com centenas de gigabytes) em partes menores,
+o que pode facilitar a manutenção e melhorar o desempenho.
+
+4- Cache:
+
+Utilize o cache apropriado, como cache de aplicativos, cache de consulta ou cache de servidor,
+para armazenar resultados frequentemente usados e reduzir o tempo de resposta.
+
+5- Manutenções:
+
+Realize otimização de tabelas, delecao de dados desnecessarios, atualização de estatísticas e
+criacao ou mesmo delecao de índices quando for necessario.
+
+6- Monitoramento de Desempenho:
+
+Implemente sistemas de monitoramento para identificar gargalos de desempenho e ajustar
+conforme necessário.
+
+7- Ajuste de Configuração:
+
+Configure adequadamente os parâmetros do sistema operacional e do banco de dados para atender às
+necessidades específicas de carga e uso.
+
+8- Atualizações de Software:
+
+Mantenha o sistema operacional, o software de banco de dados e outras ferramentas atualizadas
+para se beneficiar das últimas correções de bugs e melhorias de desempenho.
+
+9- Invista em discos mais rápidos, mais memória física, e mais cores de cpu, quando for
+necessário- Isto é tecnicamente fácil de ser resolvido em
+ambientes de banco de dados na nuvem, quando poderá disponibilizar
+recursos mais rapidamente quase que de forma imediata, do que se tiver que comprar e instalar novos
+equipamentos ou envolver técnicas de performance ou mudança da aplicação, mas não se iluda, tudo tem
+um custo e pode ser bem alto, tanto que muitas empresas após terem ido para nuvem estão retornando
+seus ambientes para infra própria devido custos da nuvem.
+
+10- Índices Adequados:
+
+Certifique-se de que as tabelas tenham índices apropriados para acelerar as consultas, mas avalie
+a relação do numero de vezes que uma consulta irá usar este índice e o numero de vezes que operações
+de inserts, delete e updates ocorrem nesta tabela, e que neste caso, o índice tornará estas
+operações mais lentas. Procure criar poucos índices por tabela (algo em torno de 5 no máximo)
+e procure criar índices com poucos campos (algo em torno de no máximo 5 campos por índices).
+
+ MAS O QUE É UM INDICE?
+
+VC VAI ENCONTRAR UMA GRANDE QT DE INFORMACOES CONCEITUAIS NA INTERNET SOBRE O QUE SAO INDICES
+E PARA QUE SERVEM, MAS SEGUE UM RESUMO RAPIDO:
+
+Índices em um banco de dados relacional, como Oracle, são estruturas de dados especiais que melhoram
+a velocidade das operações de recuperação de dados em uma tabela de banco de dados.
+Eles funcionam de maneira semelhante aos índices em um livro, permitindo que o sistema de banco de
+dados encontre rapidamente os dados desejados sem precisar percorrer todas as linhas de uma tabela.
+
+Funcionamento dos Índices
+
+Estrutura de Árvore B: A maioria dos índices em bancos de dados relacionais é implementada usando
+BTREE, que permitem acesso rápido aos dados.
+
+Mapeamento de Valores: Um índice armazena o valor de uma ou mais colunas e um ponteiro para as
+linhas correspondentes na tabela de dados. Quando uma consulta é executada, o banco de dados pode
+usar o índice para encontrar rapidamente os ponteiros para as linhas relevantes,
+em vez de fazer uma varredura completa na tabela.
+
+Benefícios dos Índices
+
+Melhoria na Performance de Consultas: A principal vantagem dos índices é acelerar a recuperação de
+dados. Consultas que filtram, ordenam ou unem tabelas com colunas indexadas geralmente são
+executadas muito mais rapidamente.
+
+Redução de I/O de Disco: Ao evitar varreduras completas de tabelas, os índices reduzem a quantidade
+de operações de leitura no disco, melhorando a eficiência geral do sistema.
+
+Desvantagens dos Índices
+
+Espaço Adicional: Índices ocupam espaço adicional no banco de dados. Quanto mais índices, mais
+espaço será necessário.
+
+Custo de Manutenção: Inserções, atualizações e exclusões de dados na tabela tendem a ser mais lentas
+porque o índice precisa ser atualizado para refletir essas mudanças.

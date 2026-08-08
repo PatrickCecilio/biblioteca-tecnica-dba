@@ -1,0 +1,9 @@
+--criando um spfile a partir de um pfile
+CREATE SPFILE='/home/oracle/spfile_test.ora'
+FROM PFILE='/home/oracle/init_test.ora';
+
+--criando um pfile a partir de um spfile
+CREATE PFILE='/home/oracle/init_test.ora' FROM SPFILE;
+
+--iniciando o banco a partir de um spfile
+STARTUP SPFILE='/home/oracle/spfile_test.ora';

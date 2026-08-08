@@ -1,0 +1,63 @@
+RMAN
+
+-- Agora vamos nos conectar ao banco de dados Oracle como sys. Minha senha criada foi
+<SENHA_ORACLE>:
+
+CONNECT TARGET sys/<SENHA_ORACLE>;
+
+OBS: ATENCAO AO TAMANHO DAS LETRAS DA SENHA DO SYS, DE ACORDO COM QUE CRIOU.
+
+-- Vamos ver onde o RMAN irá salvar os backups por padrao:
+
+SHOW ALL;
+
+o MEU RESULTADO FOI ESTE:
+
+RMAN> SHOW ALL;
+
+RMAN configuration parameters for database with db_unique_name ORCL are:
+CONFIGURE RETENTION POLICY TO REDUNDANCY 1; # default
+CONFIGURE BACKUP OPTIMIZATION OFF; # default
+CONFIGURE DEFAULT DEVICE TYPE TO DISK; # default
+CONFIGURE CONTROLFILE AUTOBACKUP ON; # default
+CONFIGURE CONTROLFILE AUTOBACKUP FORMAT FOR DEVICE TYPE DISK TO '%F'; # default - %F will generate a unique filename likes  c-‘IIIIIIIIII-YYYYMMDD-QQ’.  ‘IIIIIIIIII’ is DBID.
+CONFIGURE DEVICE TYPE DISK PARALLELISM 1 BACKUP TYPE TO BACKUPSET; # default
+CONFIGURE DATAFILE BACKUP COPIES FOR DEVICE TYPE DISK TO 1; # default
+CONFIGURE ARCHIVELOG BACKUP COPIES FOR DEVICE TYPE DISK TO 1; # default
+CONFIGURE MAXSETSIZE TO UNLIMITED; # default
+CONFIGURE ENCRYPTION FOR DATABASE OFF; # default
+CONFIGURE ENCRYPTION ALGORITHM 'AES128'; # default
+CONFIGURE COMPRESSION ALGORITHM 'BASIC' AS OF RELEASE 'DEFAULT' OPTIMIZE FOR LOAD TRUE ; # default
+CONFIGURE RMAN OUTPUT TO KEEP FOR 7 DAYS; # default
+CONFIGURE ARCHIVELOG DELETION POLICY TO NONE; # default
+CONFIGURE SNAPSHOT CONTROLFILE NAME TO 'C:\APP\ADMINISTRATOR\DATABASE\SNCFORCL.ORA'; # default
+
+O resultado fornecido indica a configuração atual do RMAN para o seu banco de dados
+Oracle.
+
+Vou destacar algumas informações relevantes:
+
+- CONFIGURE DEFAULT DEVICE TYPE TO DISK;
+indica que o dispositivo de backup padrão é o disco.
+
+- CONFIGURE CONTROLFILE AUTOBACKUP ON;
+indica que o BACKUP AUTOMÁTICO do arquivo controle do arquivo e spfile está ativado.
+
+CONTROL FILE:
+
+Os arquivos de controle, também conhecido como arquivo de controle do banco de dados
+(database control file),
+é um componente crítico do Oracle Database. Ele é responsável por manter informações
+essenciais sobre a estrutura do banco de dados, seu estado e sua consistência.
+
+Os arquivo de controle contém o registro das estruturas físicas do banco de dados e seu
+status.
+Vários tipos de informações armazenadas no arquivo de controle estão relacionados
+ao backup e recuperação:
+
+. Informações do banco de dados (resetlogs scn e time stamp)
+. Registros do tablespace e datafile (filenames, datafile checkpoints, read/write status, offline ranges)
+. Informações sobre redo (current online redo log)
+. Registros de log (log sequence numbers, intervalo SCN em cada log)
+. Um registro dos backups anteriores do RMAN
+. Informações sobre blocos corrompidos de datafile

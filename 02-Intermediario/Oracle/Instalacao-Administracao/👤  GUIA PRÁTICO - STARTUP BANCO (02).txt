@@ -1,0 +1,16 @@
+export ORAENV_ASK=NO
+export ORACLE_SID=<SID>
+. oraenv
+unset ORAENV_ASK
+
+sqlplus / as sysdba
+
+SELECT status, database_status, instance_name
+FROM v$instance;
+
+STARTUP;
+
+SELECT status, database_status, instance_name
+FROM v$instance;
+
+SHOW PDBS;

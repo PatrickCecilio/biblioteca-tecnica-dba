@@ -1,0 +1,28 @@
+// Aula 26 - O host e a rede nula
+
+# docker container run --rm -it --network host alpine:latest /bin/sh
+
+/ # ip addr show enp0s3
+
+/ # ip route
+
+A rede nula
+
+# docker container run --rm -it --network none alpine:latest /bin/sh
+
+/ # ip addr show eth0
+
+/ # ip route
+
+# docker network create --driver bridge test-net
+
+# docker container run --name web -d \
+--network test-net nginx:alpine
+
+# docker container run -it --rm --network container:web \
+alpine:latest /bin/sh
+
+/ # wget -qO - localhost
+
+$ docker container rm --force web
+$ docker network rm test-net

@@ -1,0 +1,41 @@
+| Situação                | Ação correta             |
+| ----------------------- | ------------------------ |
+| Quero parar o Data Pump | Mate o **Master (DM00)** |
+| Quero liberar CPU       | Limite workers           |
+| Worker travado          | Pode matar só ele        |
+| Job zumbi               | Master + limpeza         |
+
+
+SET LINES 200
+SET PAGES 100
+SET TRIMSPOOL ON
+SET FEEDBACK OFF
+
+COLUMN job_name FORMAT A22
+COLUMN module   FORMAT A18
+COLUMN kill_cmd FORMAT A70
+
+SELECT
+    j.owner_name,
+    j.job_name,
+    j.state,
+    s.inst_id,
+    s.sid,
+    s.serial#,
+    s.module,
+    CASE
+        WHEN s.module = 'Data Pump Master'
+        THEN 'ALTER SYSTEM KILL SESSION '''||s.sid||','||s.serial#||''' IMMEDIATE; -- MASTER'
+        WHEN s.module = 'Data Pump Worker'
+        THEN 'ALTER SYSTEM KILL SESSION '''||s.sid||','||s.serial#||''' IMMEDIATE; -- WORKER'
+    END AS kill_cmd
+FROM dba_datapump_jobs j
+JOIN gv$session s
+  ON s.action = j.job_name
+WHERE j.state = 'EXECUTING'
+ORDER BY
+    j.job_name,
+    CASE
+        WHEN s.module = 'Data Pump Master' THEN 1
+        ELSE 2
+    END;

@@ -1,0 +1,32 @@
+// Aula 16 - Montagem de código em contêiner em execução
+
+$ docker container run --rm -it \
+--volume /projects/sample-app:/app \
+alpine /bin/sh
+
+# cd fod/node/
+
+$ docker container run --rm -it \
+--volume $(pwd):/app \
+-p 3300:3300 \
+sample-app
+
+# vim index.js
+
+...
+
+app.get('/status', (req,res)=>{
+	res.send('OK');
+})
+
+$ docker container run --rm -it \
+--name my-sample-app \
+--volume $(pwd):/app \
+-p 3300:3300 \
+sample-app
+
+$ curl localhost:3300/status
+
+$ docker container exec my-sample-app cat index.js
+
+$ curl localhost:3300/status

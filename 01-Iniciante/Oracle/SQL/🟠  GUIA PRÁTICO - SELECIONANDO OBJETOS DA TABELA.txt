@@ -1,0 +1,4 @@
+SELECT owner, object_name, object_type
+FROM dba_objects
+WHERE object_name = UPPER('<OBJECT_NAME>')
+ORDER BY owner, object_type;

@@ -1,0 +1,10 @@
+SELECT dbusername,
+       TO_CHAR(event_timestamp, 'DD/MM/YYYY HH24:MI:SS') AS data_hora,
+       object_schema,
+       object_name,
+       action_name,
+       sql_text
+FROM unified_audit_trail
+WHERE dbusername = UPPER('<USERNAME>')
+  AND event_timestamp BETWEEN TRUNC(SYSDATE) - 1 AND SYSDATE
+ORDER BY event_timestamp DESC;

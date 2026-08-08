@@ -1,0 +1,122 @@
+================================================================================
+🛠️  GUIA PRÁTICO — DIAGNÓSTICO DE SESSÕES COM ALTO CONSUMO DE CPU (ORACLE)
+================================================================================
+
+🎯 OBJETIVO
+--------------------------------------------------------------------------------
+Permitir que um DBA júnior identifique:
+  • Quais sessões estão consumindo mais CPU
+  • Quais SQLs são responsáveis por esse consumo
+
+Utilizando visões dinâmicas: v$session, v$process, v$sesstat, v$sql e v$sqlarea
+
+================================================================================
+1. 🔹 Quando usar este guia:
+================================================================================
+    ✅ Banco lento
+    ✅ Pico de CPU no servidor
+    ✅ Sessões travando aplicação
+    ✅ Necessidade de saber qual processo está consumindo CPU
+
+================================================================================
+2.  CONECTANDO NO SQL*PLUS:
+
+================================================================================
+
+SQL> sqlplus / as sysdba
+
+================================================================================
+3. EXECUÇÃO — ETAPAS NUMERADAS
+================================================================================
+Passo a passo para diagnosticar e confirmar sessões com alto consumo de CPU.
+
+--------------------------------------------------------------------------------
+ETAPA 1 — Identificar sessão pelo PID do sistema operacional
+--------------------------------------------------------------------------------
+SQL> SELECT s.con_id,
+           s.sid,
+           s.serial#,
+           s.username,
+           s.machine,
+           s.program,
+           p.spid AS os_pid,
+           s.sql_id
+     FROM   v$session s
+     JOIN   v$process p ON p.addr = s.paddr
+     WHERE  p.spid = '99881';
+
+Dica:
+  Você pode consultar vários PIDs:
+  WHERE p.spid IN ('19102','53354','87321','16225');
+
+--------------------------------------------------------------------------------
+ETAPA 2 — Descobrir as sessões que mais usaram CPU
+--------------------------------------------------------------------------------
+SQL> SELECT s.sid,
+           s.serial#,
+           s.username,
+           s.status,
+           s.machine,
+           s.program,
+           p.spid AS os_pid,
+           ROUND(v.value/100,2) AS cpu_segundos
+     FROM   v$session s
+     JOIN   v$process p ON p.addr = s.paddr
+     JOIN   v$sesstat v ON v.sid = s.sid
+     JOIN   v$statname n ON n.statistic# = v.statistic#
+     WHERE  n.name = 'CPU used by this session'
+     ORDER BY v.value DESC
+     FETCH FIRST 10 ROWS ONLY;
+
+
+Observação:
+  O valor é acumulado desde que a sessão foi aberta (não resetável sem logoff)
+
+--------------------------------------------------------------------------------
+ETAPA 3 — Consolidar PID + Sessão + SQL completo
+--------------------------------------------------------------------------------
+SQL> SELECT p.spid AS os_pid,
+           s.sid,
+           s.serial#,
+           s.username,
+           s.machine,
+           s.program,
+           s.sql_id,
+           q.executions,
+           q.parse_calls,
+           ROUND(q.cpu_time/1e6,2)     AS cpu_s,
+           ROUND(q.elapsed_time/1e6,2) AS elapsed_s,
+           q.sql_fulltext
+     FROM   v$process p
+     JOIN   v$session s ON p.addr = s.paddr
+     LEFT JOIN v$sqlarea q ON q.sql_id = s.sql_id
+     WHERE  p.spid = '69438';
+
+Observação:
+  Se sql_fulltext vier NULL:
+  - A sessão não está executando SQL no momento
+  - OU o SQL foi desalocado do shared pool
+
+================================================================================
+✔️  4. VALIDAÇÃO FINAL
+================================================================================
+Após identificar a sessão de alto consumo, valide:
+
+🔹 1. O SQL é realmente pesado?
+    → Verifique full scans, joins sem índices, subqueries redundantes.
+
+🔹 2. A sessão ainda está ativa?
+SQL> SELECT status FROM v$session WHERE sid = &sid;
+
+🔹 3. Está bloqueando outras sessões?
+SQL> SELECT * FROM v$lock WHERE sid = &sid;
+
+🔹 4. Há quanto tempo a query executa?
+SQL> SELECT sql_id, event, blocking_session, last_call_et
+     FROM v$session
+     WHERE sid = &sid;
+
+🔹 5. Precisa encerrar a sessão?
+SQL> ALTER SYSTEM KILL SESSION '&sid,&serial' IMMEDIATE;
+
+OBS: Sempre confirmar com a equipe antes de matar sessão produtiva!

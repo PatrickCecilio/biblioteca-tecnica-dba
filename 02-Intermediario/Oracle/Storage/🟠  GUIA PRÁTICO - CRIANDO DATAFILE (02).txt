@@ -1,0 +1,110 @@
+============================================================
+        GUIA PRÁTICO – EXPANSÃO DE TABLESPACE ORACLE
+              (Adicionar Datafile) – Nível Júnior DBA
+============================================================
+📌 PRÉ-REQUISITOS
+============================================================
+- Usuário com privilégios DBA
+- Banco em modo OPEN
+- Espaço disponível no disco (ex.: /u02/app/oracle/oradata)
+- Nome da tablespace a ser expandida (ex.: INFOSAUDE_DATA)
+
+============================================================
+⚙️ CONFIGURAÇÃO INICIAL (SQL*Plus)
+============================================================
+SET LINES 200
+SET PAGES 200
+COLUMN tablespace_name FORMAT A20
+COLUMN allocated_mb FORMAT 999,999
+COLUMN free_mb      FORMAT 999,999
+COLUMN used_mb      FORMAT 999,999
+COLUMN pct_free     FORMAT 999
+COLUMN pct_used     FORMAT 999
+COLUMN max_mb       FORMAT 999,999
+
+============================================================
+1️⃣ VERIFICAR USO DAS TABLESPACES
+============================================================
+SELECT
+    df.tablespace_name,
+    SUM(df.bytes)/1024/1024 AS allocated_mb,
+    SUM(fs.bytes)/1024/1024 AS free_mb,
+    (SUM(df.bytes) - SUM(fs.bytes))/1024/1024 AS used_mb,
+    ROUND( (SUM(fs.bytes)/SUM(df.bytes)) * 100 ,2 ) AS pct_free,
+    ROUND( ((SUM(df.bytes)-SUM(fs.bytes))/SUM(df.bytes)) * 100,2 ) AS pct_used,
+    MAX(df.maxbytes)/1024/1024 AS max_mb
+FROM
+    dba_data_files df
+LEFT JOIN
+    dba_free_space fs
+ON
+    df.tablespace_name = fs.tablespace_name
+GROUP BY
+    df.tablespace_name
+ORDER BY
+    pct_used DESC;
+
+============================================================
+2️⃣ VERIFICAR SE É BIGFILE OU SMALLFILE
+============================================================
+SELECT tablespace_name, bigfile
+FROM dba_tablespaces
+WHERE tablespace_name = 'INFOSAUDE_DATA';
+
+INTERPRETAÇÃO:
+--------------
+YES  / TRUE  = Bigfile (apenas expandir o mesmo datafile)
+NO   / FALSE = Smallfile (pode adicionar novos datafiles ✅)
+
+============================================================
+3️⃣ ADICIONAR NOVO DATAFILE (Smallfile)
+============================================================
+Opcionando caminho explícito:
+ALTER TABLESPACE INFOSAUDE_DATA
+  ADD DATAFILE '/u02/app/oracle/oradata/CDBAULAS/pdbaulas/INFOSAUDE_DATA02.DBF'
+  SIZE 10G
+  AUTOEXTEND ON NEXT 1G MAXSIZE 32G;
+
+Sem informar caminho (Oracle escolhe):
+ALTER TABLESPACE INFOSAUDE_DATA
+  ADD DATAFILE SIZE 10G
+  AUTOEXTEND ON NEXT 1G MAXSIZE 32G;
+
+NOTAS:
+------
+SIZE 10G       → Cria com 10 GB
+NEXT 1G        → Aumenta 1 GB automático
+MAXSIZE 32G    → Limite máximo
+
+DICA:
+-----
+Use tamanhos que façam sentido para o ambiente
+e políticas de storage.
+
+============================================================
+4️⃣ VALIDAR ALTERAÇÃO
+============================================================
+SELECT file_name, bytes/1024/1024 AS size_mb, autoextensible
+FROM dba_data_files
+WHERE tablespace_name = 'INFOSAUDE_DATA';
+
+============================================================
+✅ CHECKLIST FINAL
+============================================================
+[ ] Conferiu espaço atual?
+[ ] Verificou se é BIGFILE/SMALLFILE?
+[ ] Executou comando de expansão?
+[ ] Validou datafile adicionado?
+[ ] Confirmou novo tamanho das tablespaces?
+
+============================================================
+🧠 OBSERVAÇÕES IMPORTANTES
+============================================================
+- BIGFILE não aceita múltiplos datafiles
+- Faça backup em ambientes críticos
+- Crescimento automático precisa ser controlado
+- Documentar a operação no seu runbook
+
+============================================================
+FIM DO GUIA ✅
+============================================================

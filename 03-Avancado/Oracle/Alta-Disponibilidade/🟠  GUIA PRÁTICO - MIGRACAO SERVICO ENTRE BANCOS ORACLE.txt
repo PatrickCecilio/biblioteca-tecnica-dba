@@ -1,0 +1,181 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+# GUIA PRÁTICO ORACLE
+
+## Migração de Serviço entre Bancos Oracle
+
+### 1. Ajustar o listener do banco antigo
+
+```bash
+vi $ORACLE_HOME/network/admin/listener.ora
+```
+
+---
+
+### 2. Ajustar o TNS do banco antigo
+
+```bash
+vi $ORACLE_HOME/network/admin/tnsnames.ora
+```
+
+---
+
+### 3. Reiniciar o Listener do banco antigo
+
+```bash
+lsnrctl stop
+```
+
+```bash
+lsnrctl start
+```
+
+```bash
+lsnrctl status
+```
+
+---
+
+### 4. Encerrar o banco antigo
+
+```bash
+sqlplus / as sysdba
+```
+
+```sql
+SHUTDOWN IMMEDIATE;
+```
+
+---
+
+### 5. Ajustar o ambiente do banco novo
+
+```bash
+. oraenv
+```
+
+---
+
+### 6. Ajustar o listener do banco novo
+
+```bash
+vi $ORACLE_HOME/network/admin/listener.ora
+```
+
+---
+
+### 7. Ajustar o TNS do banco novo
+
+```bash
+vi $ORACLE_HOME/network/admin/tnsnames.ora
+```
+
+---
+
+### 8. Reiniciar o Listener do banco novo
+
+```bash
+lsnrctl stop
+```
+
+```bash
+lsnrctl start
+```
+
+```bash
+lsnrctl status
+```
+
+---
+
+### 9. Conectar ao banco novo
+
+```bash
+sqlplus / as sysdba
+```
+
+---
+
+### 10. Alterar para o PDB de destino
+
+```sql
+ALTER SESSION SET CONTAINER = <PDB_NAME>;
+```
+
+---
+
+### 11. Abrir o PDB
+
+```sql
+ALTER PLUGGABLE DATABASE <PDB_NAME> OPEN;
+```
+
+---
+
+### 12. Criar o serviço
+
+```sql
+BEGIN
+    DBMS_SERVICE.CREATE_SERVICE(
+        service_name => '<SERVICE_NAME>',
+        network_name => '<SERVICE_NAME>'
+    );
+END;
+/
+```
+
+---
+
+### 13. Iniciar o serviço
+
+```sql
+EXEC DBMS_SERVICE.START_SERVICE('<SERVICE_NAME>');
+```
+
+---
+
+### 14. Registrar o serviço no Listener
+
+```sql
+ALTER SYSTEM REGISTER;
+```
+
+---
+
+### 15. Testar o serviço
+
+```bash
+tnsping <SERVICE_NAME>
+```
+
+---
+
+### 16. Verificar LOCAL_LISTENER
+
+```bash
+sqlplus / as sysdba
+```
+
+```sql
+SHOW PARAMETER LOCAL_LISTENER;
+```
+
+---
+
+### 17. Ajustar LOCAL_LISTENER
+
+```sql
+ALTER SYSTEM SET LOCAL_LISTENER = '<LOCAL_LISTENER>' SCOPE=BOTH;
+```
+
+```sql
+ALTER SYSTEM REGISTER;
+```
+
+---
+
+### 18. Validar o Listener
+
+```bash
+lsnrctl status
+```

@@ -1,0 +1,170 @@
+# GUIA PRÁTICO ORACLE
+
+## Diagnóstico e Controle de Crescimento da SYSAUX
+
+### 1. Identificar consumidores da SYSAUX
+
+```sql
+SELECT
+    occupant_name,
+    ROUND(space_usage_kbytes/1024,2) AS space_mb,
+    schema_name,
+    move_procedure
+FROM v$sysaux_occupants
+ORDER BY space_usage_kbytes DESC;
+```
+
+---
+
+### 2. Verificar retenção do histórico de estatísticas
+
+```sql
+SELECT DBMS_STATS.GET_STATS_HISTORY_RETENTION AS retention_days
+FROM dual;
+```
+
+---
+
+### 3. Alterar retenção do histórico de estatísticas
+
+```sql
+EXEC DBMS_STATS.ALTER_STATS_HISTORY_RETENTION(<RETENTION_DAYS>);
+```
+
+---
+
+### 4. Confirmar o Container atual
+
+```sql
+SHOW CON_NAME;
+```
+
+---
+
+### 5. Verificar configuração do AWR
+
+```sql
+SELECT
+    snap_interval,
+    retention
+FROM dba_hist_wr_control;
+```
+
+---
+
+### 6. Contar snapshots existentes
+
+```sql
+SELECT COUNT(*)
+FROM dba_hist_snapshot;
+```
+
+---
+
+### 7. Verificar configuração por Container
+
+```sql
+SELECT
+    con_id,
+    dbid,
+    snap_interval,
+    retention
+FROM cdb_hist_wr_control
+ORDER BY con_id;
+```
+
+---
+
+### 8. Verificar intervalo real entre snapshots
+
+```sql
+SELECT
+    begin_interval_time,
+    LAG(begin_interval_time)
+        OVER (ORDER BY snap_id) AS prev_begin,
+    begin_interval_time -
+        LAG(begin_interval_time)
+        OVER (ORDER BY snap_id) AS diff
+FROM dba_hist_snapshot
+ORDER BY snap_id
+FETCH FIRST 10 ROWS ONLY;
+```
+
+---
+
+### 9. Alterar intervalo e retenção do AWR
+
+```sql
+BEGIN
+    DBMS_WORKLOAD_REPOSITORY.MODIFY_SNAPSHOT_SETTINGS(
+        retention => <RETENTION_MINUTES>,
+        interval  => <INTERVAL_MINUTES>
+    );
+END;
+/
+```
+
+### 10. Validar nova configuração
+
+```sql
+SELECT
+    snap_interval,
+    retention
+FROM dba_hist_wr_control;
+```
+
+---
+
+### 11. Listar snapshots existentes
+
+```sql
+SELECT
+    snap_id,
+    begin_interval_time,
+    end_interval_time
+FROM dba_hist_snapshot
+ORDER BY snap_id;
+```
+
+---
+
+### 12. Remover faixa de snapshots
+
+```sql
+BEGIN
+    DBMS_WORKLOAD_REPOSITORY.DROP_SNAPSHOT_RANGE(
+        low_snap_id  => <LOW_SNAP_ID>,
+        high_snap_id => <HIGH_SNAP_ID>
+    );
+END;
+/
+```
+
+---
+
+### 13. Desabilitar Auto STS Capture
+
+```sql
+BEGIN
+    DBMS_AUTO_TASK_ADMIN.DISABLE(
+        client_name => 'Auto STS Capture Task',
+        operation   => NULL,
+        window_name => NULL
+    );
+END;
+/
+```
+
+---
+
+### 14. Remover SYS_AUTO_STS
+
+```sql
+BEGIN
+    DBMS_SQLTUNE.DROP_SQLSET(
+        sqlset_name  => 'SYS_AUTO_STS',
+        sqlset_owner => 'SYS'
+    );
+END;
+/
+```

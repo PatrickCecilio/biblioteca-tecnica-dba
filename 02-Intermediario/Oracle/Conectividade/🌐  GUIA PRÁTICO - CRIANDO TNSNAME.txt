@@ -1,0 +1,15 @@
+lsnrctl status
+
+sqlplus / as sysdba
+
+SELECT name, network_name, pdb, enabled, aq_ha_notifications
+FROM dba_services
+ORDER BY pdb, name;
+
+ALTER SYSTEM REGISTER;
+
+lsnrctl services
+
+cd "$ORACLE_HOME/network/admin"
+
+tnsping <SERVICE_NAME>

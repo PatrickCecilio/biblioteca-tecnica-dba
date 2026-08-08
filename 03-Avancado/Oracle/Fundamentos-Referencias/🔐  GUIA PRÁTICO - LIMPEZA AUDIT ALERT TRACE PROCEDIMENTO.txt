@@ -1,0 +1,11 @@
+find <ORACLE_BASE>/admin/<DB_NAME>/adump -type f -name '*.aud' -mtime +<RETENTION_DAYS> -print
+
+find <ORACLE_BASE>/diag/rdbms/<DB_NAME>/<SID>/alert -type f -name '*.xml' -mtime +<RETENTION_DAYS> -print
+
+find <ORACLE_BASE>/diag/rdbms/<DB_NAME>/<SID>/trace -type f ( -name '*.trc' -o -name '*.trm' ) -mtime +<RETENTION_DAYS> -print
+
+find <ORACLE_BASE>/admin/<DB_NAME>/adump -type f -name '*.aud' -mtime +<RETENTION_DAYS> -delete
+
+find <ORACLE_BASE>/diag/rdbms/<DB_NAME>/<SID>/alert -type f -name '*.xml' -mtime +<RETENTION_DAYS> -delete
+
+find <ORACLE_BASE>/diag/rdbms/<DB_NAME>/<SID>/trace -type f ( -name '*.trc' -o -name '*.trm' ) -mtime +<RETENTION_DAYS> -delete

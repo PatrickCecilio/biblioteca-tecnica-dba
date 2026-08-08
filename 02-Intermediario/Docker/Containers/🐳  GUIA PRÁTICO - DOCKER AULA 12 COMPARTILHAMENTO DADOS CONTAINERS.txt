@@ -1,0 +1,18 @@
+docker container run -it --name writer \
+
+docker container run -it --name reader \
+
+docker container rm -f $(docker container ls -aq)
+docker volume rm $(docker volume ls -q)
+
+docker container run --rm -it \
+
+mkdir ~/my-web
+cd ~/my-web
+
+echo "<h1>Personal Website</h1>" > index.html
+
+docker container run -d \
+
+docker container rm -f my-site
+docker container run -d \
