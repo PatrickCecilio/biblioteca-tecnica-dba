@@ -1,10 +1,3 @@
 # PROMPTS
 
-## Conteúdo
-
-- `Geral` — 1 arquivos
-- `Oracle` — 2 arquivos
-- `SQL-Server` — 1 arquivos
-- Arquivos na raiz — 5
-
-Revise cada comando antes de utilizá-lo em qualquer ambiente.
+Este índice local não mantém contagens. Consulte o [catálogo canônico](../CATALOGO.md), gerado automaticamente a partir da árvore real.

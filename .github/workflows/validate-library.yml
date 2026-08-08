@@ -13,6 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Validar catálogo canônico
+        run: python .github/scripts/generate_catalog.py --check
       - name: Validar estrutura sem executar scripts do acervo
         env:
           STRICT_PUBLIC: "1"

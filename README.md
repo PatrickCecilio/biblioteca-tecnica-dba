@@ -10,7 +10,7 @@ Biblioteca pública de estudos e procedimentos de Oracle Database, SQL Server, L
 - `APRENDIZADO`: materiais educacionais revisados;
 - `PROMPTS`: modelos de trabalho e documentação.
 
-O catálogo detalhado está em [`🗂️  ÍNDICE - CATÁLOGO.md`](./%F0%9F%97%82%EF%B8%8F%20%20%C3%8DNDICE%20-%20CAT%C3%81LOGO.md).
+O catálogo canônico, gerado automaticamente a partir da árvore real, está em [`CATALOGO.md`](CATALOGO.md).
 
 ## Uso seguro
 
