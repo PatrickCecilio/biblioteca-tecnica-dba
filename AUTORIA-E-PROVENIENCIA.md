@@ -4,10 +4,6 @@
 
 Patrick Cecílio é responsável pela seleção, organização, revisão técnica e publicação desta biblioteca.
 
-## Conteúdo público
-
-Esta versão foi filtrada para não conter toolkits externos identificados, credenciais, endereços IP, e-mails operacionais ou dados de clientes. Materiais cuja autoria ou licença não pôde ser confirmada foram mantidos fora do repositório público.
-
 ## Assistência de inteligência artificial
 
 Ferramentas de inteligência artificial auxiliaram na organização documental, padronização de nomes, revisão de linguagem e criação de índices. A validação e a responsabilidade final permanecem com Patrick Cecílio.
