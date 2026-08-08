@@ -1,0 +1,29 @@
+Falando mais sobre o shell
+Conforme vimos no vídeo, um “shell” é uma interface entre o usuário e o sistema operacional. Ele permite que os usuários interajam com o sistema operacional, geralmente digitando comandos em uma interface de linha de comando (CLI).
+
+Tipos de shell
+Existem vários Shell que podemos utilizar, alguns dos mais populares são:
+
+bash (Bourne-again Shell): - um dos mais populares, altamente flexível e poderoso;
+sh (Bourne Shell): - o precursor do Bash;
+zsh (Z Shell): - oferece recursos avançados e personalização;
+ksh (KornShell): - usado em muitos sistemas Unix;
+csh (C Shell): - tem uma sintaxe diferente, inspirada na linguagem C;
+fish (Friendly Interactive Shell): - focado em simplicidade e recursos interativos;
+PowerShell: - Criado pela Microsoft, originalmente disponível apenas no Windows.
+
+O que é o Shell Script?
+Shell Script nada mais é do que um script com várias instruções que escrevemos para ser executado num shell específico.  Ele é uma ferramenta de automação extremamente poderosa, com um simples arquivo de texto executável o sistema é capaz de executar sequências de operações, instruções e testes. É muito comum ver Shell Script sendo empregado em geração de relatórios, além de ser utilizado em executáveis de instalação e configuração.
+
+Mas vamos dividir o nome Shell Script para entendê-lo plenamente.
+
+Script: os scripts são arquivos executáveis que contém instruções definidas, executadas por um interpretador. Esses scripts têm sequências de instruções e funções executadas em série pelo interpretador.
+Shell: o Shell é o interpretador que vai ler e executar os comandos do script conforme a sequência de instruções.
+Agora que você entendeu detalhadamente o que é o Shell Script, vamos imaginar uma situação que nos explicará de forma clara a necessidade de aprender a programar em Shell.
+
+Imagine que é necessário realizar o deploy de uma aplicação com vários passos, ao invés de executar comando por comando no shell sempre que for realizar o deploy, você pode criar um script que faz todo o processo assim que é executado.
+
+Qual shell usaremos no curso?
+Ao longo do curso utilizaremos o Bash para interpretar e executar os scripts que criaremos. O Bash é o shell mais amplamente utilizado em sistemas baseados em Linux e Unix, o que o torna a escolha ideal para aprender a criar shell scripts. Ele combina uma sintaxe poderosa com simplicidade, permitindo que tanto iniciantes quanto usuários experientes criem scripts para automatizar tarefas e resolver problemas rapidamente.
+
+Além disso, o Bash é altamente versátil, sendo pré-instalado na maioria das distribuições Linux e amplamente suportado em outros sistemas operacionais, como macOS e Windows (via WSL). Sua compatibilidade garante que os scripts escritos em Bash possam ser executados em diversos ambientes.

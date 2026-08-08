@@ -1,0 +1,22 @@
+apt install jq
+
+yum install jq
+
+wget -qO-  | jq .[0].question
+sleep 5
+
+docker container run -d --name trivia fundamentalsofdocker/trivia:ed2
+
+docker container ls -l
+
+docker rm -f trivia
+
+docker container ls
+
+docker container ls -a
+
+docker container ls -q
+
+docker container rm -f $(docker container ls -a -q)
+
+docker container ls -h

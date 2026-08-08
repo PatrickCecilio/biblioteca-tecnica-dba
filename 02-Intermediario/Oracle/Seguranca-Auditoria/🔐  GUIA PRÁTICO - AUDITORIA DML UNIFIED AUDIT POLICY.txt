@@ -1,0 +1,109 @@
+# GUIA PRÁTICO ORACLE
+
+## Configuração de Auditoria DML com Unified Audit Policy
+
+### 1. Conectar como SYSDBA
+
+```bash
+sqlplus / as sysdba
+```
+
+---
+
+### 2. Verificar Unified Auditing
+
+```sql
+SELECT VALUE
+FROM V$OPTION
+WHERE PARAMETER = 'Unified Auditing';
+```
+
+---
+
+### 3. Criar política de auditoria DML
+
+```sql
+CREATE AUDIT POLICY <AUDIT_POLICY_NAME>
+ACTIONS
+    INSERT ON <SCHEMA>.<TABLE_1>,
+    UPDATE ON <SCHEMA>.<TABLE_1>,
+    DELETE ON <SCHEMA>.<TABLE_1>,
+    INSERT ON <SCHEMA>.<TABLE_2>,
+    UPDATE ON <SCHEMA>.<TABLE_2>,
+    DELETE ON <SCHEMA>.<TABLE_2>;
+```
+
+---
+
+### 4. Habilitar a política para o usuário
+
+```sql
+AUDIT POLICY <AUDIT_POLICY_NAME>
+BY <USERNAME>;
+```
+
+---
+
+### 5. Validar se a política está habilitada
+
+```sql
+SELECT
+    policy_name,
+    enabled_option,
+    entity_name,
+    entity_type,
+    success
+FROM audit_unified_enabled_policies
+WHERE policy_name = '<AUDIT_POLICY_NAME>';
+```
+
+---
+
+### 6. Consultar eventos auditados
+
+```sql
+SELECT
+    event_timestamp,
+    dbusername,
+    userhost,
+    action_name,
+    object_name,
+    sql_text
+FROM unified_audit_trail
+WHERE object_schema = '<SCHEMA>'
+ORDER BY event_timestamp DESC;
+```
+
+---
+
+### 7. Filtrar auditoria por usuário
+
+```sql
+SELECT
+    event_timestamp,
+    dbusername,
+    action_name,
+    object_schema,
+    object_name,
+    sql_text
+FROM unified_audit_trail
+WHERE dbusername = '<USERNAME>'
+ORDER BY event_timestamp DESC;
+```
+
+---
+
+### 8. Desabilitar a política
+
+```sql
+NOAUDIT POLICY <AUDIT_POLICY_NAME>
+BY <USERNAME>;
+```
+
+---
+
+### 9. Remover a política
+
+```sql
+DROP AUDIT POLICY <AUDIT_POLICY_NAME>;
+```

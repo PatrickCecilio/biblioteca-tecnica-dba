@@ -1,0 +1,23 @@
+SELECT event_timestamp,
+       dbusername,
+       action_name,
+       sql_text
+FROM unified_audit_trail
+WHERE action_name = 'ALTER SYSTEM'
+  AND UPPER(sql_text) LIKE 'ALTER SYSTEM KILL SESSION%'
+ORDER BY event_timestamp DESC
+FETCH FIRST 30 ROWS ONLY;
+
+SELECT parsing_schema_name, last_active_time, sql_text
+FROM v$sql
+WHERE UPPER(sql_text) LIKE 'ALTER SYSTEM KILL SESSION%';
+
+SELECT owner, trigger_name, status
+FROM dba_triggers
+WHERE owner = UPPER('<SCHEMA_NAME>')
+  AND trigger_name = UPPER('<TRIGGER_NAME>');
+
+SELECT resource_name, limit
+FROM dba_profiles
+WHERE profile = UPPER('<PROFILE_NAME>')
+  AND resource_name = 'IDLE_TIME';

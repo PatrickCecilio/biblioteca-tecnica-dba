@@ -1,0 +1,63 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+Atualização dos pacotes:
+sudo yum update -y
+sudo yum upgrade -y
+
+Desativar firewall
+sudo systemctl stop firewalld
+sudo systemctl disable firewalld
+sudo systemctl status firewalld
+
+reboot
+
+Instalar o pacote perl-IPC-Run via EPEL (Extra Packages for Enterprise Linux)
+sudo dnf install -y epel-release
+
+Instalar o Perl diretamente a partir do CPAN
+sudo yum install -y perl-App-cpanminus
+Depois, instale o módulo IPC::Run com:
+sudo cpanm IPC::Run
+
+Instalação dos repositório do PostgreSQL 16 (para sistemas baseados em yum):
+sudo yum install -y
+
+Desabilitar a modularidade para permitir a instalação do PostgreSQL 16
+sudo dnf module reset postgresql -y
+sudo dnf module enable postgresql:16 -y
+sudo dnf module disable postgresql:16 -y
+
+Instale o PostgreSQL 16 e o cliente PostgreSQL:
+sudo dnf install postgresql16 postgresql16-server postgresql16-contrib -y
+
+Inicializar banco de dados:
+sudo /usr/pgsql-16/bin/postgresql-16-setup initdb
+
+Verifique e inicie o serviço do PostgreSQL e ative-o para inicializar automaticamente:
+sudo systemctl status postgresql-16
+sudo systemctl start postgresql-16
+sudo systemctl enable postgresql-16
+
+Verifique o status do serviço PostgreSQL detalhado:
+sudo systemctl status postgresql-16.service
+
+Acesse o PostgreSQL como o usuário postgres:
+sudo -u postgres psql
+
+Alterar a senha do usuário postgres:
+ALTER USER postgres PASSWORD '240506P';
+
+Verifique a versão do psql:
+psql --version
+
+Validar integridade do .tar.gz (gzip)
+gzip -t /pgbackup/backup/dump/dumps_20260119_173043.tar.gz \
+  && echo "OK: gzip íntegro" || echo "ERRO: gzip corrompido"
+
+Ver o que tem dentro do pacote (não extrai)
+tar -tzf /pgbackup/backup/dump/dumps_20260119_173043.tar.gz | head -50
+
+Validar que o(s) .dump é(são) legível(is) pelo pg_restore
+tar -xzf /pgbackup/backup/dump/dumps_20260119_173043.tar.gz -C /tmp ./postgres.dump
+pg_restore -l /tmp/postgres.dump | head -40
+rm -f /tmp/postgres.dump

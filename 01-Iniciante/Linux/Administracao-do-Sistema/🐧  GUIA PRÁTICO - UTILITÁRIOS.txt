@@ -1,0 +1,33 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+---------------Como ver a rede do contêiner
+ip addr
+ip route
+
+---------------processos/rede
+top
+mrt google.com
+---------------disco
+df -h
+---------------banco
+ps -ef | grep pmon
+
+---------------zabbix
+systemctl restart zabbix-agent2
+journalctl -u zabbix-agent2 -f
+zabbix_server -R config_cache_reload
+tail -f /var/log/zabbix/zabbix_server.log
+systemctl status zabbix-agent
+tail -f /var/log/zabbix/zabbix_agentd.log  # ou zabbix_agent2.log
+zabbix_get -s <IP_DO_HOST> -k system.uptime
+
+---------------
+tail -f alert.log
+find /opt/oracle/diag/... -mtime +5 -exec rm -f {} \;
+find -mtime +90 -exec rm -rf {} \;
+find /var/log -type f -name "*.log"
+
+
+rclone ls bucket-salux:backup-manacapuru
+rclone lsd bucket-salux:
+ rclone config

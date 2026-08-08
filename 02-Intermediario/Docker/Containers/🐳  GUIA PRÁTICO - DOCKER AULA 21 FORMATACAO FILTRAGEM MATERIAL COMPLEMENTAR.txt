@@ -1,0 +1,23 @@
+// Aula 21 - Formatação e filtragens no Docker
+
+# docker container ps -a --format "table {{.Names}}\t{{.Image}}\t{{.Status}}"
+
+# docker images --format "{{.Repository}} has the following {{.ID}}"
+
+$ docker images --filter "<chave>=<valor>"
+
+# docker images --filter "reference=node*"
+
+# docker images --filter "reference=centos:latest"
+
+# docker images --filter "reference=*:latest"
+
+# docker images --filter "dangling=true"
+
+# docker images --filter "before=<nome_imagem>"
+
+# docker images --filter "before=centos:7"
+
+# docker images --filter "since=<nome_imagem>"
+
+# docker images --filter "since=centos"

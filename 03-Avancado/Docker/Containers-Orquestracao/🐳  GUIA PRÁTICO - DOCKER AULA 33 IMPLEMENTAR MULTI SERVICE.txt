@@ -1,0 +1,47 @@
+// Aula 33 - Implementar um multi-service
+
+# docker-machine start node-1 node-2 node-3 node-4 node-5
+
+# docker-machine ls
+
+# docker-machine ssh node-1 docker node ls
+
+# docker-machine ssh node-1
+
+CUIDADO COM A INDENTAÇÃO!
+CUIDADO COM O COPIA E COLA!
+USE UM 'IDE' PARA NÃO DESFORMATAR!
+
+$ vi pet-stack.yaml
+
+version: "3.7"
+services:
+   web:
+     image: fundamentalsofdocker/ch11-web:2.0
+     networks:
+       - pets-net
+     ports:
+       - 3000:3000
+     deploy:
+       replicas: 3
+   db:
+     image: fundamentalsofdocker/ch11-db:2.0
+     networks:
+       - pets-net
+     volumes:
+       - pets-data:/var/lib/postgresql/data
+
+networks:
+ pets-net:
+  driver: overlay
+
+volumes:
+ pets-data:
+
+# docker stack deploy -c pet-stack.yaml pets
+
+$ docker stack ps pets
+
+$ curl localhost:3000/pet
+
+$ docker stack rm pets

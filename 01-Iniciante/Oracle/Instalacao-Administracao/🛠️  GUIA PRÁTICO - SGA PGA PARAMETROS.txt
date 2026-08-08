@@ -1,0 +1,64 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+MUDANDO PARAMENTROS DO SGA & PGA
+
+set pagesize 100;
+set linesize 300;
+col name format A30;
+col value format A30;
+
+select name, value/1024/1024 VALUE_MB
+ from v$parameter
+ where name in ('memory_max_target','memory_target','sga_max_size','sga_target','pga_aggregate_limit','pga_aggregate_target')
+ order by 1;
+
+NAME                             VALUE_MB
+------------------------------ ----------
+memory_max_target                       0
+memory_target                           0
+pga_aggregate_limit                  2048
+pga_aggregate_target                 1024
+sga_max_size                         6144
+sga_target                           6144
+------------------------------------------
+
+alter system set memory_max_target=0 scope=spfile;
+alter system set memory_target=0 scope=spfile;
+
+alter system set sga_max_size=8G scope=spfile;
+alter system set sga_target=7G scope=spfile;
+
+alter system set pga_aggregate_limit=4096M scope=spfile;
+alter system set pga_aggregate_target=500M scope=spfile;
+--------------------------------------------------------------------------------------
+obs: posso colocar 0 na option pga_aggregate_limit, mas não indico porque significa
+que não há limite para a memória PGA agregada consumida pela instância.
+
+4 - Reiniciar banco de dados (Obs: fazer isso em um horário fora do expediente)
+
+ressaltando sempre utilizar 70% da sua memoria para gerencia o SGA e o PGA e dos 70% desse gerenciamento 30% para o PGA o restante para o SGA que é o principal da oracle.
+
+antes de mexer com SGA e PGA sempre faça um backup antes pois se der problema na inicialização do startup do seu banco você pode seguir os seguintes passos.
+
+startup pfile=/app/oracle/admin/orcl/pfile/init.ora.022202593330';
+
+após inicializar o seu banco com o pfile anterior você pode fazer a checagem se ele de fato foi alterado.:
+
+set pagesize 100;
+set linesize 300;
+col name format A30;
+col value format A30;
+
+select name, value/1024/1024 VALUE_MB
+ from v$parameter
+ where name in ('memory_max_target','memory_target','sga_max_size','sga_target','pga_aggregate_limit','pga_aggregate_target')
+ order by 1;
+
+após ver que de fato ele voltou para a parametrização de origem, podemos recriar ele e substituir o anterior, pois só assim a oracle passa a ver ele como o principal novamente
+
+create spfile from pfile='/app/oracle/admin/orcl/pfile/init.ora.022202593330';
+
+após tudo isso pode dar o shutdown no seu banco e startup ele novamente e checar se está tudo de acordo.
+
+shut immediate;
+startup;

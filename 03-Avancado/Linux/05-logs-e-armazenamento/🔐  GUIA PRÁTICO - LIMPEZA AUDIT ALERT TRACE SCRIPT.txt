@@ -1,0 +1,8 @@
+#!/bin/bash
+#AUDIT
+find /u01/app/oracle/admin/emdb24ai/adump -name \*.aud -mtime +1 -exec rm -f {} \;
+
+#ALERTS,TRACES
+find /u01/app/oracle/diag/rdbms/emdb24ai/emdb24ai/alert    -name \*.xml    -mtime +1 -exec rm -f {} \;
+find /u01/app/oracle/diag/rdbms/emdb24ai/emdb24ai/incident -name \*.tr[cm] -mtime +1 -exec rm -f {} \;
+find /u01/app/oracle/diag/rdbms/emdb24ai/emdb24ai/trace    -name \*.tr[cm] -mtime +1 -exec rm -f {} \;

@@ -1,0 +1,12 @@
+SELECT sample_time, session_id, session_serial#, event, sql_id, wait_class
+FROM v$active_session_history
+WHERE sample_time BETWEEN TO_DATE(:t1,'DD/MM/YYYY HH24:MI')
+  AND TO_DATE(:t2,'DD/MM/YYYY HH24:MI')
+ORDER BY sample_time;
+
+Top 10 Eventos de Espera:
+SELECT event, COUNT(*) AS occurrences
+FROM v$active_session_history
+GROUP BY event
+ORDER BY occurrences DESC
+FETCH FIRST 10 ROWS ONLY;

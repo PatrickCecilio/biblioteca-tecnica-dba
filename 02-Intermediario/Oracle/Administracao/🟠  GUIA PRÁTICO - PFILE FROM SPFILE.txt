@@ -1,0 +1,40 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+sqlplus / as sysdba
+
+create pfile='/tmp/pfile.ora' from spfile;
+
+
+vi /tmp/pfile.ora
+
+
+*.pga_aggregate_limit=30474836480
+*.pga_aggregate_target=10737418240
+*.sga_target=42949672960
+
+
+*.sga_max_size=64424509440
+
+sqlplus / as sysdba
+
+
+create spfile from pfile='/tmp/pfile.ora';
+
+SHUTDOWN IMMEDIATE;
+
+STARTUP;
+
+
+OBS:
+
+ORA-32002: cannot create SPFILE already being used by the instance
+
+CREATE SPFILE='/u01/app/oracle/product/19.3.0/dbhome_1/dbs/spfiledbprod_new.ora'
+FROM PFILE='/tmp/pfile.ora';
+
+SHUTDOWN IMMEDIATE;
+
+CREATE SPFILE='/u01/app/oracle/product/19.3.0/dbhome_1/dbs/spfiledbprod.ora'
+FROM PFILE='/tmp/pfile.ora';
+
+STARTUP;

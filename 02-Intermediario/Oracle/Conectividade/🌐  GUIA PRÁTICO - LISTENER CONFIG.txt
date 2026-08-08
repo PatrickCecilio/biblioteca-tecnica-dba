@@ -1,0 +1,117 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+º sudo ausearch -c 'lsnrctl' --raw | audit2allow -M my-lsnrctl
+
+º sudo chmod +x /opt/oracle/product/23ai/dbhomeFree/bin/lsnrctl
+
+Na sessao do ROOT, crie um script de inicialização customizado:
+Crie um novo script que executará dbstart, lsnrctl start, e o comando SQL para abrir
+o banco de dados (STARTUP)
+
+º mkdir -p /opt/oracle/scripts
+
+º sudo vi start_oracle.sh
+
+# INICIO AQUI DO SCRIPT
+
+#!/bin/bash
+export ORACLE_HOME=/opt/oracle/product/23ai/dbhomeFree
+export ORACLE_SID=FREE
+export PATH=$ORACLE_HOME/bin:$PATH
+
+# Iniciar banco de dados
+$ORACLE_HOME/bin/dbstart $ORACLE_HOME
+
+# Start listener
+$ORACLE_HOME/bin/lsnrctl start
+
+# Abrir banco de dados
+echo "startup;" | $ORACLE_HOME/bin/sqlplus -s / as sysdba
+
+# ATE AQUI
+
+
+º cat /opt/oracle/scripts/start_oracle.sh
+
+Torne o script executavel
+
+º sudo chmod +x /opt/oracle/scripts/start_oracle.sh
+
+VAMOS EDITAR O ARQUIVO PARA SUBIR O LISTENER DE FORMA AUTOMATICA E VAMOS INCLUIR OPCAO PARA SUBIR E ENCERRAR
+O BANCO ORACLE DE FORMA AUTOMATICA, QUANDO O ORACLE LINUX FOR INICIALIZADO OU ENCERRADO.
+
+º sudo vi /etc/systemd/system/oracle-listener.service
+
+# COMECA AQUI O SCRIPT
+
+[Unit]
+Description=Oracle Database and Listener
+After=network.target
+
+[Service]
+ExecStart=/bin/bash /opt/oracle/scripts/start_oracle.sh
+ExecStop=/bin/bash -c '/opt/oracle/product/23ai/dbhomeFree/bin/lsnrctl stop && /opt/oracle/product/23ai/dbhomeFree/bin/dbshut /opt/oracle/product/23ai/dbhomeFree'
+User=oracle
+Group=oinstall
+Restart=always
+RestartSec=3
+Type=forking
+Environment="ORACLE_HOME=/opt/oracle/product/23ai/dbhomeFree"
+Environment="ORACLE_SID=FREE"
+
+[Install]
+WantedBy=multi-user.target
+
+# ATE AQUI
+
+
+SALVE O ARQUIVO
+
+Recarregar as configurações do Systemd e habilitar o serviço:
+Recarregue as configurações do Systemd para reconhecer o novo serviço:
+
+º sudo systemctl daemon-reload
+
+Inicie o serviço do listener manualmente para verificar se funciona:
+
+º sudo systemctl start oracle-listener
+
+Verifique o status do serviço para garantir que está funcionando corretamente:
+
+º sudo systemctl status oracle-listener
+
+Se o serviço iniciar corretamente, habilite-o para iniciar automaticamente na inicialização:
+
+º sudo systemctl enable oracle-listener
+
+REINICIE O SISTEMA LINUX, COM USER ROOT.
+
+Reinicie o sistema para garantir que todas as configurações sejam aplicadas
+corretamente e que o listener do Oracle seja iniciado automaticamente:
+
+º reboot
+
+Verifique novamente o status do listener após o reboot:
+Depois que o sistema reiniciar, verifique o status do listener para garantir que ele foi
+iniciado automaticamente:
+
+NO MOBA, RODE O COMANDO ABAIXO, TANTO NA SESSAO ROOT QUANTO NA SESSAO DO USER ORACLE
+
+º lsnrctl status
+
+echo $ORACLE_HOME
+echo $ORACLE_SID
+echo $PATH
+echo $ORACLE_BASE
+echo $ORACLE_HOSTNAME
+
+Configurar o oratab
+Edite o arquivo /etc/oratab para garantir que o banco de dados seja iniciado automaticamente.
+Cada linha neste arquivo corresponde a uma instância do banco de dados Oracle
+e tem o formato: <ORACLE_SID>:<ORACLE_HOME>:N
+
+ENTAO RODANDO COM USER ROOT, VAMOS RODAR O NANO
+
+º vi /etc/oratab
+
+FREE:/opt/oracle/product/23ai/dbhomeFree:Y

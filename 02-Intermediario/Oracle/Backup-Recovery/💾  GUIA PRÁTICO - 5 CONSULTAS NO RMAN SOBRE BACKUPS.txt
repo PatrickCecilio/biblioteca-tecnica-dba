@@ -1,0 +1,9 @@
+5. Consultas no RMAN sobre backups de Archivelogs
+-- Lista todos os backups de archivelogs
+LIST BACKUP OF ARCHIVELOG ALL;
+
+-- Lista backup de uma sequência específica
+LIST BACKUP OF ARCHIVELOG SEQUENCE = <número_da_sequência>;
+
+-- Lista backup de um intervalo de sequências
+LIST BACKUP OF ARCHIVELOG FROM SEQUENCE <início> UNTIL SEQUENCE <fim>;

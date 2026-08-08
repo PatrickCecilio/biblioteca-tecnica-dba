@@ -1,0 +1,8 @@
+// Aula 31 - Criando um Docker Swarm
+
+# docker swarm init
+
+# docker swarm join --token <join-token> <IP address>:2377
+
+# docker node ls
+# docker node inspect pxb5lt3k8okl7n730wdkr9qn2

@@ -1,0 +1,60 @@
+Error: Unable to find a match: metasploit-framework
+
+O erro ocorre porque o seu sistema não tem o **Git** e o **Bundler** instalados, que são necessários para baixar e instalar o Metasploit via repositório GitHub.
+
+### Passos para resolver:
+
+#### 1. **Instalar o Git**:
+Primeiro, instale o Git para clonar o repositório do Metasploit:
+
+```bash
+sudo dnf install git
+```
+
+#### 2. **Instalar o Ruby e Bundler**:
+O Metasploit depende do Ruby e do Bundler para gerenciar suas dependências. Instale o Ruby e o Bundler:
+
+```bash
+sudo dnf install ruby
+sudo gem install bundler
+```
+
+#### 3. **Clonar o repositório do Metasploit**:
+Depois de instalar o Git, você pode clonar o repositório do Metasploit:
+
+```bash
+cd /opt
+sudo git clone
+```
+
+#### 4. **Instalar as dependências do Metasploit**:
+Entre na pasta do Metasploit e instale as dependências necessárias com o Bundler:
+
+```bash
+cd metasploit-framework
+sudo bundle install
+```
+
+Isso deve preparar o Metasploit no seu sistema.
+
+#### 5. **Rodar o Metasploit**:
+Agora, você pode rodar o Metasploit Framework com o seguinte comando:
+
+```bash
+sudo ./msfconsole
+```
+
+Esses passos devem resolver o problema e permitir que você use o Metasploit no Oracle Linux. Se algum erro persistir, me avise!
+
+
+============================================================================================
+O **Metasploit Framework** é uma ferramenta usada principalmente em **testes de penetração** (pentesting) e **segurança ofensiva**. Ele tem diversas funcionalidades, como a exploração de vulnerabilidades, realização de ataques de penetração, criação de payloads, entre outros. Dentro do contexto do seu script de pentest, ele seria o responsável por **automatizar a exploração de vulnerabilidades**, se configurado dessa forma.
+
+Com base no script mencionado, ele poderia se encaixar nas seguintes funcionalidades:
+
+- **Exploração de vulnerabilidades**: Usando o Metasploit, você pode identificar e explorar vulnerabilidades em sistemas de rede ou servidores que estão sendo testados. Isso pode ser parte do processo de pentest.
+- **Geração de relatórios**: Após realizar as explorações, o Metasploit pode gerar relatórios detalhados, que seriam enviados para a pasta de relatórios compartilhada via Samba.
+
+Em resumo, o Metasploit seria uma das ferramentas no seu ambiente de pentest, particularmente útil na etapa de **exploração de vulnerabilidades**, mas não necessariamente envolvido na parte de coleta e organização de relatórios dos arquivos modificados ou criados. Para isso, você deve utilizar o script em PowerShell para coletar informações e organizá-las, enquanto o Metasploit ficaria responsável pela parte de exploração e geração de relatórios relacionados a ataques ou descobertas de vulnerabilidades.
+
+Se precisar de mais detalhes sobre como integrar isso no seu fluxo de trabalho, me avise! 😊

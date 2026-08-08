@@ -1,0 +1,5 @@
+sudo semanage port -a -t ssh_port_t -p tcp 22000
+sudo firewall-cmd --permanent --zone=public --add-port=22000/tcp
+sudo firewall-cmd --reload
+
+sudo systemctl restart sshd.service

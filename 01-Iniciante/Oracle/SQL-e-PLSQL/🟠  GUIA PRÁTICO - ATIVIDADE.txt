@@ -1,0 +1,82 @@
+1 - função simples para visualizamos os dados de uma coluna
+
+2 - foi utilizado a função concat(argumento1,argumento2) que concatena os argumentos passados e por ser uma funções de linhas simples podem ser aninhadas em qualquer nível
+
+3- utilizamos a clausula distinct para remover os duplicados na coluna utilizada
+
+4 - utilizamos O operador de concatenação que é representado por um pipe duplo ( || ).
+
+
+1. Escreva uma consulta SQL para exibir todas as colunas da tabela EMPREGADOS
+
+select * from empregados2
+
+
+2. Escreva uma consulta para exibir o nome completo do empregado (concatenando NOME e SOBRENOME com um
+espaço), um alias NOME_COMPLETO para essa coluna e o salário total (SALARIO + BONUS). Use um
+alias SALARIO_TOTAL para a coluna calculada.
+
+select concat (nome, concat (' ' , sobrenome) ) NOME_COMPLETO, salario+bonus SALARIO TOTAL from empregados2
+
+
+3. Escreva uma consulta SQL para listar todos os departamentos distintos da empresa.
+
+select distinct id_empregado from empregados2;
+
+4. Exibir uma lista formatada com a seguinte estrutura:
+"O empregado [NOME COMPLETO] trabalha no departamento [DEPARTAMENTO] e recebe um salario de R$
+[SALARIO_TOTAL]."
+
+select '"O empregado '| |
+from empregados2
+
+
+=======================================PARTE 2 ===========================================
+
+
+1- selecionados salários acima de 6000 e utilizamos o Pipe duplo para agregar nome e sobrenome.
+2- utilizamos a clausula between para selecionamos os salario entre 5000 e 7000 e utilizamos o Pipe duplo para agregar nome e sobre nome
+3- selecionamos os funcionários do departamento financeiro trazendo dados da tabela departamentos utilizamos o Pipe duplo para agregar nome e sobre nome
+4 - utilizamos o like e a caracter coringa '%' que substitui um grupo de caracteres
+5 - utilizamos a opção is null que traz todos os bônus com o valor null
+6 - utilizamos as parênteses para mudar a ordem de execução da query e trazemos duas afirmações entre o operador OR, lembrando que o and tem precedência sobre o OR
+7 - utilizamos a clausula Fetch (empacotar) para obtermos o resultado solicitado. lembrando que pode ser usuado o FETCH FIRST ou FETCH NEXT
+
+1. Filtrar funcionarios com salário maior ou igual a 6000.
+select nome
+
+Query Builder
+1. Filtrar funcionarios com salário maior ou igual a 6000.
+
+select nome ||' '|| sobrenome NOME_COMPLETO from empregados where salario >=6000
+
+
+2. Quem tem salário entre 5 mil e 7.500?
+
+select nome ||' '|| sobrenome NOME_COMPLETO from empregados where salario between 5000 and 7500
+
+3. Quem trabalha no setor de TI ou Financeiro?
+
+select nome ||' '|| sobrenome NOME_COMPLETO from empregados
+where id departamento=(select id_departamento from departamentos where nome='Financeiro')
+
+4. Buscar funcionários cujo nome comece com "M".
+
+select nome Il' '|| sobrenome NOME_COMPLETO from empregados
+where nome like 'M$'
+
+5. Quem não recebe bônus?
+
+select nome ||' '| | sobrenome NOME_COMPLETO from empregados where bonus is null
+
+6. Quem tem salário acima de 5k e esta no TI, ou quem tem bônus e trabalha no Financeiro?
+
+select nome ||' '|l sobrenome NOME_COMPLETO, salario, ID_DEPARTAMENTO from empregados
+where (salario > 5000 and id_departamento=(select id_departamento from departamentos where nome='TI') )
+or (bonus is not null and id departamento=(select id_departamento from departamentos where nome='Financeiro') )
+
+7. Retorne so os 3 funcionarios com maior salario! Ordene a lista do maior salario ao meno
+
+select nome I|' '|l sobrenome NOME_COMPLETO, salario from empregados
+order by salario desc
+fetch first 3 rows only

@@ -1,0 +1,7 @@
+SELECT tablespace_name, status, contents, extent_management, allocation_type
+FROM dba_tablespaces
+ORDER BY tablespace_name;
+
+SELECT tablespace_name, file_name, bytes / 1024 / 1024 AS size_mb, autoextensible, maxbytes / 1024 / 1024 AS max_mb
+FROM dba_data_files
+ORDER BY tablespace_name, file_id;

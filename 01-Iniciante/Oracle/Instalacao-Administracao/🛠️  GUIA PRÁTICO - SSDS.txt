@@ -1,0 +1,24 @@
+Data 	        Horas	Atividade
+23/08/2025	02:40	Ajustes SQLNET.ORA Bug Subida do Database. Depois Atividade PATCH EXACC + Verificacao ZDLRA + Execucao dos Backups dos Bancos
+26/08/2025	00:30	Health Check ZDLRA
+28/08/2025	00:30	Health Check ZDLRA
+02/09/2025	00:30	Health Check ZDLRA
+04/09/2025	00:30	Health Check ZDLRA
+09/09/2025	00:30	Health Check ZDLRA
+11/09/2025	00:30	Health Check ZDLRA
+15/09/2025	00:30	Health Check ZDLRA
+18/09/2025	00:30	Health Check ZDLRA
+18/09/2025	01:00	Limpeza archives / Cross-check
+23/09/2025	00:30	Health Check ZDLRA
+25/09/2025	00:30	Health Check ZDLRA
+29/09/2025	00:30	Health Check ZDLRA
+02/10/2025	00:30	Health Check ZDLRA
+06/10/2025	00:30	Health Check ZDLRA
+09/10/2025	01:00	Limpeza archives / Cross-check
+13/10/2025	00:30	Health Check ZDLRA
+16/10/2025	01:00	Health Check ZDLRA / Limpeza de Archived_Log
+22/10/2025	00:30	Health Check ZDLRA
+23/10/2025	00:30	Health Check ZDLRA
+30/11/2025	01:00	Health Check ZDLRA / Limpeza de Archived_Log
+03/11/2025	00:30	Health Check ZDLRA
+05/11/2025	01:00	Health Check ZDLRA / Limpeza de Archived_Log

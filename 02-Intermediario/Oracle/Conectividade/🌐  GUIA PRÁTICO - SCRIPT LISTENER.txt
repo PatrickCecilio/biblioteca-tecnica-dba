@@ -1,0 +1,19 @@
+lsnrctl status
+
+lsnrctl services
+
+netca
+
+sqlplus / as sysdba
+
+SELECT name, network_name, pdb, enabled
+FROM dba_services
+ORDER BY pdb, name;
+
+SHOW PARAMETER local_listener;
+
+ALTER SYSTEM REGISTER;
+
+lsnrctl services
+
+tnsping <SERVICE_NAME>

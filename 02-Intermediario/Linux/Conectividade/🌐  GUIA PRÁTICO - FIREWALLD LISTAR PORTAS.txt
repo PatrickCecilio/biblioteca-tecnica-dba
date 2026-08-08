@@ -1,0 +1,8 @@
+LISTAR PORTAS NO FIREWALLD
+
+sudo firewall-cmd --state
+sudo firewall-cmd --get-active-zones
+sudo firewall-cmd --list-ports
+sudo firewall-cmd --list-services
+
+Validação: confirme a zona ativa da interface antes de interpretar portas e serviços liberados.

@@ -1,0 +1,12 @@
+SELECT name, value / 1024 / 1024 AS value_mb
+FROM v$parameter
+WHERE name IN ('memory_max_target', 'memory_target', 'sga_max_size', 'sga_target', 'pga_aggregate_limit', 'pga_aggregate_target')
+ORDER BY name;
+
+SELECT s.sid, s.serial#, s.username, s.machine, s.program, ROUND(p.value / 1024 / 1024, 2) AS pga_mb
+FROM v$session s
+JOIN v$sesstat p ON p.sid = s.sid
+JOIN v$statname n ON n.statistic# = p.statistic#
+WHERE n.name = 'session pga memory'
+  AND s.username IS NOT NULL
+ORDER BY p.value DESC;

@@ -1,0 +1,11 @@
+find '<AUDIT_PATH>' -type f -name '*.aud' -mtime +<RETENTION_DAYS> -print
+
+find '<TRACE_PATH>' -type f \( -name '*.trc' -o -name '*.trm' \) -mtime +<RETENTION_DAYS> -print
+
+find '<LISTENER_LOG_PATH>' -type f -name 'log_*' -mtime +<RETENTION_DAYS> -print
+
+find '<AUDIT_PATH>' -type f -name '*.aud' -mtime +<RETENTION_DAYS> -delete
+
+find '<TRACE_PATH>' -type f \( -name '*.trc' -o -name '*.trm' \) -mtime +<RETENTION_DAYS> -delete
+
+find '<LISTENER_LOG_PATH>' -type f -name 'log_*' -mtime +<RETENTION_DAYS> -delete

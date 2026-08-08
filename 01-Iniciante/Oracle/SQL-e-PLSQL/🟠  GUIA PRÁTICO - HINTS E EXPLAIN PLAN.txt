@@ -1,0 +1,18 @@
+Habilitar Estatísticas de Plano:
+SELECT /*+ GATHER_PLAN_STATISTICS */ *
+FROM sua_tabela
+WHERE condicao;
+
+Exibir Plano de Execução:
+SELECT *
+FROM TABLE(DBMS_XPLAN.DISPLAY_CURSOR(
+  cursor_id => NULL,
+  cursor_child_number => 0,
+  format => 'ALLSTATS LAST'
+));
+
+Gerar Plano Estático:
+EXPLAIN PLAN FOR
+SELECT * FROM sua_tabela WHERE condicao;
+
+SELECT * FROM TABLE(DBMS_XPLAN.DISPLAY());

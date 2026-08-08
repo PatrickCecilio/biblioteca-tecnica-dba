@@ -1,0 +1,111 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+# GUIA PRÁTICO ORACLE
+
+## Recuperação do SPFILE utilizando PFILE
+
+### 1. Conectar como SYSDBA
+
+```bash
+sqlplus / as sysdba
+```
+
+---
+
+### 2. Localizar o PFILE válido
+
+```bash
+cd <PFILE_PATH>
+```
+
+```bash
+ls
+```
+
+---
+
+### 3. Iniciar o banco utilizando o PFILE
+
+```sql
+STARTUP PFILE='<PFILE_PATH>/<PFILE_NAME>';
+```
+
+---
+
+### 4. Recriar o SPFILE a partir do PFILE
+
+```sql
+CREATE SPFILE
+FROM PFILE='<PFILE_PATH>/<PFILE_NAME>';
+```
+
+---
+
+### 5. Validar os parâmetros carregados
+
+```sql
+SELECT
+    name,
+    value/1024/1024 AS value_mb
+FROM v$parameter
+WHERE name IN (
+    'memory_max_target',
+    'memory_target',
+    'sga_max_size',
+    'sga_target',
+    'pga_aggregate_limit',
+    'pga_aggregate_target'
+)
+ORDER BY 1;
+```
+
+---
+
+### 6. Reiniciar utilizando o SPFILE
+
+```sql
+SHUTDOWN IMMEDIATE;
+```
+
+```sql
+STARTUP;
+```
+
+---
+
+### 7. Validar os parâmetros após o Startup
+
+```sql
+SELECT
+    name,
+    value/1024/1024 AS value_mb
+FROM v$parameter
+WHERE name IN (
+    'memory_max_target',
+    'memory_target',
+    'sga_max_size',
+    'sga_target',
+    'pga_aggregate_limit',
+    'pga_aggregate_target'
+)
+ORDER BY 1;
+```
+
+---
+
+### 8. Validar o estado do banco
+
+```sql
+SELECT
+    name,
+    open_mode
+FROM v$database;
+```
+
+---
+
+### 9. Criar PFILE de contingência a partir do SPFILE
+
+```sql
+CREATE PFILE FROM SPFILE;
+```

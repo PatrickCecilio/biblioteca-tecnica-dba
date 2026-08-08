@@ -1,0 +1,13 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+sqlplus / as sysdba
+
+CREATE PFILE='<PFILE_PATH>' FROM SPFILE;
+
+HOST vi <PFILE_PATH>
+
+CREATE SPFILE FROM PFILE='<PFILE_PATH>';
+
+SHUTDOWN IMMEDIATE;
+
+STARTUP;

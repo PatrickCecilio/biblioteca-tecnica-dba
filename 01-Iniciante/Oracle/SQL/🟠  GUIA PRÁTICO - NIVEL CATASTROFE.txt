@@ -1,0 +1,13 @@
+SELECT 'ALTER SYSTEM KILL SESSION ''' || sid || ',' || serial# || ''' IMMEDIATE;' AS kill_command
+FROM v$session
+WHERE type = 'USER'
+  AND username = UPPER('<USERNAME>')
+ORDER BY sid;
+
+SELECT 'ALTER SYSTEM KILL SESSION ''' || sid || ',' || serial# || ''' IMMEDIATE;' AS kill_command
+FROM v$session
+WHERE status = 'INACTIVE'
+  AND type = 'USER'
+  AND username IS NOT NULL
+  AND last_call_et > <IDLE_SECONDS>
+ORDER BY last_call_et DESC;

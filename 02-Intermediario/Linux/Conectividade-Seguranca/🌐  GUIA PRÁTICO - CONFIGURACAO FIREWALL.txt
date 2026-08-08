@@ -1,0 +1,15 @@
+############################################
+# Passos para liberar a porta 1521 no firewall
+############################################
+
+# 1. Verificar portas já liberadas
+sudo firewall-cmd --list-ports
+
+# 2. Adicionar a porta 1521 permanentemente (TCP)
+sudo firewall-cmd --permanent --add-port=1521/tcp
+
+# 3. Recarregar as regras do firewall
+sudo firewall-cmd --reload
+
+# 4. Confirmar novamente as portas liberadas
+sudo firewall-cmd --list-ports

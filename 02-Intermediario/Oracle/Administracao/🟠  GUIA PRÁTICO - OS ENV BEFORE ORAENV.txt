@@ -1,0 +1,11 @@
+LD_LIBRARY_PATH=/u01/app/oracle/product/19.0.0/dbhome_1/lib
+ORACLE_SID=CDB1
+ORACLE_BASE=/u01/app/oracle
+ORACLE_HOME=/u01/app/oracle/product/19.0.0/dbhome_1
+USER=oracle
+PWD=/home/oracle
+HOME=/home/oracle
+XDG_DATA_DIRS=/home/oracle/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/usr/local/share:/usr/share
+MAIL=/var/spool/mail/oracle
+LOGNAME=oracle
+PATH=/home/oracle/.local/bin:/home/oracle/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/u01/app/oracle/product/19.0.0/dbhome_1/bin

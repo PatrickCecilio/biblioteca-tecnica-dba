@@ -1,0 +1,31 @@
+No Oracle XE 21c, a administração da tablespace SYSAUX exige mais atenção do que nas edições Enterprise. Isso acontece porque o XE possui um limite rígido de armazenamento total e a SYSAUX faz parte do núcleo do banco.
+
+Mesmo que ainda exista espaço disponível antes de atingir o teto global, se a SYSAUX chegar a 100% de uso, operações internas começam a falhar. Ela não compartilha espaço com outras tablespaces. A partir desse ponto, surgem erros como ORA-01653 (unable to extend) em tarefas que precisam alocar extents na SYSAUX, ainda que a USERS ou outras tablespaces estejam folgadas.
+
+O banco pode até continuar “de pé”, mas perde funcionalidades internas importantes. O alert log passa a registrar falhas recorrentes, e componentes essenciais começam a ser afetados, como históricos e relatórios internos (WRI$), advisors, retenção de estatísticas do otimizador e rotinas automáticas de manutenção.
+
+Com o tempo, o ambiente se degrada. Estatísticas antigas deixam de ser limpas, tarefas automáticas falham e o desempenho tende a piorar gradualmente. Por isso, no XE, a solução correta não é simplesmente aumentar o datafile, mas entender e controlar o que está consumindo espaço dentro da SYSAUX.
+
+O primeiro passo é identificar os “moradores” da SYSAUX usando V$SYSAUX_OCCUPANTS e DBA_SEGMENTS, para saber quais componentes e quais segmentos são os maiores consumidores. A view V$SYSAUX_OCCUPANTS também expõe a coluna MOVE_PROCEDURE, que indica quando existe um procedimento suportado para mover um componente para outra tablespace.
+
+No seu cenário, o XDB possui procedure de move e pode ser realocado para uma tablespace dedicada, reduzindo o consumo dentro da SYSAUX. Já o occupant SM/OTHER normalmente não tem move procedure, então o caminho é interromper a geração e expurgar os dados associados.
+
+A análise dos maiores segmentos mostrou que o principal consumo vinha de objetos relacionados a SQL Tuning Sets, especialmente WRI$_SQLSET_PLAN_LINES e seus LOBs. Isso é consistente com o SQLSET SYS_AUTO_STS ter acumulado dezenas de milhares de statements ao longo do tempo.
+
+Nessas situações, não adianta apenas fazer resize do datafile sem atacar a causa. A SYSAUX volta a crescer e consome ainda mais do limite global do XE. O controle passa por desabilitar coletas automáticas desnecessárias e reduzir retenções, evitando que o banco acumule relatórios e históricos por meses.
+
+A redução da ocupação atual envolve purges: apagar execuções antigas, expurgar dados expirados e remover históricos que não fazem sentido manter em um ambiente XE.
+
+No caso das estatísticas do otimizador (SM/OPTSTAT), o ideal é reduzir a retenção com DBMS_STATS.ALTER_STATS_HISTORY_RETENTION para algo em torno de 7 a 10 dias. Em seguida, executa-se DBMS_STATS.PURGE_STATS para eliminar estatísticas mais antigas do que a retenção definida. Esse conjunto de ações reduz o crescimento futuro e elimina dados históricos que viram peso morto dentro da SYSAUX.
+
+Para o AWR (SM/AWR), quando necessário, é possível reduzir tanto a retenção quanto o intervalo de snapshots, além de remover snapshots antigos com DBMS_WORKLOAD_REPOSITORY.DROP_SNAPSHOT_RANGE. Assim, o repositório de performance não passa a consumir espaço desproporcional em um ambiente com recursos limitados.
+
+Além do purge, existe um ponto crítico: apagar dados não reduz automaticamente o tamanho físico dos segmentos por causa do high water mark e da fragmentação. É aí que entra a reorganização. Mover tabelas internas grandes e reconstruir índices permite “reempacotar” os blocos, devolvendo extents como espaço livre.
+
+Na prática, esse reempacotamento transforma segmentos cheios de buracos em estruturas compactas dentro da mesma tablespace. Criar um novo datafile na SYSAUX pode ajudar nesse processo, pois fornece um destino limpo e facilita concentrar os segmentos em extents contíguos.
+
+Depois disso, se a parte final do datafile antigo ficar livre, pode ser possível reduzir fisicamente o arquivo com ALTER DATABASE DATAFILE … RESIZE. O resize, portanto, serve para devolver espaço ao disco, mas não controla o crescimento. Quem controla o crescimento são retenções bem definidas, purges regulares e a desativação de rotinas que geram dados desnecessários.
+
+No XE, quando o limite começa a se aproximar, o objetivo é sempre liberar espaço sem inflar ainda mais a SYSAUX, preservando o pouco espaço total disponível.
+
+No fim das contas, “refazer a SYSAUX” não significa recriá-la, mas manter seu conteúdo sob controle, com diagnóstico contínuo, retenções agressivas, expurgos periódicos e reorganizações sempre que necessário.

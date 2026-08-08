@@ -1,0 +1,459 @@
+2. LOG_BUFFER
+
+
+O redo log buffer é um buffer circular na SGA (System Global Area) que fica na memória RAM,
+que mantem informações sobre as mudanças feitas no banco de dados.
+Estas informações são persistidas de forma assincrona nos arquivos de redo_log no disco.
+Como já vimos anteriormente informacoes no redo_log são necessária para reconstruir,
+ou refazer mudanças feitas no banco de dados pelas operaçãos
+INSERT, UPDATE, DELETE, CREATE, ALTER, ou DROP.
+Entradas de Redo se necessário são usados para recuperação do banco de dados.
+
+O log writer process (LGWR) é responsável por gerenciamento e escrita do redo log buffer para
+o redo log file (arquivo de redo) no disco e basicamente
+faz a gravação para o redo_log no disco, imediatamente quando uma operação é comitada,
+a Cada 3 segundos e quando o redo log buffer alcança 1/3 do total.
+
+O LOG_BUFFER é um parâmetro de inicialização do Oracle que define o tamanho do buffer usado
+para armazenar
+informações de log temporariamente antes de serem gravadas nos arquivos de redo log.
+Este parâmetro afeta o desempenho do sistema em termos de gravação de transações no redo log.
+
+Grandes operacoes de inserts, updates e deletes que estejam rodando em aberto, e nao tenham sido
+aplicados o comando commit, se houver um log buffer
+pequeno, o Oracle irá comecar a gravar as transacoes no file do redo_log sem os commits, porque não
+houve tempo de reciclar o buffer do redo log, porque
+as transacoes ainda estavam em abertas, trazendo assim uma perda relativa de performance,
+porque as novas transacoes estão sendo gravados no disco.
+Neste caso será interessante aumentar o log bugger.
+
+A recomendação para o tamanho do buffer de redo log no Oracle Database depende do ambiente e da carga
+de trabalho específica do banco de dados, mas há algumas orientações gerais que podem ser seguidas:
+
+Parâmetro LOG_BUFFER: Este parâmetro controla o tamanho do buffer de redo log. O valor padrão pode
+variar com base na versão do Oracle Database e na configuração do hardware, mas geralmente é adequado
+para a maioria dos ambientes de produção.
+
+Tamanho Mínimo: Em ambientes de produção, um valor mínimo recomendado para o LOG_BUFFER é de 4 MB.
+No entanto, em sistemas de alto desempenho ou com alta taxa de transação, esse valor pode precisar
+ser significativamente maior.
+
+Monitoramento e Ajustes: É importante monitorar a eficiência do buffer de redo log. Indicadores como o
+número de waits por LGWR (Log Writer) e a frequência de commits podem ajudar a determinar se o tamanho
+do LOG_BUFFER é adequado. Se houver muitos waits por LGWR ou se o log buffer estiver sendo
+constantemente sobrecarregado, considere aumentar o LOG_BUFFER.
+
+Cálculo Baseado em Memória Disponível: O tamanho do LOG_BUFFER deve ser configurado levando em
+consideração a memória total disponível no sistema. Alocar memória demais para o LOG_BUFFER pode
+prejudicar outras operações do banco de dados, enquanto alocar muito pouca pode causar gargalos
+no desempenho.
+
+Exemplos de Valores para comecar :
+Ambientes de teste/desenvolvimento: 4 MB a 16 MB.
+Ambientes de produção com baixa/média carga: 16 MB a 64 MB.
+Ambientes de produção com alta carga transacional: 64 MB ou mais.
+
+Você pode consultar o valor atual do LOG_BUFFER usando a seguinte consulta SQL:
+
+show parameter log_buffer;
+
+NAME       TYPE        VALUE
+---------- ----------- -----
+log_buffer big integer 6448K
+
+OBS: O valor está em Kbytes, no meu caso cerca de 6MBytes.
+
+Melhores práticas para performance:
+
+Aqui estão algumas práticas recomendadas:
+
+- Ajuste com base na carga de trabalho: O tamanho do LOG_BUFFER pode ser ajustado com base na carga
+  de trabalho do seu sistema.
+  Se você tiver muitas transações intensivas em gravação, será benéfico aumentar o tamanho do buffer.
+  Os valores default definidos pela Oracle estão entre 2 MB a 32 MB, dependendo do tamanho do SGA e
+  do número de CPUs, mas para quem
+  trabalha com FlashBack considere no minimo 64MB.
+
+- Monitore o desempenho: Use ferramentas como o Oracle Enterprise Manager ou consultas SQL para
+  monitorar o desempenho do sistema.
+  Isso ajudará a identificar se o tamanho do LOG_BUFFER está adequado para suas operações.
+
+Para identificar se há problemas relacionados ao LOG_BUFFER através de eventos de espera
+(wait events) no Oracle, você pode usar
+a visão dinâmica V$SESSION_EVENT para monitorar os eventos de espera associados às sessões ativas.
+Se você observar um grande número de waits relacionados ao log_buffer_space, isso pode indicar
+que o tamanho do LOG_BUFFER
+pode ser um fator limitante no desempenho.
+
+Aqui está um exemplo de como você pode verificar esses eventos:
+
+  SELECT
+  event,
+  total_waits,
+  time_waited
+FROM
+  v$session_event
+WHERE
+  event LIKE '%buffer%'
+ORDER BY
+  total_waits DESC;
+
+Este código mostra a quantidade de eventos de waits e o tempo em milisegundos (para ver segundos,
+precisa dividir por 1000) que outros recursos precisou esperar para rodar porque o log buffer estava
+a fazer algum trabalho. A vezes tempos muito grandes são indicativos que
+temos problemas em algum recurso do Oracle, que precisam ser melhor dimensionados.
+
+Se quiser ver todos os waits basta remover o filtro:
+
+  SELECT
+  event,
+  total_waits,
+  time_waited
+FROM
+  v$session_event
+ORDER BY
+  total_waits DESC;
+
+*** WAITS É ALGO QUE PRECISA MONITORAR, PORQUE SAO INDICATIVOS QUE O ORACLE ESTA A AGUARDAR
+ALGUM RECURSO COMO CPU, DISCO, MEMORIA, REDE, BLOQUEIOS EM PAGINAS DE DADOS OU TABELAS, PARA
+PODER EXECUTAR ALGUM COMANDO.
+
+--
+
+- Considere outros parâmetros relacionados: Além do LOG_BUFFER, outros parâmetros,
+  como LOG_FILE_SIZE, também podem afetar o desempenho do redo log.
+  Certifique-se de revisar e ajustar esses parâmetros conforme necessário.
+
+- Teste em ambientes controlados: Antes de fazer alterações em ambientes de produção, teste as
+  configurações propostas em ambientes controlados de QA
+  para avaliar o impacto nas operações e no desempenho do sistema.
+
+Vamos ao LAB
+
+Vamos alterar o parametro atual para 128MB. Este parametro Só poderá ser alterarado no SPFILE
+e NÃO USANDO MEMORY OU BOTH.
+
+ALTER SYSTEM SET log_buffer=128M SCOPE=SPFILE;
+shut immediate;
+startup;
+
+SELECT open_mode FROM v$database;
+
+- Vamos verificar se o valor foi alterado:
+
+show parameter log_buffer;
+
+NAME                                 TYPE        VALUE
+------------------------------------ ----------- ------------------------------
+log_buffer                           big integer 128M
+
+-------------------------------------------------------------------------------------------------------------------------------------------
+
+**
+
+3. LOG_FILE_SIZE
+
+Os arquivos de redo_log online armazenam as operações realizadas no disco em arquivos de redo log,
+antes mesmo dos dados serem incluidos, alterados ou deletados nos datafiles finais (tablespaces permanentes)
+no banco de dados, permitindo a recuperação das transações em caso de falhas, como já vimos anteriormente.
+
+Padrão:
+O tamanho padrão do arquivo de redo_log online pode variar de acordo com a versão do Oracle e as
+configurações iniciais do banco de dados.
+É comum encontrar valores na faixa de dezenas ou centenas de megabytes.
+
+Tamanho Adequado:
+
+O tamanho dos arquivos de redo_log online deve ser configurado de maneira a equilibrar a necessidade
+de recuperação rápida após uma parada do Oracle
+e a eficiência operacional, ou seja, arquivos muito pequenos podem levar a trocas frequentes e criacao
+de archives logs no disco com a copia das transacoes comitadas, enquanto arquivos muito grandes podem
+resultar em tempos prolongados de recuperação, quando o Oracle for dar startup.
+
+Distribuir os arquivos de log em vários grupos e membros pode melhorar o desempenho, e em discos
+diferentes dos datafiles aumentam a eficiente das operacoes
+de I/O, pois permite que vários files sejam escritos simultaneamente, principalmente se ainda
+utiliza discos do tipo magnético, o que seria um absurdo no caso do Oracle, ate devido ao custo
+de licencas, mas ja vi varios casos destes.
+
+Para visualizar informações sobre files do redo log, você pode usar a seguinte consulta SQL no Oracle:
+
+SELECT *
+ FROM v$logfile;
+
+WAITS....
+
+O evento de wait (espera) “sincronização de arquivo de log” do Oracle é acionado quando uma sessão
+de usuário emite um commit (ou um rollback).
+A sessão do usuário postará o LGWR para gravar o buffer de log no arquivo de redo log
+no disco.
+Quando o LGWR terminar de escrever a operacao no disco, irá liberar para o usuário com operacao
+realizada.
+A espera (wait) depende inteiramente do LGWR para escrever os blocos de redo ou rollback necessários
+para enviar a confirmação de sua conclusão
+de volta à sessão do usuário. O tempo de espera inclui a gravação do buffer de log e a postagem
+no redo_log, e às vezes é chamado de “latência de confirmação”.
+
+dica:
+Se uma instrução SQL encontrar uma quantidade significativa de tempo total para esse evento,
+o tempo médio de espera deverá ser examinado.
+Se o tempo médio de espera for baixo, mas o número de esperas for alto, então o aplicativo poderá
+estar confirmando após cada linha, em vez de agrupar COMMITs em lote.
+Os aplicativos Oracle podem reduzir essa espera fazendo commit após “n” linhas, para que haja menos
+operações COMMIT distintas, como ja vimos por exemplo em operacoes em bloco.
+
+- Para verificar se existem muitas esperas (wait events) relacionadas aos redo log files no Oracle,
+você pode usar as visões de dicionário de dados
+relacionadas a espera. Aqui estão algumas consultas que podem ajudar a identificar waits relacionados
+aos redo logs:
+
+SELECT event, total_waits, time_waited
+ FROM v$system_event
+ WHERE event LIKE 'log file sync%';
+
+O wait log file sync é comumente associada a espera pela gravação do redo log no disco.
+O time_waited dá uma indicação de quanto tempo, em centésimos de segundo, os usuários e processos do
+sistema esperaram por esse evento.
+SE ESTE NUMERO COMECAR A CRESCER MUITO E SE MANTER, AO MESMO TEMPO QUE TENHA RECLAMACOES DE USUARIOS,
+ PENSE EM COLOCAR OS ARQUIVOS EM OUTROS
+DISCOS MAIS RAPIDOS, E AUMENTAR O TAMANHO E QUANTIDADE DE ARQUIVOS.
+
+DICA: Poderá no comando acima, criar um novo campo calculado, para trazer a media do tempo
+dos waits a partir da divisao dos campos TIME_WAITED com TOTAL_WAITS e acompanhar esta média
+dos waits com uma ferramenta grafica. Isto pode ser feito para qualquer wait.
+
+Esta consulta identificará sessões online que estão atualmente em espera devido à sincronização
+do redo log:
+
+SELECT sid, serial#, username, event, state
+ FROM v$session
+ WHERE event LIKE 'log file sync%';
+
+Detalhamento da Sincronização de Arquivos de Log:
+
+Redo Log Buffer: Quando uma transação faz uma alteração em um banco de dados Oracle, essas mudanças
+são inicialmente registradas no Redo Log Buffer, uma área de memória dentro
+do SGA (System Global Area).
+
+Commit da Transação: Quando uma transação é confirmada (commit), o Oracle precisa garantir que todas
+as entradas no Redo Log Buffer sejam gravadas fisicamente no disco, nos arquivos de redo log, ou
+que as instrucoes que estejam no file do redo log sejam garantidas.
+
+Evento log file sync: Este evento ocorre quando uma sessão de banco de dados está esperando pela
+conclusão da gravação das entradas do Redo Log Buffer no disco. Esta espera é necessária para
+garantir que as alterações sejam persistentes e que o banco de dados possa ser recuperado
+corretamente em caso de falha.
+
+Significado de Sincronização:
+
+Persistência: Garantir que todas as mudanças feitas pela transação sejam gravadas em disco,
+protegendo contra perda de dados em caso de falha do sistema.
+
+Durabilidade: Parte das propriedades ACID (Atomicidade, Consistência, Isolamento, Durabilidade)
+que garantem que uma vez que uma transação é confirmada, ela permanece confirmada mesmo em caso de
+falhas.
+
+Recuperabilidade: Permite que o banco de dados possa ser recuperado para um estado consistente após
+uma falha, usando os dados dos arquivos de redo log.
+
+A espera elevada e continua pelo evento log file sync pode indicar que há um gargalo no sistema de E/S (entrada/saída),
+possivelmente devido a um volume alto de commits ou uma performance de disco insuficiente para lidar
+com a carga de trabalho atual. Identificar e analisar estas esperas pode ajudar a melhorar a
+performance geral do banco de dados.
+--
+
+dica: Se os valores de 'solicitações de espaço de redo log' ou 'tempo de espera de espaço de redo log'
+ em V$SYSSTAT comecarem a crescer muito e fora dos padroes medios e houver reclamacoes de problemas
+de performance, provavelmente esteja ocorrendo waits relacionados aos processos do Oracle
+de gravacao simultâneos no
+buffer de log e nos files do redo log, nesse caso seria necessario um acompanhamento destes
+indicadores e provavelmente seria necessario aumentar o tamanho do log_buffer e os files do redo log,
+e ja vimos como fazer.
+
+SELECT
+   substr(name,1,30),
+   value
+FROM
+   v$sysstat
+WHERE
+   NAME = 'redo log space requests'
+   OR
+   NAME = 'redo buffer allocation retries'
+   OR
+   NAME = 'redo log space wait time';
+
+
+DICAS GERAIS FINAIS:
+
+E/S de disco lento: segregar os arquivos de redo log em disco separados irá reduzir os waits de
+sincronização do arquivo de log.
+Mover os files do redo logs on-line para armazenamento SSD rápido e aumentar o tamanho do log_buffer
+como já falamos.
+
+OBS: Já tivemos aula sobre esta questão de como podemos aumentar o numero de arquivos de redo_log,
+tamanho e local, e não iremos repetir aqui.
+Caso tenha duvida, retorne a aula do script10 onde discutimos este tema.
+
+
+-------------------------------------------------------------------------------------------------------------------------------------------
+
+**
+
+PARALELISMO  (USO DE CPU)
+
+
+O Oracle Database define automaticamente parâmetros de execução paralela por padrão.
+isso significa dividir uma query ou uma operacao qualquer como criacao de indice, etc, um job
+em várias partes e fazer com que essas partes
+sejam executadas simultaneamente dentro da(s) cpu(s) atraves de thereads.
+
+O parâmetro PARALLEL_DEGREE_POLICY é um parâmetro de inicialização do Oracle Database que controla o
+comportamento do paralelismo de execução de queries no banco de dados. Para visualizar o valor
+atual deste parâmetro, você pode usar a seguinte consulta SQL:
+
+SELECT name, value
+ FROM v$parameter
+ WHERE name = 'parallel_degree_policy';
+
+Essa consulta retornará o nome do parâmetro e seu valor atual.
+O parâmetro pode ter os seguintes valores:
+
+MANUAL:
+Desabilita o grau automático de paralelismo, enfileiramento de instruções e execução paralela
+na memória.
+
+LIMITED:
+Habilita o grau automático de paralelismo para algumas instruções. O grau automático de paralelismo
+é aplicado somente às instruções que acessam tabelas ou índices indicados explicitamente
+usando a cláusula PARALLEL
+
+AUTO: O Oracle Database ajusta automaticamente o grau de paralelismo com base na carga do sistema.
+
+VALOR DEFAULT: MANUAL
+
+O valor dafault é adequado para a grande maioria dos casos, principalmente
+se a maioria dos processos que rodam na instancia Oracle sao processos curtos, comandos
+rapidos que processam muitos inserts, updates e deletes com poucos dados, ou seja, comandos
+que duram poucos segundos e este parametro default é adequado se seu ambiente esta com a CPU,
+memória ou I/O já saturados ou próximos do limite de uso.
+
+Dica, não altere estes parametros de forma global, mas se precisar alterar por exemplo altere de manual
+para LIMITED e trabalhe em objetos especificos ou comandos que precisem ser trabalhados com
+processamento em paralelo e acompanhe o uso da CPU porque se estes processos levarem a cpu
+a um grande pico constante, tera que rever estes processos em paralelos.
+
+ alter system set parallel_degree_policy = auto;
+
+SELECT name, value
+ FROM v$parameter
+ WHERE name = 'parallel_degree_policy';
+
+Vamos retornar para default:
+
+alter system set parallel_degree_policy = manual;
+
+SELECT name, value
+ FROM v$parameter
+ WHERE name = 'parallel_degree_policy';
+
+alter system set parallel_degree_policy = limited;
+
+SELECT name, value
+ FROM v$parameter
+ WHERE name = 'parallel_degree_policy';
+
+Se por algum motivo, precisar usar mais threads, usando mais ciclos da CPU, para um determinado
+processo, um relatorio, ... poderá para aquele sessão
+alterar, mas deverá antes fazer simulacao no seu ambiente de QA a fim de verificar se
+realmente terá impacto positivo, porque em muitos casos pode nao ter impacto positivo, ao contrario,
+e ainda irá prejudicar outros processos que estão a usar a cpu ao mesmo tempo:
+
+ALTER SESSION FORCE PARALLEL QUERY;
+
+ATENCAO:
+
+O comando ALTER SESSION FORCE PARALLEL QUERY é utilizado no Oracle Database para forçar a execução
+de uma operacoes sql em modo paralelo para a sessão atual.
+Normalmente, as operacoes sql paralelas são determinadas pelo otimizador de query com base nas
+estatísticas, na complexidade da query e
+se a opcao esta marcada como AUTO ou LIMITED. No entanto, esse comando permite ao usuário forçar uma
+query específica ou conjunto de queries dentro da sessao a ser executada em modo paralelo,
+independentemente das decisões do otimizador e da option definida.
+
+A execução em modo paralelo envolve a divisão da tarefa de processamento da query entre várias
+threads ou processos paralelos,
+ o que pode resultar em um desempenho mais rápido para queries que envolvem grandes
+conjuntos de dados ou operações complexas, como relatorios complexos, MAS TAMBEM PODE AO CONTRÁRIO
+TORNAR A MESMA MAIS LENTA OU PIOR TODAS AS OUTRAS OPERACOES SIMPLES QUE DEMANDAM CPU,
+ENTAO DEVE SER TESTADO CASO A CASO.
+
+É importante ter cuidado ao usar o ALTER SESSION FORCE PARALLEL QUERY, pois forçar queries
+paralelas pode não ser apropriado para todas as consultas
+ou em todas as situações. A execução paralela consome recursos adicionais, e o benefício real
+depende da natureza da consulta,
+do hardware disponível e de outros fatores.
+
+Além disso, o uso indiscriminado desse comando pode levar a uma alocação excessiva de recursos
+paralelos, impactando negativamente o desempenho geral do sistema.
+
+Antes de usar o ALTER SESSION FORCE PARALLEL QUERY, é aconselhável analisar cuidadosamente a
+necessidade de execução paralela
+para a query específica em questão e considerar os possíveis impactos no desempenho do sistema.
+
+Para reverter a sessão para que executa query paralela ao comportamento padrão
+rode o comando
+ALTER SESSION DISABLE PARALLEL QUERY;
+
+Portanto, se você forçou a execução paralela de varios threads dentro da cpu,
+para todos os proximos comandos sql dentro da sessão que rodou o comando:
+
+ALTER SESSION FORCE PARALLEL QUERY;
+
+Você deve desativar no final do processo e permitir que o otimizador decida novamente, se vai usar
+ou nao o paralelismo se estiver marcado como AUTO por exemplo,  usando:
+
+ALTER SESSION DISABLE PARALLEL QUERY;
+
+--
+
+PODEMOS AINDA CRIAR PARALELISMO EM NIVEL DE OBJETOS (TABELAS E INDICES):
+
+ALTER SESSION SET CONTAINER = ORCLPDBLINUX1;
+SELECT pdb_name FROM cdb_pdbs;
+
+CREATE USER novousuario111 IDENTIFIED BY senha123;
+
+CREATE TABLE novousuario111.minha_tabela1 (id NUMBER,nome VARCHAR2(50),idade NUMBER);
+CREATE INDEX novousuario111.idx_minha_tabela1_id ON novousuario111.minha_tabela1 (id);
+
+ -- Ativando parallel para tabela:
+ ALTER TABLE novousuario111.minha_tabela1 PARALLEL(DEGREE 4);
+
+OBS: Este comando altera a tabela novousuario111.minha_tabela1 para habilitar o paralelismo com um
+grau de 4. Isso significa que as operações de consulta, inserção, atualização e exclusão na tabela
+novousuario111.minha_tabela1 podem ser executadas em paralelo utilizando até 4 threads ou processos
+simultâneos. Essa configuração pode melhorar o desempenho para operações que manipulam grandes
+volumes de dados.
+
+--Ativando parallel para Index:
+ALTER INDEX novousuario111.idx_minha_tabela1_id PARALLEL(DEGREE 4);
+
+-- disabilitando parallel. Pode usar um dos dois metodos abaixo:
+
+ALTER TABLE novousuario111.minha_tabela1 PARALLEL(DEGREE 1);
+ALTER TABLE novousuario111.minha_tabela1 NOPARALLEL;
+
+e se quiser remover do indice tambem:
+
+ALTER INDEX novousuario111.idx_minha_tabela1_id NOPARALLEL;
+
+ALTER SESSION SET CONTAINER = CDB$ROOT;
+SELECT name, cdb FROM v$database;
+
+---------------------
+
+SEgue a lista dos parametros, mas evite ficar alterando os paramentros que vem da Oracle
+e que a maioria deles já são dinamicos para estar de
+acordo com a necessidade do seu ambiente.
+
+2.4.1 Parameters by Functional Category

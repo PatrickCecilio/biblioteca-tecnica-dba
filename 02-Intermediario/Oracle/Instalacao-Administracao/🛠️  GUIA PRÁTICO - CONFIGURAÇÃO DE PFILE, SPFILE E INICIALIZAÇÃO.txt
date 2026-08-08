@@ -1,0 +1,8 @@
+-- Converter PFILE em SPFILE
+enable output on;
+create spfile from pfile='/app/oracle/pfile.ora';
+
+# Iniciar banco com PFILE específico
+sqlplus / as sysdba <<EOF
+startup pfile='/u01/app/oracle/product/21c/dbhome_1/dbs/initstby.ora';
+EOF

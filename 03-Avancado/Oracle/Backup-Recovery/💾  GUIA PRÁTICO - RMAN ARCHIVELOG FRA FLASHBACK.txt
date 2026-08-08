@@ -1,0 +1,61 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+banco tem que está em modo archivelg
+ARCHIVE LOG LIST;
+SHUTDOWN IMMEDIATE;
+STARTUP MOUNT;
+ALTER DATABASE ARCHIVELOG;
+ALTER DATABASE OPEN;
+
+rman target /
+CONFIGURE RETENTION POLICY TO RECOVERY WINDOW OF 7 DAYS;
+BACKUP AS COMPRESSED BACKUPSET DATABASE PLUS ARCHIVELOG;
+LIST BACKUP;
+VALIDATE BACKUPSET 1;
+VALIDATE DATABASE;
+RESTORE DATABASE VALIDATE;
+SELECT FLASHBACK_ON FROM V$DATABASE;
+SHOW PARAMETER db_recovery_file_dest;
+SHOW PARAMETER db_flashback_retention_target;
+ALTER SYSTEM SET db_flashback_retention_target=1440 SCOPE=BOTH;
+
+-- Criando diretórios
+mkdir -p /opt/oracle/fast_recovery_area
+chmod 700 /opt/oracle/fast_recovery_area
+chown oracle:oinstall /opt/oracle/fast_recovery_area
+
+-- Ativar o Flashback
+SHUTDOWN IMMEDIATE;
+STARTUP MOUNT;
+ALTER SYSTEM SET db_recovery_file_dest_size=10G SCOPE=BOTH;
+ALTER SYSTEM SET db_recovery_file_dest='/opt/oracle/fast_recovery_area' SCOPE=BOTH;
+SHUTDOWN IMMEDIATE;
+STARTUP MOUNT;
+ALTER DATABASE FLASHBACK ON;
+ALTER DATABASE OPEN;
+SELECT FLASHBACK_ON FROM V$DATABASE;
+CREATE RESTORE POINT restore_test GUARANTEE FLASHBACK DATABASE;
+DROP RESTORE POINT restore_test;
+-------------------------------------
+SET ECHO OFF
+SET FEEDBACK ON
+SET LINESIZE 180
+SET PAGESIZE 100
+SET TAB OFF
+COLUMN name  FORMAT A30           HEADING "RESTORE_POINT"
+COLUMN time  FORMAT A19           HEADING "DATA/HORA"
+COLUMN gua   FORMAT A3            HEADING "GUA"
+COLUMN scn   FORMAT 999999999999  HEADING "SCN"
+COLUMN database_incarnation# FORMAT 9999 HEADING "INC"
+-------------------------------------
+
+SELECT NAME, SCN, TIME, DATABASE_INCARNATION#, GUARANTEE_FLASHBACK_DATABASE
+FROM V$RESTORE_POINT;
+
+
+SELECT NAME, TIME
+FROM V$RESTORE_POINT
+WHERE GUARANTEE_FLASHBACK_DATABASE = 'YES';
+
+
+SELECT FLASHBACK_ON FROM V$DATABASE;

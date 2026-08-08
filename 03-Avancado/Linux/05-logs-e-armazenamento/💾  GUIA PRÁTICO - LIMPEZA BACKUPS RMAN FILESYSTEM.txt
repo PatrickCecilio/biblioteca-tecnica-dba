@@ -1,0 +1,67 @@
+# GUIA PRÁTICO ORACLE
+
+## Limpeza de Backups RMAN Antigos no Filesystem
+
+### 1. Validar backups de Archive antigos
+
+```bash
+find <RMAN_ARCHIVE_PATH> \
+-name "*.bkp" \
+-mtime +<RETENTION_DAYS>
+```
+
+---
+
+### 2. Remover backups de Archive antigos
+
+```bash
+find <RMAN_ARCHIVE_PATH> \
+-name "*.bkp" \
+-mtime +<RETENTION_DAYS> \
+-exec rm -f {} \;
+```
+
+---
+
+### 3. Validar backups de Database antigos
+
+```bash
+find <RMAN_DATABASE_PATH> \
+-name "*.bkp" \
+-mtime +<RETENTION_DAYS>
+```
+
+---
+
+### 4. Remover backups de Database antigos
+
+```bash
+find <RMAN_DATABASE_PATH> \
+-name "*.bkp" \
+-mtime +<RETENTION_DAYS> \
+-exec rm -f {} \;
+```
+
+---
+
+### 5. Validar novamente após a limpeza
+
+```bash
+find <RMAN_ARCHIVE_PATH> \
+-name "*.bkp" \
+-mtime +<RETENTION_DAYS>
+```
+
+```bash
+find <RMAN_DATABASE_PATH> \
+-name "*.bkp" \
+-mtime +<RETENTION_DAYS>
+```
+
+---
+
+### 6. Verificar espaço disponível
+
+```bash
+df -h
+```

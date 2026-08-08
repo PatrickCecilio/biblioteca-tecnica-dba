@@ -1,0 +1,39 @@
+// Aula 32 - Implantar um primeiro aplicativo
+
+# docker-machine ssh node-1
+
+CUIDADO COM A INDENTAÇÃO!
+CUIDADO COM O COPIA E COLA!
+
+$ vim stack.yaml
+
+version: "3.7"
+services:
+   whoami:
+     image: training/whoami:latest
+     networks:
+       - test-net
+     ports:
+       - 81:8000
+     deploy:
+      replicas: 6
+      update_config:
+       parallelism: 2
+       delay: 10s
+      labels:
+       app: sample-app
+       environment: prod-south
+networks:
+ test-net:
+  driver: overlay
+
+
+$ docker stack deploy -c stack.yaml sample-stack
+
+$ docker stack ls
+
+$ docker service ls
+
+# docker service inspect sample-stack_whoami
+
+# docker service logs n4l77de4vwgliocue9uroquum

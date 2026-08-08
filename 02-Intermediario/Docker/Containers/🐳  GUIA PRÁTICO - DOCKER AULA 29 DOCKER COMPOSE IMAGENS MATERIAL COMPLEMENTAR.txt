@@ -1,0 +1,57 @@
+// Aula 29 - Criação de imagens com Docker Compose
+
+
+# curl -L " -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+# chmod +x /usr/local/bin/docker-compose
+
+# ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+
+# docker-compose --version
+
+
+# git clone
+
+# cd Linux/docker_compose/
+
+# docker-compose build
+
+
+# docker-compose up
+
+# docker-compose up -d
+
+# docker-compose ps
+
+# docker-compose down
+
+# docker-compose down -v
+
+# docker-compose -p meu-app up
+
+# docker-compose down
+
+E vamos alterar o arquivo "docker-compose.yml":
+
+version: "2.4"
+services:
+  web:
+    image: fundamentalsofdocker/ch11-web:2.0
+    build: web
+    ports:
+      - 3000
+  db:
+    image: fundamentalsofdocker/ch11-db:2.0
+    build: database
+    volumes:
+      - pets-data:/var/lib/postgresql/data
+
+volumes:
+  pets-data:
+
+# docker-compose up -d
+# docker-compose up -d --scale web=3
+
+# docker-compose ps
+
+# curl -4 localhost:32768

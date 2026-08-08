@@ -1,0 +1,406 @@
+################################################################################################################################################
+################################################################################################################################################
+
+#####VENEZA
+-Banco >
+sankhya : find /u01/app/oracle/diag/rdbms/cdbsankhya/CDBSANKHYA/alert
+          find /u01/app/oracle/diag/rdbms/cdbsankhya/CDBSANKHYA/trace
+
+-Listener sankhya >
+        find /u01/app/oracle/diag/tnslsnr/oraclestdb/listener/alert
+        find /u01/app/oracle/diag/tnslsnr/oraclestdb/listener/trace
+
+____________________________________________________________________________
+
+-Banco >
+-cdbwint : find /u01/app/oracle/diag/rdbms/cdbwint/CDBWINT/alert
+            find /u01/app/oracle/diag/rdbms/cdbwint/CDBWINT/trace
+
+-listener wint>
+****PARA VERIFICAR OS ARQUIVOS .LOG NO ALERT  (Alert)
+find /u01/app/oracle/diag/tnslsnr/oraclestdb/listener/alert -name "log_*" -mtime +285 -exec rm -f {} \;
+
+
+****PARA VERIFICAR OS ARQUIVOS LISTENER.LOG  (Trace)
+find /u01/app/oracle/diag/tnslsnr/oraclestdb/listener/trace -name "listener*" -mtime +285 -exec rm -f {} \;
+
+################################################################################################################################################
+################################################################################################################################################
+
+#####SALUX - SEMSA
+-Banco >
+ orasx01 OK
+ orasx02 : find /u01/app/oracle/diag/rdbms/orasx02/ORASX02/alert
+           find /u01/app/oracle/diag/rdbms/orasx02/ORASX02/trace
+
+-Listener orasx01 >
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO ALERT
+find /u01/app/oracle/diag/tnslsnr/srvoracle/listener/alert -name "log_*" -mtime +285
+
+*****PARA VERIFICAR OS ARQUIVOS LISTENER.LOG
+find /u01/app/oracle/diag/tnslsnr/srvoracle/listener/trace -name "log_*" -mtime +285
+
+_________________________________________________________________________________________________________
+-Listener orasx02 >
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO ALERT
+find /u01/app/oracle/diag/tnslsnr/srvoracle/listener/alert -name "log_*" -mtime +285
+
+*****PARA VERIFICAR OS ARQUIVOS LISTENER.LOG
+find /u01/app/oracle/diag/tnslsnr/srvoracle/listener/trace -name "log_*" -mtime +285
+
+################################################################################################################################################
+################################################################################################################################################
+
+#####CHIBATÃO
+-Banco > OK
+
+-Listener >
+******PARA VERIFICAR OS ARQUIVOS .LOG NO ALERT
+find /u01/app/grid/diag/tnslsnr/srv-modal-db1/listener/alert -name "log_*" -mtime +285
+
+
+******PARA VERIFICAR OS ARQUIVOS .LOG NO TRACE
+find /u01/app/grid/diag/tnslsnr/srv-modal-db1/listener/trace -name "log_*" -mtime +285
+
+################################################################################################################################################
+################################################################################################################################################
+
+#####SALUX - PRODAM
+-Banco > OK
+
+-Listener >
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO ALERT
+find /u01/app/oracle/diag/tnslsnr/salux-bd/listener/alert -name "log_*" -mtime +285
+
+******PARA VERIFICAR OS ARQUIVOS .LOG NO TRACE
+find /u01/app/oracle/diag/tnslsnr/salux-bd/listener/trace -name "log_*" -mtime +285
+
+################################################################################################################################################
+################################################################################################################################################
+
+######SALUX TO - ALVORADA
+-Banco >
+ xe: find /opt/oracle/diag/rdbms/xe/XE/alert
+     find /opt/oracle/diag/rdbms/xe/XE/trace
+
+-Listener >
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO ALERT
+find /opt/oracle/diag/tnslsnr/srv-hralv/listener/alert
+
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO TRACE
+find /opt/oracle/diag/tnslsnr/srv-hralv/listener/trace
+
+################################################################################################################################################
+################################################################################################################################################
+
+#####SALUX TO - ARAGUAÇU
+-Banco >
+xe: find /opt/oracle/diag/rdbms/xe/XE/alert
+    find /opt/oracle/diag/rdbms/xe/XE/trace
+
+-Listener xe:
+    find /opt/oracle/diag/tnslsnr/srvoraclehrtcla/listener/alert
+    find /opt/oracle/diag/tnslsnr/srvoraclehrtcla/listener/trace
+
+-Banco >
+CDBARA: find /u01/app/oracle/diag/rdbms/cdbara/CDBARA/alert
+        find /u01/app/oracle/diag/rdbms/cdbara/CDBARA/trace
+-Listener >
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO ALERT
+find /u01/app/oracle/diag/tnslsnr/srvoraclehrtcla/listener2/alert -name "log_*" -mtime +285
+
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO TRACE
+find /u01/app/oracle/diag/tnslsnr/srvoraclehrtcla/listener2/trace -name "log_*" -mtime +285
+
+################################################################################################################################################
+################################################################################################################################################
+
+#####SALUX TO - ARAGUAINA
+-Banco>
+CDBARAG: find /u01/app/oracle/diag/rdbms/cdbarag/CDBARAG/alert
+         find /u01/app/oracle/diag/rdbms/cdbarag/CDBARAG/trace
+
+-Listener >
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO ALERT
+find /u01/app/oracle/diag/tnslsnr/SRV-ORACLEARAG/listener/alert -name "log_*" -mtime +285
+
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO TRACE
+find /u01/app/oracle/diag/tnslsnr/SRV-ORACLEARAG/listener/trace -name "log_*" -mtime +285
+
+################################################################################################################################################
+################################################################################################################################################
+
+#####SALUX TO - ARAPOEMA
+-Banco >
+xe: find /opt/oracle/diag/rdbms/xe/XE/alert
+    find /opt/oracle/diag/rdbms/xe/XE/trace
+-Listener >
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO ALERT
+find /opt/oracle/diag/tnslsnr/srvoraclehrmira/listener/alert -name "log_*" -mtime +285
+
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO TRACE
+find /opt/oracle/diag/tnslsnr/srvoraclehrmira/listener/trace -name "log_*" -mtime +285
+
+################################################################################################################################################
+################################################################################################################################################
+
+#####SALUX TO - ARRAIAS
+-Banco>
+xe :find /opt/oracle/diag/rdbms/xe/XE/alert
+    find /opt/oracle/diag/rdbms/xe/XE/trace
+
+-Listener
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO ALERT
+find /opt/oracle/diag/tnslsnr/srv-arraias/listener/alert
+
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO TRACE
+find /opt/oracle/diag/tnslsnr/srv-arraias/listener/trace
+
+################################################################################################################################################
+################################################################################################################################################
+
+#####SALUX TO - AUGUSTINOPOLIS
+-Banco >
+XE: find /opt/oracle/diag/rdbms/xe/XE/alert
+    find /opt/oracle/diag/rdbms/xe/XE/trace
+
+-Listener XE >
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO ALERT
+find /opt/oracle/diag/tnslsnr/SRVDB-AUGUS01/listener/alert
+
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO TRACE
+find /opt/oracle/diag/tnslsnr/SRVDB-AUGUS01/listener/trace
+
+___________________________________________________________
+- Banco >
+CDBAUG: find /u01/app/oracle/diag/rdbms/cdbaug/CDBAUG/alert
+        find /u01/app/oracle/diag/rdbms/cdbaug/CDBAUG/trace
+-Listener CDBAUG >
+*****PARA VERIFICAR OS ARQUIVOS NO ALERT
+find /u01/app/oracle/diag/tnslsnr/SRVDB-AUGUS01/listener2/alert
+*****PARA VERIFICAR OS ARQUIVOS NO TRACE
+find /u01/app/oracle/diag/tnslsnr/SRVDB-AUGUS01/listener2/trace
+
+################################################################################################################################################
+################################################################################################################################################
+
+#####SALUX TO - DIANOPOLIS
+-Banco >
+XE: find /opt/oracle/diag/rdbms/xe/XE/alert
+    find /opt/oracle/diag/rdbms/xe/XE/trace
+
+-Listener >
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO ALERT
+     find /opt/oracle/diag/tnslsnr/srv-dianopolis/listener/alert
+
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO TRACE
+     find /opt/oracle/diag/tnslsnr/srv-dianopolis/listener/trace
+________________________________________________________________
+-Banco >
+CDBDIA:
+       find /u01/app/oracle/diag/rdbms/cdbdia/CDBDIA/alert
+       find /u01/app/oracle/diag/rdbms/cdbdia/CDBDIA/trace
+
+-Listener >
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO ALERT
+       find /u01/app/oracle/diag/tnslsnr/srv-dianopolis/listener2/alert
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO TRACE
+       find /u01/app/oracle/diag/tnslsnr/srv-dianopolis/listener2/trace
+
+################################################################################################################################################
+################################################################################################################################################
+
+#####SALUX TO - DONA REGINA  (*existe uma rotina no crontab mas está comentada e o script não existe no caminho informado)
+
+-Banco >
+CDBMDR: find /u01/app/oracle/diag/rdbms/cdbmdr/CDBMDR/alert
+        find /u01/app/oracle/diag/rdbms/cdbmdr/CDBMDR/trace
+
+-Listener >
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO ALERT
+        find /u01/app/oracle/diag/tnslsnr/srvoraclemdr/listener/alert
+
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO TRACE
+        find /u01/app/oracle/diag/tnslsnr/srvoraclemdr/listener/trace
+
+################################################################################################################################################
+################################################################################################################################################
+
+#####SALUX TO - GUARAI
+-Banco >
+xe : find /opt/oracle/diag/rdbms/xe/XE/alert
+     find /opt/oracle/diag/rdbms/xe/XE/trace
+
+-Listener xe >
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO ALERT
+     find /opt/oracle/diag/tnslsnr/srvoraclehrg/listener/alert
+
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO TRACE
+     find /opt/oracle/diag/tnslsnr/srvoraclehrg/listener/trace
+
+___________________________________________________________________________
+-Banco CDBGUARAI >
+CDBGUARAI: find /u01/app/oracle/diag/rdbms/cdbguarai/CDBGUARAI/alert
+           find /u01/app/oracle/diag/rdbms/cdbguarai/CDBGUARAI/trace
+
+-Listener CDBGUARAI >
+*****PARA VERIFICAR OS ARQUIVOS NO ALERT
+           find /u01/app/oracle/diag/tnslsnr/srvoraclehrg/listener2/alert
+
+*****PARA VERIFICAR OS ARQUIVOS NO TRACE
+           find /u01/app/oracle/diag/tnslsnr/srvoraclehrg/listener2/alert
+
+################################################################################################################################################
+################################################################################################################################################
+
+#####SALUX TO - GURUPI
+-Banco >
+ CDBGRP: find /u01/app/oracle/diag/rdbms/cdbgrp/CDBGRP/alert
+         find /u01/app/oracle/diag/rdbms/cdbgrp/CDBGRP/trace
+
+-Listener xe >
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO ALERT
+     find /u01/app/oracle/diag/tnslsnr/srvoraclehrgpi/listener2/alert
+
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO TRACE
+    find /u01/app/oracle/diag/tnslsnr/srvoraclehrgpi/listener2/trace
+
+################################################################################################################################################
+################################################################################################################################################
+
+#####SALUX TO - HGP
+-Banco >
+CDBHGP: find /u01/app/oracle/diag/rdbms/cdbhgp/CDBHGP/alert
+        find /u01/app/oracle/diag/rdbms/cdbhgp/CDBHGP/trace
+
+-Listener >
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO ALERT
+        find /u01/app/oracle/diag/tnslsnr/SRVORACLE-HGP/listener/alert
+
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO TRACE
+        find /u01/app/oracle/diag/tnslsnr/SRVORACLE-HGP/listener/trace
+
+################################################################################################################################################
+################################################################################################################################################
+
+#####SALUX TO - H. TIA DEDE
+-Banco xe >
+xe : find /opt/oracle/diag/rdbms/xe/XE/alert
+     find /opt/oracle/diag/rdbms/xe/XE/trace
+
+-Listener xe >
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO ALERT
+     find /opt/oracle/diag/tnslsnr/srvdb-hmitd/listener/alert
+
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO TRACE
+     find /opt/oracle/diag/tnslsnr/srvdb-hmitd/listener/alert
+___________________________________________________________________
+
+-Banco >
+CDBTD:  find /u01/app/oracle/diag/rdbms/cdbtd/CDBTD/alert
+        find /u01/app/oracle/diag/rdbms/cdbtd/CDBTD/trace
+
+-Listener >
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO ALERT
+   find /u01/app/oracle/diag/tnslsnr/srvdb-hmitd/listener2/alert
+
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO TRACE
+   find /u01/app/oracle/diag/tnslsnr/srvdb-hmitd/listener2/trace
+
+################################################################################################################################################
+################################################################################################################################################
+
+#####SALUX TO - MIRACEMA
+-Banco >
+xe : find /opt/oracle/diag/rdbms/xe/XE/alert
+     find /opt/oracle/diag/rdbms/xe/XE/trace
+
+-Listener xe >
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO ALERT
+     find /opt/oracle/diag/tnslsnr/srvoraclehrm/listener/alert
+
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO TRACE
+     find /opt/oracle/diag/tnslsnr/srvoraclehrm/listener/trace
+_____________________________________________________________________
+
+Banco >
+CDBHRM : find /u01/app/oracle/diag/rdbms/cdbhrm/CDBHRM/alert
+         find /u01/app/oracle/diag/rdbms/cdbhrm/CDBHRM/trace
+-Listener >
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO ALERT
+         find /u01/app/oracle/diag/tnslsnr/srvoraclehrm/listener/alert
+
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO TRACE
+         find /u01/app/oracle/diag/tnslsnr/srvoraclehrm/listener/trace
+
+################################################################################################################################################
+################################################################################################################################################
+
+#####SALUX TO - PARAISO
+-Banco >
+CDBPARAISO: find /u01/app/oracle/diag/rdbms/cdbparaiso/CDBPARAISO/alert
+            find /u01/app/oracle/diag/rdbms/cdbparaiso/CDBPARAISO/trace
+
+-Listener >
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO ALERT
+           find /u01/app/oracle/diag/tnslsnr/srvoracleparaiso/listener/alert
+
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO TRACE
+           find /u01/app/oracle/diag/tnslsnr/srvoracleparaiso/listener/trace
+
+################################################################################################################################################
+################################################################################################################################################
+
+#####SALUX TO - PEDRO AFONSO
+-Banco >
+xe : find /opt/oracle/diag/rdbms/xe/XE/alert
+     find /opt/oracle/diag/rdbms/xe/XE/trace
+
+-Listener >
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO ALERT
+    find /opt/oracle/diag/tnslsnr/srvoraclehrpals/listener/alert
+
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO TRACE
+    find /opt/oracle/diag/tnslsnr/srvoraclehrpals/listener/trace
+
+################################################################################################################################################
+################################################################################################################################################
+
+#####SALUX TO - PORTO NACIONAL
+-Banco xe >
+xe: find /opt/oracle/diag/rdbms/xe/XE/alert
+    find /opt/oracle/diag/rdbms/xe/XE/trace
+
+-Listener xe >
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO ALERT
+   find /opt/oracle/diag/tnslsnr/srvdb-hrpn/listener/alert
+
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO TRACE
+   find /opt/oracle/diag/tnslsnr/srvdb-hrpn/listener/trace
+______________________________________________________________________________________
+
+-Banco >
+CDBPORTO: find /u01/app/oracle/diag/rdbms/cdbporto/CDBPORTO/alert
+          find /u01/app/oracle/diag/rdbms/cdbporto/CDBPORTO/trace
+
+-Listener >
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO ALERT
+          find /u01/app/oracle/diag/tnslsnr/srvdb-hrpn/listener/alert
+
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO TRACE
+          find /u01/app/oracle/diag/tnslsnr/srvdb-hrpn/listener/traces
+
+################################################################################################################################################
+################################################################################################################################################
+
+#####SALUX TO - XAMBIOA
+-Banco >
+xe : find /opt/oracle/diag/rdbms/xe/XE/alert
+     find /opt/oracle/diag/rdbms/xe/XE/trace
+
+-Listener >
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO ALERT
+     find /opt/oracle/diag/tnslsnr/srvoracle/listener/alert
+
+*****PARA VERIFICAR OS ARQUIVOS .LOG NO TRACE
+    find /opt/oracle/diag/tnslsnr/srvoracle/listener/trace

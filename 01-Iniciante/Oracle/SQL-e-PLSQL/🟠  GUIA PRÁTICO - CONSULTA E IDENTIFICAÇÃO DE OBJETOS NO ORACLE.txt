@@ -1,0 +1,199 @@
+================================================================================
+📘 GUIA PRÁTICO – CONSULTA E IDENTIFICAÇÃO DE OBJETOS NO ORACLE
+Público-alvo: DBA Júnior / Analista em Aprendizado
+================================================================================
+
+
+================================================================================
+🔎 1) CONSULTA LIMITADA DE REGISTROS
+================================================================================
+
+COMANDO:
+--------------------------------------------------------------------------------
+SELECT *
+FROM TIPO_PLANO_MARGEM_VENDA
+FETCH FIRST 1000 ROWS ONLY;
+
+PARA QUE SERVE:
+--------------------------------------------------------------------------------
+Consulta os primeiros 1.000 registros do objeto TIPO_PLANO_MARGEM_VENDA.
+
+PONTOS IMPORTANTES:
+--------------------------------------------------------------------------------
+- FETCH FIRST 1000 ROWS ONLY limita a quantidade de linhas retornadas
+  (disponível a partir do Oracle 12c).
+- Quando o schema não é informado, o Oracle tenta resolver o nome assim:
+  1) Procura tabela ou view no schema do usuário logado
+  2) Procura sinônimo privado
+  3) Procura sinônimo público
+
+INTERPRETAÇÃO:
+--------------------------------------------------------------------------------
+- Retorna dados → objeto existe e possui registros visíveis
+- Retorna vazio → objeto existe, mas não há dados visíveis
+- Erro → problema de permissão ou objeto inexistente
+
+
+================================================================================
+🔖 2) VERIFICAÇÃO DE SINÔNIMO
+================================================================================
+
+COMANDO:
+--------------------------------------------------------------------------------
+SELECT owner, synonym_name, table_owner, table_name
+FROM dba_synonyms
+WHERE synonym_name = 'PK_TP_MARGEM_VENDA';
+
+PARA QUE SERVE:
+--------------------------------------------------------------------------------
+Verifica se PK_TP_MARGEM_VENDA é um sinônimo e identifica
+para qual objeto real ele aponta.
+
+COLUNAS PRINCIPAIS:
+--------------------------------------------------------------------------------
+- OWNER        → quem criou o sinônimo (PUBLIC = sinônimo público)
+- SYNONYM_NAME → nome do sinônimo
+- TABLE_OWNER  → schema do objeto real
+- TABLE_NAME   → nome real do objeto
+
+INTERPRETAÇÃO:
+--------------------------------------------------------------------------------
+- Retorna linha:
+  → PK_TP_MARGEM_VENDA NÃO é uma tabela
+  → É apenas um apelido (sinônimo)
+
+- Não retorna nada:
+  → Sinônimo não existe ou falta permissão
+
+OBSERVAÇÃO:
+--------------------------------------------------------------------------------
+Nomes iniciados com "PK_" normalmente indicam Primary Key,
+não tabelas.
+
+
+================================================================================
+🔐 3) IDENTIFICAÇÃO DE CONSTRAINT
+================================================================================
+
+COMANDO:
+--------------------------------------------------------------------------------
+SELECT owner, table_name, constraint_type
+FROM all_constraints
+WHERE constraint_name = 'PK_TP_MARGEM_VENDA';
+
+PARA QUE SERVE:
+--------------------------------------------------------------------------------
+Identifica se PK_TP_MARGEM_VENDA é uma constraint
+e a qual tabela ela pertence.
+
+TIPOS DE CONSTRAINT:
+--------------------------------------------------------------------------------
+P → Primary Key
+R → Foreign Key
+U → Unique
+C → Check
+
+INTERPRETAÇÃO:
+--------------------------------------------------------------------------------
+- constraint_type = 'P'
+  → PK_TP_MARGEM_VENDA é a chave primária da tabela informada
+- Confirma que o nome NÃO representa uma tabela
+
+
+================================================================================
+📦 4) IDENTIFICAÇÃO DO TIPO DE OBJETO
+================================================================================
+
+COMANDO:
+--------------------------------------------------------------------------------
+SELECT owner, object_type
+FROM all_objects
+WHERE object_name = 'TIPO_PLANO_MARGEM_VENDA';
+
+PARA QUE SERVE:
+--------------------------------------------------------------------------------
+Identifica qual é o tipo do objeto TIPO_PLANO_MARGEM_VENDA.
+
+POSSÍVEIS OBJECT_TYPE:
+--------------------------------------------------------------------------------
+- TABLE
+- VIEW
+- SYNONYM
+- MATERIALIZED VIEW
+- INDEX
+
+INTERPRETAÇÃO:
+--------------------------------------------------------------------------------
+- TABLE → tabela física
+- VIEW  → consulta virtual
+- SYNONYM → apelido para outro objeto
+- Mais de uma linha → mesmo nome existe em schemas diferentes
+
+
+================================================================================
+📄 5) CONSULTA COMPLETA DE REGISTROS
+================================================================================
+
+COMANDO:
+--------------------------------------------------------------------------------
+SELECT *
+FROM TIPO_PLANO_MARGEM_VENDA;
+
+PARA QUE SERVE:
+--------------------------------------------------------------------------------
+Consulta todos os registros do objeto.
+
+OBSERVAÇÃO CRÍTICA:
+--------------------------------------------------------------------------------
+- NÃO recomendado em produção para tabelas grandes
+- Pode causar impacto de performance
+
+INTERPRETAÇÃO:
+--------------------------------------------------------------------------------
+- Retorna dados → objeto acessível e populado
+- Retorna vazio → objeto sem registros
+- Erro → problema de permissão ou resolução do objeto
+
+
+================================================================================
+🔢 6) CONTAGEM REAL DE REGISTROS (SCHEMA EXPLÍCITO)
+================================================================================
+
+COMANDO:
+--------------------------------------------------------------------------------
+SELECT COUNT(*)
+FROM infosaude.tipo_plano_margem_venda;
+
+PARA QUE SERVE:
+--------------------------------------------------------------------------------
+Conta exatamente quantos registros existem na tabela física.
+
+POR QUE ESSE COMANDO É IMPORTANTE:
+--------------------------------------------------------------------------------
+- Usa schema explícito (INFOSAUDE)
+- Elimina ambiguidade causada por:
+  - sinônimos
+  - views
+  - objetos com mesmo nome
+
+INTERPRETAÇÃO:
+--------------------------------------------------------------------------------
+- COUNT > 0 → tabela contém dados
+- COUNT = 0 → tabela está vazia
+- Erro → falta de permissão no schema INFOSAUDE
+
+
+================================================================================
+✅ CONCLUSÃO PRÁTICA
+================================================================================
+
+SE:
+--------------------------------------------------------------------------------
+- COUNT(*) no schema INFOSAUDE retorna 0
+- SELECT * retorna vazio
+
+ENTÃO:
+--------------------------------------------------------------------------------
+✔️ A tabela existe
+✔️ Não há dados inseridos
+✔️ Ou os dados não estão visíveis para o usuário

@@ -1,0 +1,14 @@
+ip a
+
+ip route
+
+netstat
+
+netstat -tuln
+
+ss -tuln
+
+curl -I
+
+netstat pode ser substituído por ss em sistemas mais recentes.
+curl -I mostra apenas os cabeçalhos da resposta HTTP/HTTPS.

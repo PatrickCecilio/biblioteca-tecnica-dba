@@ -1,0 +1,17 @@
+Elasticidade de Recursos no Exadata Database Service on Dedicated Infrastructure (ExaDB-D): Entendendo o Conceito de Zero OCPUs
+
+No Exadata Database Service on Dedicated Infrastructure (ExaDB-D), a Oracle oferece um modelo de uso bastante flexível, pensado para ajudar no controle de custos sem perder desempenho quando o ambiente está em uso. Uma dúvida comum em exames de certificação é se é possível configurar um compute server com zero OCPUs. Embora isso pareça estranho à primeira vista, a resposta é sim — e esse comportamento faz parte da elasticidade do serviço.
+
+A opção “Zero enabled OCPUs per compute server is allowed for ExaDB-D” está correta porque está ligada ao recurso conhecido como Scale to Zero. Ele permite reduzir o número de OCPUs de um VM Cluster até chegar a zero, levando todo o ambiente a um estado completamente desligado. Isso é útil em ambientes de desenvolvimento, testes ou homologação, onde não há necessidade de manter processamento ativo o tempo todo. Quando você ajusta para zero OCPUs, os nós do banco são desligados e a cobrança de computação para, mas toda a infraestrutura permanece provisionada e pronta para ser religada quando necessário.
+
+É importante separar esse modo desligado dos requisitos mínimos para manter o banco realmente online. Para um banco estar ativo, com instâncias rodando, o mínimo é 2 OCPUs por VM. Já quando a pergunta trata do valor mínimo permitido pela plataforma, sem considerar operação ativa, o número correto é zero.
+
+Outro ponto que costuma gerar confusão é o licenciamento. Modelos como BYOL (Bring Your Own License) afetam custos e regras de conformidade, mas não definem limites de OCPUs e não influenciam a elasticidade da infraestrutura.
+
+Em resumo:
+
+Para o banco ficar online: mínimo de 2 OCPUs por servidor.
+
+Para o ambiente desligado (Scale to Zero): mínimo permitido de 0 OCPUs.
+
+Entender essa diferença ajuda tanto em provas de certificação quanto no uso prático do ExaDB-D, principalmente quando o objetivo é equilibrar eficiência operacional e redução de custos.

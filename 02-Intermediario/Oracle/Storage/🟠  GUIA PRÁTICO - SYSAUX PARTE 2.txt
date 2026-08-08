@@ -1,0 +1,15 @@
+Mesmo que o Oracle XE ainda tenha cerca de 3 GB livres antes de atingir o limite de 12 GB, se a SYSAUX estiver 100% cheia, o problema acontece exclusivamente nela.
+A SYSAUX não compartilha espaço com outras tablespaces, então o fato de USERS ou DATA estarem com 50–60% de uso não ajuda em nada.
+
+A partir desse ponto, qualquer operação que precise alocar espaço na SYSAUX começa a falhar, normalmente com erros do tipo ORA-01653 (unable to extend).
+O banco geralmente não cai de imediato, mas passa a perder funcionalidades internas que dependem dessa tablespace.
+
+Isso afeta, por exemplo, históricos e relatórios (WRI$), advisors, retenção de estatísticas (SM/OPTSTAT) e algumas rotinas automáticas de manutenção.
+Na prática, você até consegue continuar trabalhando com tabelas em outras tablespaces, mas as tarefas internas começam a falhar e o alert log tende a encher de mensagens de erro.
+
+Com o tempo, esse cenário leva a uma piora gradual de desempenho, por falta de estatísticas atualizadas e limpezas automáticas, além de aumentar a instabilidade operacional.
+
+Os 3 GB “sobrando” só ajudam se você aumentar o datafile da SYSAUX, sempre respeitando o limite global do XE.
+Ainda assim, no XE a abordagem mais correta é primeiro diagnosticar e limpar o que está consumindo espaço, especialmente advisors e dados históricos.
+
+Depois de ajustar retenções e realizar os purges necessários, a SYSAUX costuma voltar a ter folga sem “consumir” o pouco espaço total disponível no Oracle XE.

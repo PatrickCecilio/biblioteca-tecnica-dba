@@ -1,0 +1,1497 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+# GUIA PRÁTICO ORACLE
+
+## Oracle Data Guard — Primary + Physical Standby
+
+# PRIMARY
+
+## Etapa 1
+
+**Objetivo**
+
+Validar banco, versão, role, ARCHIVELOG, FORCE LOGGING e parâmetros principais.
+
+**Comandos**
+
+```sql
+sqlplus / as sysdba
+```
+
+```sql
+SELECT banner_full
+FROM v$version;
+```
+
+```sql
+SELECT
+    name,
+    db_unique_name,
+    database_role,
+    open_mode,
+    log_mode,
+    force_logging,
+    flashback_on
+FROM v$database;
+```
+
+```sql
+SHOW PARAMETER db_name;
+SHOW PARAMETER db_unique_name;
+SHOW PARAMETER compatible;
+SHOW PARAMETER log_archive_format;
+SHOW PARAMETER log_archive_max_processes;
+SHOW PARAMETER standby_file_management;
+```
+
+**Validação**
+
+```sql
+SELECT name, db_unique_name
+FROM v$database;
+```
+
+---
+
+## Etapa 2
+
+**Objetivo**
+
+Configurar parâmetros básicos do Primary.
+
+**Comandos**
+
+```sql
+ALTER SYSTEM SET db_unique_name='<PRIMARY_DB_UNIQUE_NAME>'
+SCOPE=SPFILE;
+```
+
+```sql
+ALTER SYSTEM SET log_archive_format='%t_%s_%r.arc'
+SCOPE=SPFILE;
+```
+
+```sql
+ALTER SYSTEM SET standby_file_management='AUTO'
+SCOPE=BOTH;
+```
+
+```sql
+ALTER SYSTEM SET log_archive_max_processes=<ARCHIVE_PROCESSES>
+SCOPE=BOTH;
+```
+
+**Observação**
+
+Não utilizar valor arbitrário para `LOG_ARCHIVE_MAX_PROCESSES`; definir conforme o ambiente.
+
+---
+
+## Etapa 3
+
+**Objetivo**
+
+Habilitar ARCHIVELOG caso o banco ainda esteja em NOARCHIVELOG.
+
+**Comandos**
+
+```sql
+SHUTDOWN IMMEDIATE;
+```
+
+```sql
+STARTUP MOUNT;
+```
+
+```sql
+ALTER DATABASE ARCHIVELOG;
+```
+
+```sql
+ALTER DATABASE OPEN;
+```
+
+**Validação**
+
+```sql
+SELECT log_mode
+FROM v$database;
+```
+
+---
+
+## Etapa 4
+
+**Objetivo**
+
+Ativar FORCE LOGGING.
+
+**Comandos**
+
+```sql
+ALTER DATABASE FORCE LOGGING;
+```
+
+**Validação**
+
+```sql
+SELECT force_logging
+FROM v$database;
+```
+
+---
+
+## Etapa 5
+
+**Objetivo**
+
+Configurar os parâmetros básicos de archive e Data Guard.
+
+**Comandos**
+
+```sql
+ALTER SYSTEM SET log_archive_config=
+'DG_CONFIG=(<PRIMARY_DB_UNIQUE_NAME>,<STANDBY_DB_UNIQUE_NAME>)'
+SCOPE=BOTH;
+```
+
+```sql
+ALTER SYSTEM SET log_archive_dest_1=
+'LOCATION=<PRIMARY_ARCHIVE_PATH>
+ VALID_FOR=(ALL_LOGFILES,ALL_ROLES)
+ DB_UNIQUE_NAME=<PRIMARY_DB_UNIQUE_NAME>'
+SCOPE=BOTH;
+```
+
+```sql
+ALTER SYSTEM SET log_archive_dest_state_1=ENABLE
+SCOPE=BOTH;
+```
+
+**Validação**
+
+```sql
+SHOW PARAMETER log_archive_config;
+SHOW PARAMETER log_archive_dest_1;
+```
+
+---
+
+## Etapa 6
+
+**Objetivo**
+
+Dimensionar e criar Standby Redo Logs no Primary.
+
+**Comandos**
+
+```sql
+SELECT
+    thread#,
+    group#,
+    bytes/1024/1024 AS size_mb
+FROM v$log
+ORDER BY thread#, group#;
+```
+
+```sql
+SELECT
+    thread#,
+    COUNT(*) AS online_groups,
+    MAX(bytes)/1024/1024 AS max_size_mb
+FROM v$log
+GROUP BY thread#;
+```
+
+Criar pelo menos:
+
+```text
+ONLINE REDO GROUPS POR THREAD + 1
+```
+
+```sql
+ALTER DATABASE ADD STANDBY LOGFILE
+THREAD <THREAD_NUMBER>
+GROUP <SRL_GROUP_NUMBER>
+'<PRIMARY_SRL_PATH>'
+SIZE <SRL_SIZE>;
+```
+
+Repetir para todos os grupos necessários.
+
+**Validação**
+
+```sql
+SELECT
+    group#,
+    thread#,
+    bytes/1024/1024 AS size_mb,
+    status
+FROM v$standby_log
+ORDER BY thread#, group#;
+```
+
+---
+
+## Etapa 7
+
+**Objetivo**
+
+Configurar Oracle Net no Primary.
+
+**Arquivo**
+
+```text
+<ORACLE_HOME>/network/admin/tnsnames.ora
+```
+
+**Conteúdo**
+
+```text
+<PRIMARY_TNS> =
+  (DESCRIPTION =
+    (ADDRESS =
+      (PROTOCOL = TCP)
+      (HOST = <PRIMARY_HOST>)
+      (PORT = <LISTENER_PORT>)
+    )
+    (CONNECT_DATA =
+      (SERVICE_NAME = <PRIMARY_SERVICE_NAME>)
+    )
+  )
+
+<STANDBY_TNS> =
+  (DESCRIPTION =
+    (ADDRESS =
+      (PROTOCOL = TCP)
+      (HOST = <STANDBY_HOST>)
+      (PORT = <LISTENER_PORT>)
+    )
+    (CONNECT_DATA =
+      (SERVICE_NAME = <STANDBY_SERVICE_NAME>)
+    )
+  )
+```
+
+**Arquivo**
+
+```text
+<ORACLE_HOME>/network/admin/listener.ora
+```
+
+Adicionar serviço estático para o Broker quando não houver Oracle Restart/Clusterware:
+
+```text
+SID_LIST_LISTENER =
+  (SID_LIST =
+    (SID_DESC =
+      (GLOBAL_DBNAME = <PRIMARY_DGMGRL_SERVICE>)
+      (ORACLE_HOME = <ORACLE_HOME>)
+      (SID_NAME = <PRIMARY_SID>)
+    )
+  )
+```
+
+**Comandos**
+
+```bash
+lsnrctl reload
+```
+
+```bash
+tnsping <PRIMARY_TNS>
+tnsping <STANDBY_TNS>
+```
+
+---
+
+## Etapa 8
+
+**Objetivo**
+
+Configurar transporte de redo para o Standby.
+
+**Comandos**
+
+```sql
+ALTER SYSTEM SET log_archive_dest_2=
+'SERVICE=<STANDBY_TNS>
+ ASYNC
+ VALID_FOR=(ONLINE_LOGFILES,PRIMARY_ROLE)
+ DB_UNIQUE_NAME=<STANDBY_DB_UNIQUE_NAME>'
+SCOPE=BOTH;
+```
+
+```sql
+ALTER SYSTEM SET log_archive_dest_state_2=ENABLE
+SCOPE=BOTH;
+```
+
+```sql
+ALTER SYSTEM SET fal_server='<STANDBY_TNS>'
+SCOPE=BOTH;
+```
+
+Para File System com caminhos diferentes:
+
+```sql
+ALTER SYSTEM SET db_file_name_convert=
+'<STANDBY_DATA_PATH>','<PRIMARY_DATA_PATH>'
+SCOPE=SPFILE;
+```
+
+```sql
+ALTER SYSTEM SET log_file_name_convert=
+'<STANDBY_REDO_PATH>','<PRIMARY_REDO_PATH>'
+SCOPE=SPFILE;
+```
+
+**Validação**
+
+```sql
+SHOW PARAMETER log_archive_dest_2;
+SHOW PARAMETER fal_server;
+```
+
+---
+
+## Etapa 9
+
+**Objetivo**
+
+Habilitar Flashback Database no Primary.
+
+**Comandos**
+
+```sql
+SHOW PARAMETER db_recovery_file_dest;
+SHOW PARAMETER db_recovery_file_dest_size;
+```
+
+Caso FRA ainda não esteja configurada:
+
+```sql
+ALTER SYSTEM SET db_recovery_file_dest='<FRA_PATH>'
+SCOPE=BOTH;
+```
+
+```sql
+ALTER SYSTEM SET db_recovery_file_dest_size=<FRA_SIZE>
+SCOPE=BOTH;
+```
+
+```sql
+ALTER SYSTEM SET db_flashback_retention_target=<RETENTION_MINUTES>
+SCOPE=BOTH;
+```
+
+```sql
+ALTER DATABASE FLASHBACK ON;
+```
+
+**Validação**
+
+```sql
+SELECT flashback_on
+FROM v$database;
+```
+
+---
+
+# STANDBY
+
+## Etapa 10
+
+**Objetivo**
+
+Validar Oracle Home e patch level.
+
+**Comandos**
+
+```bash
+export ORACLE_SID=<STANDBY_SID>
+export ORACLE_HOME=<ORACLE_HOME>
+export PATH=$ORACLE_HOME/bin:$ORACLE_HOME/OPatch:$PATH
+```
+
+```bash
+sqlplus -V
+```
+
+```bash
+$ORACLE_HOME/OPatch/opatch lspatches
+```
+
+---
+
+## Etapa 11
+
+**Objetivo**
+
+Criar diretórios do Standby.
+
+**Comandos**
+
+```bash
+mkdir -p <STANDBY_DATA_PATH>
+mkdir -p <STANDBY_REDO_PATH>
+mkdir -p <STANDBY_ARCHIVE_PATH>
+mkdir -p <ORACLE_BASE>/admin/<STANDBY_SID>/adump
+```
+
+```bash
+chown -R oracle:<ORACLE_GROUP> <STANDBY_DATA_PATH>
+chown -R oracle:<ORACLE_GROUP> <STANDBY_REDO_PATH>
+chown -R oracle:<ORACLE_GROUP> <STANDBY_ARCHIVE_PATH>
+```
+
+---
+
+## Etapa 12
+
+**Objetivo**
+
+Preparar o Password File do Standby.
+
+**Comandos**
+
+No Primary:
+
+```bash
+scp $ORACLE_HOME/dbs/orapw<PRIMARY_SID> \
+oracle@<STANDBY_HOST>:$ORACLE_HOME/dbs/orapw<STANDBY_SID>
+```
+
+No Standby:
+
+```bash
+ls -l $ORACLE_HOME/dbs/orapw<STANDBY_SID>
+```
+
+**Observação**
+
+SYS/SYSBACKUP devem possuir credenciais compatíveis para o Active Duplicate.
+
+---
+
+## Etapa 13
+
+**Objetivo**
+
+Copiar Oracle Wallet quando TDE estiver habilitado.
+
+**Validação no Primary**
+
+```sql
+SELECT
+    wrl_parameter,
+    status,
+    wallet_type
+FROM v$encryption_wallet;
+```
+
+**Comando**
+
+```bash
+scp -p <WALLET_FILES> \
+oracle@<STANDBY_HOST>:<STANDBY_WALLET_PATH>
+```
+
+---
+
+## Etapa 14
+
+**Objetivo**
+
+Configurar Listener estático no Standby.
+
+**Arquivo**
+
+```text
+<ORACLE_HOME>/network/admin/listener.ora
+```
+
+**Conteúdo**
+
+```text
+SID_LIST_LISTENER =
+  (SID_LIST =
+
+    (SID_DESC =
+      (GLOBAL_DBNAME = <STANDBY_SERVICE_NAME>)
+      (ORACLE_HOME = <ORACLE_HOME>)
+      (SID_NAME = <STANDBY_SID>)
+    )
+
+    (SID_DESC =
+      (GLOBAL_DBNAME = <STANDBY_DGMGRL_SERVICE>)
+      (ORACLE_HOME = <ORACLE_HOME>)
+      (SID_NAME = <STANDBY_SID>)
+    )
+
+  )
+```
+
+**Comandos**
+
+```bash
+lsnrctl reload
+```
+
+```bash
+lsnrctl services
+```
+
+---
+
+## Etapa 15
+
+**Objetivo**
+
+Configurar TNS no Standby.
+
+**Arquivo**
+
+```text
+<ORACLE_HOME>/network/admin/tnsnames.ora
+```
+
+**Conteúdo**
+
+```text
+<PRIMARY_TNS> =
+  (DESCRIPTION =
+    (ADDRESS =
+      (PROTOCOL = TCP)
+      (HOST = <PRIMARY_HOST>)
+      (PORT = <LISTENER_PORT>)
+    )
+    (CONNECT_DATA =
+      (SERVICE_NAME = <PRIMARY_SERVICE_NAME>)
+    )
+  )
+
+<STANDBY_TNS> =
+  (DESCRIPTION =
+    (ADDRESS =
+      (PROTOCOL = TCP)
+      (HOST = <STANDBY_HOST>)
+      (PORT = <LISTENER_PORT>)
+    )
+    (CONNECT_DATA =
+      (SERVICE_NAME = <STANDBY_SERVICE_NAME>)
+    )
+  )
+```
+
+**Validação**
+
+```bash
+tnsping <PRIMARY_TNS>
+tnsping <STANDBY_TNS>
+```
+
+```bash
+sqlplus sys@<PRIMARY_TNS> as sysdba
+```
+
+```bash
+sqlplus sys@<STANDBY_TNS> as sysdba
+```
+
+---
+
+## Etapa 16
+
+**Objetivo**
+
+Criar PFILE mínimo do Auxiliary.
+
+**Arquivo**
+
+```bash
+vi $ORACLE_HOME/dbs/init<STANDBY_SID>.ora
+```
+
+**Conteúdo**
+
+```text
+*.db_name='<PRIMARY_DB_NAME>'
+*.db_unique_name='<STANDBY_DB_UNIQUE_NAME>'
+*.remote_login_passwordfile='EXCLUSIVE'
+*.diagnostic_dest='<ORACLE_BASE>'
+*.control_files='<STANDBY_CONTROLFILE_01>','<STANDBY_CONTROLFILE_02>'
+```
+
+**Comandos**
+
+```bash
+sqlplus / as sysdba
+```
+
+```sql
+STARTUP NOMOUNT
+PFILE='<ORACLE_HOME>/dbs/init<STANDBY_SID>.ora';
+```
+
+**Validação**
+
+```sql
+SELECT instance_name, status
+FROM v$instance;
+```
+
+---
+
+# RMAN DUPLICATE
+
+## Etapa 17
+
+**Objetivo**
+
+Conectar Target e Auxiliary.
+
+**Comandos**
+
+Executar no servidor Standby:
+
+```bash
+rman target sys@<PRIMARY_TNS> auxiliary sys@<STANDBY_TNS>
+```
+
+---
+
+## Etapa 18
+
+**Objetivo**
+
+Criar o Physical Standby via Active Duplicate.
+
+**Comandos**
+
+```rman
+DUPLICATE TARGET DATABASE
+FOR STANDBY
+FROM ACTIVE DATABASE
+DORECOVER
+SPFILE
+
+  SET db_unique_name='<STANDBY_DB_UNIQUE_NAME>'
+
+  SET log_archive_config=
+      'DG_CONFIG=(<PRIMARY_DB_UNIQUE_NAME>,<STANDBY_DB_UNIQUE_NAME>)'
+
+  SET log_archive_dest_1=
+      'LOCATION=<STANDBY_ARCHIVE_PATH>
+       VALID_FOR=(ALL_LOGFILES,ALL_ROLES)
+       DB_UNIQUE_NAME=<STANDBY_DB_UNIQUE_NAME>'
+
+  SET log_archive_dest_2=
+      'SERVICE=<PRIMARY_TNS>
+       ASYNC
+       VALID_FOR=(ONLINE_LOGFILES,PRIMARY_ROLE)
+       DB_UNIQUE_NAME=<PRIMARY_DB_UNIQUE_NAME>'
+
+  SET fal_server='<PRIMARY_TNS>'
+
+  SET standby_file_management='AUTO'
+
+  SET log_archive_format='%t_%s_%r.arc'
+
+  SET control_files=
+      '<STANDBY_CONTROLFILE_01>',
+      '<STANDBY_CONTROLFILE_02>'
+
+  SET db_file_name_convert=
+      '<PRIMARY_DATA_PATH>',
+      '<STANDBY_DATA_PATH>'
+
+  SET log_file_name_convert=
+      '<PRIMARY_REDO_PATH>',
+      '<STANDBY_REDO_PATH>'
+
+NOFILENAMECHECK;
+```
+
+**Observação**
+
+`NOFILENAMECHECK` deve ser utilizado apenas quando Primary e Standby estão em hosts diferentes. Nunca utilizá-lo em duplicação no mesmo host quando houver risco de sobrescrever arquivos.
+
+---
+
+## Etapa 19
+
+**Objetivo**
+
+Validar o resultado do Duplicate.
+
+**Comandos**
+
+```bash
+sqlplus / as sysdba
+```
+
+```sql
+SELECT
+    name,
+    db_unique_name,
+    database_role,
+    open_mode
+FROM v$database;
+```
+
+```sql
+SHOW PARAMETER spfile;
+```
+
+```sql
+SELECT name FROM v$controlfile;
+```
+
+```sql
+SELECT name FROM v$datafile
+ORDER BY name;
+```
+
+**Validação**
+
+Esperado:
+
+```text
+DATABASE_ROLE = PHYSICAL STANDBY
+OPEN_MODE     = MOUNTED
+```
+
+---
+
+## Etapa 20
+
+**Objetivo**
+
+Validar e completar Standby Redo Logs no Standby.
+
+**Comandos**
+
+```sql
+SELECT
+    group#,
+    thread#,
+    bytes/1024/1024 AS size_mb,
+    status
+FROM v$standby_log
+ORDER BY thread#, group#;
+```
+
+Caso estejam ausentes ou insuficientes:
+
+```sql
+ALTER DATABASE ADD STANDBY LOGFILE
+THREAD <THREAD_NUMBER>
+GROUP <SRL_GROUP_NUMBER>
+'<STANDBY_SRL_PATH>'
+SIZE <SRL_SIZE>;
+```
+
+**Validação**
+
+```sql
+SELECT
+    thread#,
+    COUNT(*) AS srl_groups
+FROM v$standby_log
+GROUP BY thread#;
+```
+
+---
+
+## Etapa 21
+
+**Objetivo**
+
+Habilitar Flashback no Standby.
+
+**Comandos**
+
+```sql
+SHOW PARAMETER db_recovery_file_dest;
+```
+
+```sql
+ALTER SYSTEM SET db_flashback_retention_target=<RETENTION_MINUTES>
+SCOPE=BOTH;
+```
+
+```sql
+ALTER DATABASE FLASHBACK ON;
+```
+
+**Validação**
+
+```sql
+SELECT flashback_on
+FROM v$database;
+```
+
+---
+
+# INÍCIO DO MRP
+
+## Etapa 22
+
+**Objetivo**
+
+Iniciar Redo Apply em background.
+
+**Comandos**
+
+```sql
+ALTER DATABASE RECOVER MANAGED STANDBY DATABASE
+DISCONNECT FROM SESSION;
+```
+
+**Validação**
+
+```sql
+SELECT
+    process,
+    status,
+    thread#,
+    sequence#
+FROM v$managed_standby
+ORDER BY process;
+```
+
+Verificar processo:
+
+```text
+MRP0
+```
+
+---
+
+## Etapa 23
+
+**Objetivo**
+
+Utilizar Active Data Guard quando licenciado.
+
+**Comandos**
+
+```sql
+ALTER DATABASE RECOVER MANAGED STANDBY DATABASE CANCEL;
+```
+
+```sql
+ALTER DATABASE OPEN;
+```
+
+```sql
+ALTER DATABASE RECOVER MANAGED STANDBY DATABASE
+DISCONNECT FROM SESSION;
+```
+
+**Validação**
+
+```sql
+SELECT open_mode
+FROM v$database;
+```
+
+Esperado:
+
+```text
+READ ONLY WITH APPLY
+```
+
+```sql
+SHOW PDBS;
+```
+
+**Observação**
+
+Não executar esta etapa sem licença Oracle Active Data Guard. Sem Active Data Guard, manter o Physical Standby em `MOUNTED` com MRP ativo.
+
+---
+
+# VALIDAÇÕES
+
+## Etapa 24
+
+**Objetivo**
+
+Validar transporte de redo.
+
+**PRIMARY**
+
+```sql
+ALTER SYSTEM ARCHIVE LOG CURRENT;
+```
+
+```sql
+SELECT
+    dest_id,
+    status,
+    target,
+    destination,
+    db_unique_name,
+    error
+FROM v$archive_dest
+WHERE status <> 'INACTIVE'
+ORDER BY dest_id;
+```
+
+**STANDBY**
+
+```sql
+SELECT
+    name,
+    value,
+    unit,
+    time_computed,
+    datum_time
+FROM v$dataguard_stats
+WHERE name IN (
+    'transport lag',
+    'apply lag',
+    'apply finish time'
+);
+```
+
+---
+
+## Etapa 25
+
+**Objetivo**
+
+Validar Apply e possíveis gaps.
+
+**Comandos no Standby**
+
+```sql
+SELECT
+    process,
+    status,
+    thread#,
+    sequence#
+FROM v$managed_standby
+ORDER BY process;
+```
+
+```sql
+SELECT *
+FROM v$archive_gap;
+```
+
+```sql
+SELECT
+    thread#,
+    MAX(sequence#) AS last_received
+FROM v$archived_log
+GROUP BY thread#
+ORDER BY thread#;
+```
+
+```sql
+SELECT
+    thread#,
+    MAX(sequence#) AS last_applied
+FROM v$archived_log
+WHERE applied='YES'
+GROUP BY thread#
+ORDER BY thread#;
+```
+
+---
+
+## Etapa 26
+
+**Objetivo**
+
+Validar Listener e conectividade dos dois lados.
+
+**Comandos**
+
+```bash
+lsnrctl services
+```
+
+```bash
+tnsping <PRIMARY_TNS>
+tnsping <STANDBY_TNS>
+```
+
+---
+
+## Etapa 27
+
+**Objetivo**
+
+Migrar o gerenciamento para Oracle Data Guard Broker.
+
+**Comandos no Primary**
+
+```sql
+ALTER SYSTEM SET log_archive_dest_state_2=DEFER
+SCOPE=BOTH;
+```
+
+```sql
+ALTER SYSTEM SET log_archive_dest_2=''
+SCOPE=BOTH;
+```
+
+```sql
+ALTER SYSTEM SET dg_broker_start=TRUE
+SCOPE=BOTH;
+```
+
+**Comandos no Standby**
+
+```sql
+ALTER SYSTEM SET log_archive_dest_2=''
+SCOPE=BOTH;
+```
+
+```sql
+ALTER SYSTEM SET dg_broker_start=TRUE
+SCOPE=BOTH;
+```
+
+**Comandos DGMGRL**
+
+```bash
+dgmgrl
+```
+
+```text
+CONNECT sys@<PRIMARY_TNS>;
+```
+
+```text
+CREATE CONFIGURATION '<DG_CONFIG_NAME>'
+AS
+PRIMARY DATABASE IS '<PRIMARY_DB_UNIQUE_NAME>'
+CONNECT IDENTIFIER IS '<PRIMARY_TNS>';
+```
+
+```text
+ADD DATABASE '<STANDBY_DB_UNIQUE_NAME>'
+AS
+CONNECT IDENTIFIER IS '<STANDBY_TNS>';
+```
+
+```text
+ENABLE CONFIGURATION;
+```
+
+```text
+EDIT DATABASE '<STANDBY_DB_UNIQUE_NAME>'
+SET PROPERTY LogXptMode='ASYNC';
+```
+
+**Validação**
+
+```text
+SHOW CONFIGURATION;
+```
+
+```text
+SHOW CONFIGURATION LAG;
+```
+
+```text
+VALIDATE DATABASE VERBOSE '<PRIMARY_DB_UNIQUE_NAME>';
+```
+
+```text
+VALIDATE DATABASE VERBOSE '<STANDBY_DB_UNIQUE_NAME>';
+```
+
+```text
+VALIDATE DATABASE SPFILE '<STANDBY_DB_UNIQUE_NAME>';
+```
+
+```text
+VALIDATE NETWORK CONFIGURATION FOR ALL;
+```
+
+```text
+VALIDATE STATIC CONNECT IDENTIFIER FOR ALL;
+```
+
+---
+
+# SWITCHOVER
+
+## Etapa 28
+
+**Objetivo**
+
+Validar o ambiente antes do Switchover.
+
+**Comandos**
+
+```bash
+dgmgrl
+```
+
+```text
+CONNECT sys@<PRIMARY_TNS>;
+```
+
+```text
+SHOW CONFIGURATION;
+```
+
+```text
+SHOW CONFIGURATION LAG;
+```
+
+```text
+VALIDATE DATABASE '<STANDBY_DB_UNIQUE_NAME>' STRICT ALL;
+```
+
+```text
+VALIDATE NETWORK CONFIGURATION FOR ALL;
+```
+
+```text
+VALIDATE STATIC CONNECT IDENTIFIER FOR ALL;
+```
+
+---
+
+## Etapa 29
+
+**Objetivo**
+
+Executar o Switchover.
+
+**Comando**
+
+```text
+SWITCHOVER TO '<STANDBY_DB_UNIQUE_NAME>';
+```
+
+**Validação**
+
+```text
+SHOW CONFIGURATION;
+```
+
+```text
+SHOW DATABASE VERBOSE '<STANDBY_DB_UNIQUE_NAME>';
+```
+
+```text
+SHOW DATABASE VERBOSE '<PRIMARY_DB_UNIQUE_NAME>';
+```
+
+Nos dois bancos:
+
+```sql
+SELECT
+    db_unique_name,
+    database_role,
+    open_mode
+FROM v$database;
+```
+
+Em ambiente CDB:
+
+```sql
+SHOW PDBS;
+```
+
+---
+
+# FAILOVER
+
+## Etapa 30
+
+**Objetivo**
+
+Tentar enviar o redo restante antes do Failover quando o Primary ainda estiver acessível.
+
+**Comando no Primary**
+
+```sql
+ALTER SYSTEM FLUSH REDO
+TO <STANDBY_DB_UNIQUE_NAME>;
+```
+
+**Observação**
+
+Executar somente se o Primary ainda puder ser montado/acessado. Se estiver indisponível, seguir para a próxima etapa.
+
+---
+
+## Etapa 31
+
+**Objetivo**
+
+Validar o Standby antes do Failover.
+
+**Comandos**
+
+```bash
+dgmgrl
+```
+
+```text
+CONNECT sys@<STANDBY_TNS>;
+```
+
+```text
+VALIDATE DATABASE VERBOSE '<STANDBY_DB_UNIQUE_NAME>';
+```
+
+```text
+SHOW CONFIGURATION;
+```
+
+---
+
+## Etapa 32
+
+**Objetivo**
+
+Executar Complete Failover.
+
+**Comando**
+
+```text
+FAILOVER TO '<STANDBY_DB_UNIQUE_NAME>';
+```
+
+**Validação**
+
+```text
+SHOW CONFIGURATION;
+```
+
+```text
+SHOW DATABASE VERBOSE '<STANDBY_DB_UNIQUE_NAME>';
+```
+
+No novo Primary:
+
+```sql
+SELECT
+    db_unique_name,
+    database_role,
+    open_mode
+FROM v$database;
+```
+
+---
+
+## Etapa 33
+
+**Objetivo**
+
+Reintegrar o antigo Primary como Physical Standby.
+
+No antigo Primary:
+
+```sql
+STARTUP MOUNT;
+```
+
+No DGMGRL conectado ao novo Primary:
+
+```text
+REINSTATE DATABASE '<OLD_PRIMARY_DB_UNIQUE_NAME>';
+```
+
+**Validação**
+
+```text
+SHOW CONFIGURATION;
+```
+
+```text
+SHOW DATABASE VERBOSE '<OLD_PRIMARY_DB_UNIQUE_NAME>';
+```
+
+**Observação**
+
+`REINSTATE` depende de Flashback Database e flashback logs suficientes. Caso não seja possível reintegrar, recriar o Standby através de RMAN Duplicate.
+
+---
+
+# HEALTH CHECK
+
+## Etapa 34
+
+**Objetivo**
+
+Validar estado geral do Primary.
+
+**Comandos**
+
+```sql
+SELECT
+    db_unique_name,
+    database_role,
+    open_mode,
+    protection_mode,
+    protection_level,
+    switchover_status,
+    force_logging,
+    flashback_on
+FROM v$database;
+```
+
+```sql
+SELECT
+    dest_id,
+    status,
+    target,
+    destination,
+    db_unique_name,
+    error
+FROM v$archive_dest
+WHERE status <> 'INACTIVE'
+ORDER BY dest_id;
+```
+
+---
+
+## Etapa 35
+
+**Objetivo**
+
+Validar estado geral do Standby.
+
+**Comandos**
+
+```sql
+SELECT
+    db_unique_name,
+    database_role,
+    open_mode,
+    protection_mode,
+    protection_level,
+    switchover_status,
+    flashback_on
+FROM v$database;
+```
+
+```sql
+SELECT
+    name,
+    value,
+    unit,
+    time_computed,
+    datum_time
+FROM v$dataguard_stats
+ORDER BY name;
+```
+
+```sql
+SELECT
+    process,
+    status,
+    thread#,
+    sequence#
+FROM v$managed_standby
+ORDER BY process;
+```
+
+```sql
+SELECT *
+FROM v$archive_gap;
+```
+
+```sql
+SELECT
+    group#,
+    thread#,
+    sequence#,
+    bytes/1024/1024 AS size_mb,
+    status
+FROM v$standby_log
+ORDER BY thread#, group#;
+```
+
+---
+
+## Etapa 36
+
+**Objetivo**
+
+Validar CDB/PDB.
+
+**Comandos**
+
+```sql
+SHOW CON_NAME;
+```
+
+```sql
+SHOW PDBS;
+```
+
+```sql
+SELECT
+    con_id,
+    name,
+    open_mode
+FROM v$pdbs
+ORDER BY con_id;
+```
+
+---
+
+## Etapa 37
+
+**Objetivo**
+
+Executar Health Check do Data Guard Broker.
+
+**Comandos**
+
+```bash
+dgmgrl
+```
+
+```text
+CONNECT sys@<PRIMARY_TNS>;
+```
+
+```text
+SHOW CONFIGURATION;
+```
+
+```text
+SHOW CONFIGURATION LAG;
+```
+
+```text
+SHOW DATABASE VERBOSE '<PRIMARY_DB_UNIQUE_NAME>';
+```
+
+```text
+SHOW DATABASE VERBOSE '<STANDBY_DB_UNIQUE_NAME>';
+```
+
+```text
+VALIDATE DATABASE VERBOSE '<PRIMARY_DB_UNIQUE_NAME>';
+```
+
+```text
+VALIDATE DATABASE VERBOSE '<STANDBY_DB_UNIQUE_NAME>';
+```
+
+```text
+VALIDATE DATABASE '<STANDBY_DB_UNIQUE_NAME>' STRICT ALL;
+```
+
+```text
+VALIDATE NETWORK CONFIGURATION FOR ALL;
+```
+
+```text
+VALIDATE STATIC CONNECT IDENTIFIER FOR ALL;
+```

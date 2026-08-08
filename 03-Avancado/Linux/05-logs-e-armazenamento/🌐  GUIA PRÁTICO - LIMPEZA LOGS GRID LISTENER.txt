@@ -1,0 +1,34 @@
+# GUIA PRÁTICO ORACLE
+
+## Limpeza de Alert, Incident e Trace — Grid/Listener
+
+### 1. Limpar arquivos XML do Alert
+
+```bash
+find <GRID_BASE>/diag/tnslsnr/<HOSTNAME>/<LISTENER_NAME>/alert \
+-name "*.xml" \
+-mtime +1 \
+-exec rm -f {} \;
+```
+
+---
+
+### 2. Limpar arquivos de Incident
+
+```bash
+find <GRID_BASE>/diag/tnslsnr/<HOSTNAME>/<LISTENER_NAME>/incident \
+-name "*.tr[cm]" \
+-mtime +1 \
+-exec rm -f {} \;
+```
+
+---
+
+### 3. Limpar arquivos de Trace
+
+```bash
+find <GRID_BASE>/diag/tnslsnr/<HOSTNAME>/<LISTENER_NAME>/trace \
+-name "*.tr[cm]" \
+-mtime +1 \
+-exec rm -f {} \;
+```

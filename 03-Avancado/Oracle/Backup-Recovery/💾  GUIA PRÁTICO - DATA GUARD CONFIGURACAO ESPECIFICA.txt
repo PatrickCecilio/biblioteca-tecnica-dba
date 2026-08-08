@@ -1,0 +1,54 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+/u01/app/oracle/product/19.0.0/dbhome_1/dbs
+cp orapwCDB1 orapwCDB1DG
+
+cd /u01/app/oracle/product/19.0.0/dbhome_1/dbs
+mv initCDB1DG.ora initCDB1DG_sujo.bkp
+vi initCDB1DG.ora
+db_name='CDB1'
+db_unique_name='CDB1DG'
+
+control_files='/u01/app/oracle/oradata/CDB1DG/control01.ctl','/u01/app/oracle/oradata/CDB1DG/control02.ctl'
+
+diagnostic_dest='/u01/app/oracle'
+
+memory_target=1200M
+processes=300
+
+enable_pluggable_database=TRUE
+
+remote_login_passwordfile='EXCLUSIVE'
+
+service_names='CDB1DG'
+mkdir -p /u01/app/oracle/oradata/CDB1DG
+mkdir -p /u01/app/oracle/oradata/CDB1DG
+mkdir -p /u01/app/oracle/admin/cdb1dg/adump
+mkdir -p /u01/app/oracle/oradata/CDB1DG
+mkdir -p /u01/app/oracle/oradata/CDB1DG/pdbseed
+mkdir -p /u01/app/oracle/oradata/CDB1DG/XEPDB1
+mkdir -p /u01/app/oracle/oradata/CDB1DG/XEPDB2
+
+CREATE SPFILE FROM PFILE='/u01/app/oracle/product/19.0.0/dbhome_1/dbs/initCDB1DG.ora';
+SHUTDOWN IMMEDIATE;
+STARTUP NOMOUNT;
+
+ALTER SYSTEM SET log_archive_config='DG_CONFIG=(CDB1,CDB1DG)' SCOPE=SPFILE;
+ALTER SYSTEM SET fal_client='CDB1DG' SCOPE=SPFILE;
+ALTER SYSTEM SET fal_server='CDB1'   SCOPE=SPFILE;
+ALTER SYSTEM SET log_archive_max_processes=5 SCOPE=SPFILE;
+ALTER SYSTEM SET local_listener='LISTENER_CDB1' SCOPE=BOTH;
+
+SHUTDOWN IMMEDIATE;
+STARTUP NOMOUNT;
+
+tail -f duplicate_standby.log
+ nohup ./duplicate_standby.sh > duplicate_standby.log 2>&1 &
+SQL> ALTER SYSTEM REGISTER;
+
+System altered.
+
+SQL> show pdbs;
+SQL> ALTER SYSTEM SET local_listener='LISTENER_CDB1' SCOPE=MEMORY;
+
+STARTUP NOMOUNT PFILE='/u01/app/oracle/product/19.0.0/dbhome_1/dbs/initCDB1DG.ora';

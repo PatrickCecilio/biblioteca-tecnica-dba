@@ -1,0 +1,9 @@
+tail -f /opt/oracle/diag/rdbms/free/FREE/trace/alert_FREE.log
+
+grep "ORA-" /opt/oracle/diag/rdbms/free/FREE/trace/alert_FREE.log
+grep "ORA-01156" /opt/oracle/diag/rdbms/free/FREE/trace/alert_FREE.log
+
+SELECT MESSAGE, TIMESTAMP
+FROM V$DIAG_ALERT_EXT
+ORDER BY TIMESTAMP DESC
+FETCH FIRST 20 ROWS ONLY;

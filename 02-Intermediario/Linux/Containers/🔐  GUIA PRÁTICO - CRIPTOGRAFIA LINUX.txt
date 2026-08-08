@@ -1,0 +1,47 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+CRIPTOGRAFIA
+
+Instalar o cryptsetup
+sudo dnf install cryptsetup
+
+Criar um volume criptografado
+sudo dd if=/dev/zero of=/app.img bs=1M count=3072
+
+Configurar o volume criptografado:
+sudo cryptsetup luksFormat /app.img
+
+Quando você for solicitado a confirmar a operação (com a palavra "YES"), digite em caixa alta:
+YES
+
+Abrir o volume criptografado
+sudo cryptsetup luksOpen /app.img app_crypt
+
+Criar o sistema de arquivos:
+sudo mkfs.ext4 /dev/mapper/app_crypt
+
+Montar o volume criptografado:
+sudo mount /dev/mapper/app_crypt /app
+
+
+Adicionar ao fstab (opcional):
+
+Se você deseja que o volume criptografado seja montado automaticamente após um reinício, adicione a seguinte linha no arquivo /etc/fstab:
+
+Abra o arquivo /etc/fstab:
+
+sudo nano /etc/fstab
+Adicione esta linha no final do arquivo:
+
+/dev/mapper/app_crypt /app ext4 defaults 0 2
+
+Desmontar e fechar o volume criptografado quando terminar:
+
+Quando você terminar de usar a pasta /app, lembre-se de desmontá-la e fechar o volume para garantir a segurança:
+
+Desmontar:
+
+sudo umount /app
+Fechar o volume criptografado:
+
+sudo cryptsetup luksClose app_crypt

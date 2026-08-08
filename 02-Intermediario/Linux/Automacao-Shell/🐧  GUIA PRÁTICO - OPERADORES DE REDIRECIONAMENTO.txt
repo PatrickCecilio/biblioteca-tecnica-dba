@@ -1,0 +1,10 @@
+operadores de redirecionamento
+Os operadores de redirecionamento são usados para redirecionar a saída de um comando para um arquivo ou para a entrada de outro comando. Eles são usados para redirecionar a saída padrão, a saída de erro e a entrada padrão.
+
+Os operadores de redirecionamento disponíveis são:
+
+> - redireciona a saída padrão para um arquivo, sobrescrevendo o conteúdo do arquivo;
+>> - redireciona a saída padrão para um arquivo, mas não sobrescreve o conteúdo do arquivo, apenas adiciona ao final do arquivo;
+2> - redireciona a saída de erro para um arquivo, sobrescrevendo o conteúdo do arquivo;
+< - redireciona a entrada padrão de um arquivo para um comando;
+| - redireciona a saída de um comando para a entrada de outro comando.

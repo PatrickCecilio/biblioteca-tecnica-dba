@@ -1,0 +1,301 @@
+# GUIA PRÁTICO ORACLE
+
+## Health Check Operacional do Oracle Database
+
+### 1. Conectar como SYSDBA
+
+```bash id="5hpjba"
+sqlplus / as sysdba
+```
+
+---
+
+### 2. Verificar processos principais da instância
+
+```sql id="25hlhp"
+SELECT
+    pid,
+    spid,
+    pname,
+    program,
+    tracefile
+FROM v$process
+WHERE pname IN (
+    'PMON',
+    'DBW0',
+    'DBW1',
+    'DBW2',
+    'DBW3',
+    'DBW4',
+    'DBW5',
+    'DBW6',
+    'DBW7',
+    'LGWR',
+    'SMON',
+    'CKPT',
+    'MMON',
+    'MMNL',
+    'RECO'
+);
+```
+
+---
+
+### 3. Verificar processos do Listener no Linux
+
+```bash id="j8xo6x"
+ps -ef | grep tns
+```
+
+---
+
+### 4. Verificar status do Listener
+
+```bash id="dqse4b"
+lsnrctl status <LISTENER_NAME>
+```
+
+O material executa essas verificações individualmente para cada Listener configurado no servidor.
+
+---
+
+### 5. Verificar erros ORA- registrados no Alert Log
+
+```sql id="67k5qr"
+SELECT
+    originating_timestamp,
+    module_id,
+    message_text
+FROM x$dbgalertext
+WHERE originating_timestamp > SYSTIMESTAMP - 30
+  AND REGEXP_LIKE(message_text, '(ORA-)');
+```
+
+---
+
+### 6. Verificar alertas pendentes do banco
+
+```sql id="l02u70"
+SELECT
+    object_name,
+    object_type,
+    reason,
+    creation_time,
+    time_suggested
+FROM dba_outstanding_alerts;
+```
+
+Essas duas consultas compõem a etapa de checagem de erros e alertas do procedimento.
+
+---
+
+### 7. Verificar DBMS_JOB
+
+```sql id="xmyhe6"
+SELECT
+    job,
+    log_user,
+    last_date,
+    next_date,
+    broken,
+    what
+FROM dba_jobs
+WHERE last_date IS NOT NULL
+ORDER BY last_date DESC;
+```
+
+---
+
+### 8. Verificar Scheduler Jobs
+
+```sql id="zeivy5"
+SELECT
+    owner,
+    job_name,
+    enabled,
+    last_start_date,
+    next_run_date
+FROM dba_scheduler_jobs
+WHERE owner NOT IN (
+    'SYS',
+    'EXFSYS',
+    'ORACLE_OCM',
+    'SYSTEM'
+);
+```
+
+---
+
+### 9. Executar verificação de integridade da estrutura
+
+```sql id="es3tpj"
+EXEC DBMS_HM.RUN_CHECK(
+    'DB Structure Integrity Check',
+    '<CHECK_NAME>'
+);
+```
+
+---
+
+### 10. Executar verificação de integridade do Redo
+
+```sql id="7xacfa"
+EXEC DBMS_HM.RUN_CHECK(
+    'Redo Integrity Check',
+    '<REDO_CHECK_NAME>'
+);
+```
+
+---
+
+### 11. Consultar relatório de integridade da estrutura
+
+```sql id="gg09ik"
+SELECT DBMS_HM.GET_RUN_REPORT('<CHECK_NAME>')
+FROM dual;
+```
+
+---
+
+### 12. Consultar relatório de integridade do Redo
+
+```sql id="iikvbl"
+SELECT DBMS_HM.GET_RUN_REPORT('<REDO_CHECK_NAME>')
+FROM dual;
+```
+
+---
+
+### 13. Verificar corrupção de blocos
+
+```sql id="p7gmhs"
+SELECT *
+FROM v$database_block_corruption;
+```
+
+---
+
+### 14. Verificar transações corrompidas relacionadas a Undo
+
+```sql id="0zop79"
+SELECT *
+FROM v$corrupt_xid_list;
+```
+
+O procedimento utiliza o Health Monitor e as views de corrupção como parte da validação de integridade.
+
+---
+
+### 15. Verificar arquivos em modo BEGIN BACKUP
+
+```sql id="ax72sq"
+SELECT DISTINCT status
+FROM v$backup;
+```
+
+---
+
+### 16. Verificar utilização dos Tablespaces
+
+```sql id="etklyd"
+SELECT
+    NVL(
+        b.tablespace_name,
+        NVL(a.tablespace_name,'UNKNOWN')
+    ) AS name,
+    kbytes_alloc AS mbytes,
+    kbytes_alloc - NVL(kbytes_free,0) AS used,
+    NVL(kbytes_free,0) AS free,
+    (
+        (kbytes_alloc - NVL(kbytes_free,0))
+        / kbytes_alloc
+    ) * 100 AS pct_used,
+    NVL(largest,0) AS largest
+FROM (
+    SELECT
+        SUM(bytes)/1024/1024 AS kbytes_free,
+        MAX(bytes)/1024/1024 AS largest,
+        tablespace_name
+    FROM sys.dba_free_space
+    GROUP BY tablespace_name
+) a,
+(
+    SELECT
+        SUM(bytes)/1024/1024 AS kbytes_alloc,
+        tablespace_name
+    FROM sys.dba_data_files
+    GROUP BY tablespace_name
+) b
+WHERE a.tablespace_name (+) = b.tablespace_name
+ORDER BY 5 DESC;
+```
+
+---
+
+### 17. Verificar Datafiles
+
+```sql id="jzi1mr"
+SELECT
+    file_name,
+    file_id,
+    tablespace_name,
+    autoextensible,
+    bytes/1024/1024 AS size_mb,
+    online_status
+FROM dba_data_files
+ORDER BY online_status;
+```
+
+---
+
+### 18. Identificar segmentos maiores que 1 GB
+
+```sql id="y7ow56"
+SELECT
+    owner,
+    segment_name,
+    tablespace_name,
+    segment_type,
+    bytes/1024/1024 AS size_mb
+FROM dba_segments
+WHERE owner NOT IN (
+    'SYSTEM',
+    'SYS',
+    'PUBLIC',
+    'OUTLN',
+    'ORACLE_OCM',
+    'SYSMAN',
+    'WMSYS',
+    'DBSNMP',
+    'APPQOSSYS',
+    'EXFSYS',
+    'CTXSYS',
+    'XDB',
+    'ORDSYS',
+    'ORDDATA',
+    'ORDPLUGINS',
+    'MDSYS',
+    'OLAPSYS'
+)
+AND bytes/1024/1024 > 1000
+ORDER BY bytes DESC;
+```
+
+As verificações de espaço do material incluem Tablespaces, Datafiles e segmentos de grande porte.
+
+---
+
+### 19. Verificar objetos inválidos
+
+```sql id="4fwvhq"
+SELECT
+    owner,
+    object_name,
+    object_type,
+    created,
+    last_ddl_time,
+    status
+FROM dba_objects
+WHERE status = 'INVALID'
+  AND last_ddl_time > SYSDATE - 60;
+```

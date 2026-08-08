@@ -1,0 +1,11 @@
+CONECTAR AO RMAN COM CATÁLOGO
+
+Pré-requisitos: serviço TNS validado, usuário do catálogo desbloqueado e credencial obtida de fonte segura.
+
+rman target / catalog <USUARIO_CATALOGO>@<SERVICO_CATALOGO>
+
+Informe a senha de forma interativa quando solicitado. Em automações, prefira Oracle Wallet.
+
+Validação no RMAN:
+SHOW ALL;
+LIST INCARNATION;

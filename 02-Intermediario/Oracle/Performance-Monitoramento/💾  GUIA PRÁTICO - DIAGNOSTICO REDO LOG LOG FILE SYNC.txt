@@ -1,0 +1,60 @@
+# GUIA PRÁTICO ORACLE
+
+## Diagnóstico de Redo Log e Wait Event LOG FILE SYNC
+
+### 1. Conectar como SYSDBA
+
+```bash
+sqlplus / as sysdba
+```
+
+---
+
+### 2. Verificar arquivos de Redo Log
+
+```sql
+SELECT *
+FROM v$logfile;
+```
+
+---
+
+### 3. Verificar waits de LOG FILE SYNC
+
+```sql
+SELECT
+    event,
+    total_waits,
+    time_waited
+FROM v$system_event
+WHERE event LIKE 'log file sync%';
+```
+
+---
+
+### 4. Identificar sessões aguardando LOG FILE SYNC
+
+```sql
+SELECT
+    sid,
+    serial#,
+    username,
+    event,
+    state
+FROM v$session
+WHERE event LIKE 'log file sync%';
+```
+
+---
+
+### 5. Verificar estatísticas de espaço de Redo
+
+```sql
+SELECT
+    SUBSTR(name,1,30),
+    value
+FROM v$sysstat
+WHERE name = 'redo log space requests'
+   OR name = 'redo buffer allocation retries'
+   OR name = 'redo log space wait time';
+```

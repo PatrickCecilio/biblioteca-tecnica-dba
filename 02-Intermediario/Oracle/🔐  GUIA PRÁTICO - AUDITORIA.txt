@@ -1,0 +1,3 @@
+cd C:\Users\LUSTRA\Documents\winrar
+
+.\AuditoriaArquivos.ps1 -rootPath "C:\Program Files\WinRAR\patrick\COMANDS\NOVOS" -daysToAnalyze 30

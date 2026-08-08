@@ -1,0 +1,6 @@
+BACKUP DATABASE;
+-- ou
+BACKUP DATABASE PLUS ARCHIVELOG;
+
+Verificação:
+list backup;

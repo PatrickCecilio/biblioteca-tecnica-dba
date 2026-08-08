@@ -1,0 +1,9 @@
+BACKUP DO DATABASE COM ARCHIVELOGS
+
+Pré-requisitos: banco em ARCHIVELOG, destino com espaço e política RMAN revisada.
+
+REPORT OBSOLETE;
+BACKUP DATABASE PLUS ARCHIVELOG;
+LIST BACKUP SUMMARY;
+
+Validação: revise o log do job, falhas de canal e status dos backup pieces.

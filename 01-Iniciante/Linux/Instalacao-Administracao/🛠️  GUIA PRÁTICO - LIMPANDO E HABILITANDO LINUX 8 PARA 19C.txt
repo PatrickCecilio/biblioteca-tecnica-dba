@@ -1,0 +1,2 @@
+sudo dnf config-manager --enable ol8_baseos_latest ol8_appstream ol8_addons ol8_codeready_builder
+sudo dnf makecache

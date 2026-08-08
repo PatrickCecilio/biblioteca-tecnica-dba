@@ -1,0 +1,256 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+# GUIA PRÁTICO ORACLE
+
+## Simulação e Diagnóstico de Sessões Bloqueadas
+
+### 1. Alterar para a PDB
+
+```sql
+ALTER SESSION SET CONTAINER=<PDB_NAME>;
+```
+
+---
+
+### 2. Criar usuário de teste
+
+```sql
+CREATE USER <LOCK_USER>
+IDENTIFIED BY "<PASSWORD>"
+QUOTA UNLIMITED ON USERS;
+```
+
+```sql
+GRANT CREATE SESSION, CREATE TABLE
+TO <LOCK_USER>;
+```
+
+```sql
+ALTER USER <LOCK_USER>
+DEFAULT ROLE ALL;
+```
+
+---
+
+### 3. Conceder acesso às views de monitoramento
+
+```sql
+GRANT SELECT ON v_$session TO <LOCK_USER>;
+```
+
+```sql
+GRANT SELECT ON v_$lock TO <LOCK_USER>;
+```
+
+```sql
+GRANT SELECT ON v_$sql TO <LOCK_USER>;
+```
+
+---
+
+### 4. Conectar com o usuário de teste
+
+```sql
+CONN <LOCK_USER>/"<PASSWORD>"
+```
+
+---
+
+### 5. Criar tabela para simulação
+
+```sql
+CREATE TABLE t_lock (
+    id          NUMBER PRIMARY KEY,
+    payload     VARCHAR2(100),
+    updated_by  VARCHAR2(30),
+    updated_at  DATE DEFAULT SYSDATE
+);
+```
+
+---
+
+### 6. Inserir registro de teste
+
+```sql
+INSERT INTO t_lock (
+    id,
+    payload,
+    updated_by
+)
+VALUES (
+    1,
+    'seed',
+    'setup'
+);
+```
+
+```sql
+COMMIT;
+```
+
+```sql
+SELECT *
+FROM t_lock;
+```
+
+---
+
+### 7. Criar sessão bloqueadora
+
+Executar em uma sessão separada:
+
+```sql
+CONN <LOCK_USER>/"<PASSWORD>"
+```
+
+```sql
+BEGIN
+    DBMS_APPLICATION_INFO.SET_MODULE(
+        'LOCKER',
+        NULL
+    );
+END;
+/
+```
+
+```sql
+SELECT payload
+FROM t_lock
+WHERE id = 1
+FOR UPDATE;
+```
+
+```sql
+BEGIN
+    DBMS_LOCK.SLEEP(120);
+END;
+/
+```
+
+```sql
+COMMIT;
+```
+
+---
+
+### 8. Criar sessão bloqueada
+
+Executar em outra sessão:
+
+```sql
+CONN <LOCK_USER>/"<PASSWORD>"
+```
+
+```sql
+BEGIN
+    DBMS_APPLICATION_INFO.SET_MODULE(
+        'WAITER',
+        NULL
+    );
+END;
+/
+```
+
+```sql
+UPDATE t_lock
+SET payload    = 'updated by ' || USER,
+    updated_by = USER,
+    updated_at = SYSDATE
+WHERE id = 1;
+```
+
+```sql
+COMMIT;
+```
+
+---
+
+### 9. Consultar sessões bloqueadas e bloqueadoras
+
+```sql
+SELECT
+    s.sid,
+    s.serial#,
+    s.username,
+    s.module,
+    s.status,
+    s.event,
+    s.wait_class,
+    s.state,
+    s.seconds_in_wait,
+    s.blocking_session,
+    s.final_blocking_session
+FROM v$session s
+WHERE s.wait_class <> 'Idle'
+  AND (
+        s.event LIKE 'enq: TX - row lock contention%'
+        OR s.blocking_session IS NOT NULL
+      )
+ORDER BY s.blocking_session NULLS LAST,
+         s.sid;
+```
+
+---
+
+### 10. Consultar relação entre Blocker e Waiter
+
+```sql
+SELECT
+    'SID=' || l1.sid AS blocker,
+    'SID=' || l2.sid AS waiter,
+    l1.type,
+    l1.id1,
+    l1.id2,
+    l1.lmode,
+    l2.request,
+    s2.event
+FROM v$lock l1
+JOIN v$lock l2
+    ON l2.id1 = l1.id1
+   AND l2.id2 = l1.id2
+   AND l2.block = 1
+JOIN v$session s1
+    ON s1.sid = l1.sid
+JOIN v$session s2
+    ON s2.sid = l2.sid
+WHERE l1.block = 1;
+```
+
+---
+
+### 11. Consultar SQL da sessão
+
+```sql
+DEFINE SID = <SID>
+```
+
+```sql
+SELECT
+    s.sid,
+    s.serial#,
+    q.sql_text
+FROM v$session s
+JOIN v$sql q
+    ON s.sql_id = q.sql_id
+WHERE s.sid = &SID;
+```
+
+```sql
+UNDEFINE SID;
+```
+
+---
+
+### 12. Encerrar sessão
+
+```sql
+ALTER SYSTEM KILL SESSION '<SID>,<SERIAL#>' IMMEDIATE;
+```
+
+---
+
+### 13. Remover ambiente de teste
+
+```sql
+DROP USER <LOCK_USER> CASCADE;
+```

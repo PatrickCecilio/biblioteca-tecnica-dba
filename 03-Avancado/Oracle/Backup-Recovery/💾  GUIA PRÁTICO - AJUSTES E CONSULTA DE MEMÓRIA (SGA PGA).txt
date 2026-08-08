@@ -1,0 +1,7 @@
+SHOW PARAMETER sga;
+SHOW PARAMETER pga;
+
+ALTER SYSTEM SET sga_target=1024M SCOPE=SPFILE;
+ALTER SYSTEM SET pga_aggregate_target=512M SCOPE=SPFILE;
+
+startup;

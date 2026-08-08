@@ -1,0 +1,104 @@
+@echo off
+setlocal enabledelayedexpansion
+
+REM ============================================================
+REM  BACKUP LÓGICO EXPDP - XEPDB1 (ORACLE XE 21c)
+REM  - Retenção: 7 dias (ZIP + logs)
+REM  - Dump/Log: C:\DUMP   (DIRECTORY DUMP_DIR)
+REM  - ZIP + logs: C:\DUMP
+REM ============================================================
+
+REM --- PARÂMETROS ORACLE ---
+set "ORACLE_HOME=C:\oraclexe\product\21c\dbhomexe"
+set "ORACLE_SID=XE"
+set "ORACLE_USER=system"
+set "ORACLE_PWD=<SENHA_ORACLE>"
+set "ORACLE_SERVICE=XEPDB1"
+set "ORACLE_DIRECTORY=DUMP_DIR"
+
+REM --- CAMINHO DO 7-ZIP ---
+set "SEVENZIP=C:\Program Files\7-Zip\7z.exe"
+
+REM --- DIRETÓRIOS ---
+REM Diretório físico do DIRECTORY DUMP_DIR (XEPDB1)
+set "DUMP_DIR_FS=C:\DUMP"
+
+REM Diretórios de destino do ZIP + logs
+set "BACKUP_DIR=D:\Compartilhamentos.SX\backup\logico"
+set "LOG_DIR=%BACKUP_DIR%\logs"
+
+set "PATH=%ORACLE_HOME%\bin;%PATH%"
+
+if not exist "%BACKUP_DIR%" mkdir "%BACKUP_DIR%"
+if not exist "%LOG_DIR%" mkdir "%LOG_DIR%"
+
+REM Timestamp AAAAMMDD_HHMMSS
+for /f %%i in ('powershell -NoLogo -NoProfile -Command "Get-Date -Format yyyyMMdd_HHmmss"') do set DATESTAMP=%%i
+
+REM Base dos nomes
+set "BASE=expdp_XEPDB1_%DATESTAMP%"
+
+REM Nomes de arquivos
+set "RUN_LOG=%LOG_DIR%\%BASE%_exec.log"
+set "EXPDP_LOG=%BASE%.log"
+set "DUMPFILE=%BASE%_%%U.dmp"
+set "ZIPFILE=%BACKUP_DIR%\%BASE%.zip"
+
+echo [%date% %time%] Iniciando export... > "%RUN_LOG%"
+
+REM ============================================================
+REM 1) EXECUTA O EXPDP
+REM ============================================================
+
+"%ORACLE_HOME%\bin\expdp" %ORACLE_USER%/%ORACLE_PWD%@%ORACLE_SERVICE% ^
+ directory=%ORACLE_DIRECTORY% ^
+ dumpfile=%DUMPFILE% ^
+ logfile=%EXPDP_LOG% ^
+ full=y ^
+ filesize=16G ^
+ reuse_dumpfiles=n >> "%RUN_LOG%" 2>&1
+
+IF ERRORLEVEL 1 (
+    echo [%date% %time%] ERRO na exportacao. Verificar logs do EXPDP. >> "%RUN_LOG%"
+    goto RETENCAO
+) ELSE (
+    echo [%date% %time%] Exportacao concluida com sucesso. >> "%RUN_LOG%"
+)
+
+REM Confere se DMPs foram gerados no C:\DUMP
+dir /b "%DUMP_DIR_FS%\%BASE%_*.dmp" >nul 2>&1
+IF ERRORLEVEL 1 (
+    echo [%date% %time%] NENHUM DUMP encontrado em "%DUMP_DIR_FS%\%BASE%_*.dmp". Nao sera feita compactacao. >> "%RUN_LOG%"
+    goto RETENCAO
+)
+
+REM ============================================================
+REM 2) COMPACTA DUMPS + LOG COM 7-ZIP
+REM ============================================================
+
+echo [%date% %time%] Iniciando compactacao com 7-Zip... >> "%RUN_LOG%"
+
+"%SEVENZIP%" a -tzip "%ZIPFILE%" ^
+ "%DUMP_DIR_FS%\%BASE%_*.dmp" ^
+ "%DUMP_DIR_FS%\%EXPDP_LOG%" >> "%RUN_LOG%" 2>&1
+
+IF ERRORLEVEL 1 (
+    echo [%date% %time%] ERRO ao compactar arquivos com 7-Zip. Dumps NAO serao apagados. >> "%RUN_LOG%"
+) ELSE (
+    echo [%date% %time%] Arquivos compactados em %ZIPFILE%. >> "%RUN_LOG%"
+    del /q "%DUMP_DIR_FS%\%BASE%_*.dmp"
+    del /q "%DUMP_DIR_FS%\%EXPDP_LOG%"
+)
+
+:RETENCAO
+REM ============================================================
+REM 3) ROTINA DE RETENÇÃO (7 DIAS)
+REM ============================================================
+
+forfiles /p "%BACKUP_DIR%" /m "expdp_XEPDB1_*.zip" /d -7 /c "cmd /c del @file" >> "%RUN_LOG%" 2>&1
+forfiles /p "%LOG_DIR%" /m "expdp_XEPDB1_*_exec.log" /d -7 /c "cmd /c del @file" >> "%RUN_LOG%" 2>&1
+
+echo [%date% %time%] Fim da rotina. >> "%RUN_LOG%"
+
+endlocal
+exit /b 0

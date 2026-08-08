@@ -1,0 +1,21 @@
+free -h
+
+grep -E 'MemTotal|SwapTotal|HugePages_Total|HugePages_Free|Hugepagesize' /proc/meminfo
+
+sysctl vm.nr_hugepages
+
+sqlplus / as sysdba
+
+SHOW PARAMETER memory_target;
+
+SHOW PARAMETER sga;
+
+SHOW PARAMETER pga;
+
+SELECT component, current_size / 1024 / 1024 AS current_mb, min_size / 1024 / 1024 AS min_mb, max_size / 1024 / 1024 AS max_mb
+FROM v$sga_dynamic_components
+ORDER BY component;
+
+SELECT name, value
+FROM v$pgastat
+ORDER BY name;

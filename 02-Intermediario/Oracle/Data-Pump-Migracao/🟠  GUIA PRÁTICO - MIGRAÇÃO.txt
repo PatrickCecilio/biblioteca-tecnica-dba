@@ -1,0 +1,124 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+Origem
+. oraenv
+XE
+
+
+sqlplus / as sysdba
+
+alter session set container=XEPDB1;
+
+ALTER USER "INFOSAUDE" ACCOUNT LOCK;
+ALTER USER "SYBSA" ACCOUNT LOCK;
+
+exit;
+
+executar o expdp-full.sh
+nohup ./expdp-full.sh &
+
+após finalizar o expdp
+fazer o impdp-infosaude
+
+------------------------------------------------------------------------------
+Destino
+
+drop user infosaude cascade;
+
+vi /u01/dump/impdp-infosaude.sh
+nohup ./impdp-infosaude.sh &
+
+se ocorre errors
+tabelas com erros:
+grep ORA-31693: -C2 import_infosaude_06012026.log
+grep -C 2 'error' nohup.out
+
+após finalizar o import
+CDBHRM
+
+
+sqlplus / as sysdba
+
+alter session set container=PDBHMR;
+
+
+@/home/oracle/Script2.sql
+@$ORACLE_HOME/rdbms/admin/utlrp.sql
+
+------------------------------------------------------------------------------
+
+conferir os grants
+
+ROLE_CONSULTA, ROLE_CRIARUSUARIOS, ROLE_INFODEVELOPER, ROLE_INFOSAUDE, ROLE_READONLY
+
+conferir os grants do usuário:
+
+ infosaude
+
+
+ lsnrctl start LISTENER2
+ lsnrctl stop LISTENER2
+ lsnrctl status LISTENER2
+
+alterando os listeners
+
+------------------------------------------------------------------------------
+ajustar as portas:
+. oraenv
+
+XE
+vi /opt/oracle/homes/OraDBHome21cXE/network/admin/listener.ora
+lsnrctl stop
+
+
+1525
+
+sqlplus / as sysdba
+SHOW PARAMETER LOCAL_LISTENER;
+
+ LISTENER_XE
+ ALTER SYSTEM SET LOCAL_LISTENER = 'LISTENER_XE' SCOPE=BOTH;
+
+lsnrctl start
+-------------------------------------------------------------------------------
+. oraenv
+CDBHMR
+
+vi /u01/app/oracle/product/19.3.0/dbhome_1/network/admin/listener.ora
+lsnrctl start LISTENER2
+
+
+1521
+
+sqlplus / as sysdba
+SHOW PARAMETER LOCAL_LISTENER;
+
+LISTENER_CDBHRM
+ ALTER SYSTEM SET LOCAL_LISTENER = 'LISTENER_CDBHRM' SCOPE=BOTH;
+lsnrctl stop LISTENER2
+------------------------------------------------------------------------------
+ LISTENER_CDBHRM
+ ALTER SYSTEM SET LOCAL_LISTENER = 'LISTENER_CDBHRM' SCOPE=BOTH;
+
+
+criando um serviço XEPDB1 apontando para  PDBDIA
+ALTER SESSION SET CONTAINER = PDBHRM;
+
+ALTER PLUGGABLE DATABASE PDBHRM OPEN;
+
+BEGIN
+  DBMS_SERVICE.CREATE_SERVICE(
+    service_name => 'XEPDB1',
+    network_name => 'XEPDB1'
+  );
+END;
+/
+
+EXEC DBMS_SERVICE.START_SERVICE('XEPDB1');
+
+ALTER SYSTEM REGISTER;
+
+------------------------------------------------------------------------------
+parar o banco XE:
+
+sudo systemctl stop oracle-xe-21c

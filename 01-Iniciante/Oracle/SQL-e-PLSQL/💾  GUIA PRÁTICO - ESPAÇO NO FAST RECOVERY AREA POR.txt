@@ -1,0 +1,17 @@
+-- Espaço no Fast Recovery Area por tipo de arquivo
+SELECT file_type, percent_space_used, percent_space_reclaimable, number_of_files
+FROM v$flash_recovery_area_usage;
+
+-- Mostra tamanho total/uso da FRA em MB
+SELECT SPACE_LIMIT/1024/1024 AS MB_LIMIT,
+       SPACE_USED/1024/1024  AS MB_USED,
+       SPACE_RECLAIMABLE/1024/1024 AS MB_RECLAIMABLE
+FROM   V$RECOVERY_FILE_DEST;
+
+-- Localização dos arquivos de control file
+SELECT name FROM v$controlfile;
+
+-- Consulta para ver se há archivelog pendente
+SELECT THREAD#, LOW_SEQUENCE#, HIGH_SEQUENCE#
+FROM   V$ARCHIVE_DEST_STATUS
+WHERE  STATUS='VALID';

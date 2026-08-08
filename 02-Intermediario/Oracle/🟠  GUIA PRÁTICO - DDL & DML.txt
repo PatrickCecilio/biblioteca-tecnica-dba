@@ -1,0 +1,335 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+================================================================================
+📘 GUIA PRÁTICO DBA
+Auditoria DML/DDL + Segurança de Perfil
+Oracle Database 19c
+================================================================================
+
+
+🎯 OBJETIVO DO GUIA
+------------------------------------------------------------------------------
+Configurar auditoria DML/DDL no schema GOKU e implementar política de
+segurança de perfil no ambiente Oracle 19c.
+
+
+==============================================================================
+1️⃣  🔎 LEVANTAMENTO DO AMBIENTE
+==============================================================================
+
+🎯 Objetivo:
+Identificar tablespaces, tabelas envolvidas e verificar se o Unified Auditing
+está habilitado.
+
+
+------------------------------------------------------------------------------
+1.1 ✔ Verificar Tablespaces Existentes
+------------------------------------------------------------------------------
+
+SQL:
+SELECT tablespace_name FROM dba_tablespaces;
+
+📖 Função:
+Lista todos os tablespaces existentes no banco.
+
+Exemplo de retorno relevante:
+SYSTEM
+SYSAUX
+UNDOTBS1
+TEMP
+GOKU
+
+
+------------------------------------------------------------------------------
+1.2 ✔ Ajustar Layout no SQL*Plus
+------------------------------------------------------------------------------
+
+SQL:
+SET LINES 200
+SET PAGES 200
+COLUMN owner FORMAT A20
+COLUMN table_name FORMAT A35
+COLUMN tablespace_name FORMAT A20
+COLUMN status FORMAT A10
+
+📖 Função:
+Padroniza visualização para geração de evidências.
+
+💡 DICA PROFISSIONAL:
+Sempre ajuste layout antes de coletar prints ou relatórios para cliente.
+
+
+------------------------------------------------------------------------------
+1.3 ✔ Listar Tabelas do Tablespace GOKU
+------------------------------------------------------------------------------
+
+SQL:
+SELECT
+  owner,
+  table_name,
+  tablespace_name,
+  status
+FROM dba_tables
+WHERE tablespace_name = 'GOKU'
+ORDER BY owner, table_name;
+
+Resultado esperado:
+CLIENTES
+PEDIDOS
+
+
+------------------------------------------------------------------------------
+1.4 ✔ Verificar se Unified Auditing Está Ativo
+------------------------------------------------------------------------------
+
+SQL:
+SELECT VALUE
+FROM V$OPTION
+WHERE PARAMETER = 'Unified Auditing';
+
+Resultado:
+FALSE
+
+⚠ OBSERVAÇÃO IMPORTANTE:
+
+Se retornar FALSE:
+- O banco está usando auditoria tradicional.
+- Algumas DDLs (DROP / TRUNCATE) podem não ser auditadas.
+- Para auditoria completa, recomenda-se Unified Auditing.
+
+
+==============================================================================
+2️⃣  🛠 CONFIGURAÇÃO DE AUDITORIA DML
+==============================================================================
+
+🎯 Objetivo:
+Auditar INSERT, UPDATE e DELETE nas tabelas CLIENTES e PEDIDOS.
+
+
+------------------------------------------------------------------------------
+2.1 ✔ Criar Policy de Auditoria
+------------------------------------------------------------------------------
+
+SQL:
+CREATE AUDIT POLICY POL_AUDIT_DML_GOKU
+  ACTIONS
+   INSERT ON GOKU.CLIENTES,
+   UPDATE ON GOKU.CLIENTES,
+   DELETE ON GOKU.CLIENTES,
+   INSERT ON GOKU.PEDIDOS,
+   UPDATE ON GOKU.PEDIDOS,
+   DELETE ON GOKU.PEDIDOS;
+
+📖 Função:
+Cria política específica para DML nas tabelas do schema GOKU.
+
+
+------------------------------------------------------------------------------
+2.2 ✔ Habilitar Policy para Usuário
+------------------------------------------------------------------------------
+
+SQL:
+AUDIT POLICY POL_AUDIT_DML_GOKU BY GOKU;
+
+📖 Função:
+Ativa auditoria apenas para o usuário GOKU.
+
+💡 BOA PRÁTICA:
+Evite auditoria global desnecessária.
+Audite apenas usuários ou objetos críticos.
+
+
+==============================================================================
+3️⃣  🔍 VALIDAR POLICY ATIVA
+==============================================================================
+
+SQL:
+SELECT
+   policy_name,
+   enabled_option,
+   entity_name,
+   entity_type,
+   success
+FROM audit_unified_enabled_policies
+WHERE policy_name = 'POL_AUDIT_DML_GOKU';
+
+Resultado esperado:
+STATUS = ENABLED
+SCOPE  = BY USER
+
+
+==============================================================================
+4️⃣  🔎 CONSULTAR LOGS DE AUDITORIA
+==============================================================================
+
+------------------------------------------------------------------------------
+4.1 ✔ Ajuste de Layout
+------------------------------------------------------------------------------
+
+SET LINESIZE 200
+SET PAGESIZE 100
+COLUMN EVENT_TIMESTAMP FORMAT A24 HEADING 'DATA / HORA'
+COLUMN DBUSERNAME      FORMAT A15 HEADING 'USUÁRIO'
+COLUMN USERHOST        FORMAT A20 HEADING 'HOST'
+COLUMN ACTION_NAME     FORMAT A20 HEADING 'AÇÃO'
+COLUMN OBJECT_NAME     FORMAT A25 HEADING 'OBJETO'
+COLUMN SQL_TEXT        FORMAT A80 HEADING 'SQL EXECUTADO'
+
+
+------------------------------------------------------------------------------
+4.2 ✔ Consulta na UNIFIED_AUDIT_TRAIL
+------------------------------------------------------------------------------
+
+SQL:
+SELECT
+    EVENT_TIMESTAMP,
+    DBUSERNAME,
+    USERHOST,
+    ACTION_NAME,
+    OBJECT_NAME,
+    SQL_TEXT
+FROM UNIFIED_AUDIT_TRAIL
+WHERE OBJECT_SCHEMA = 'GOKU'
+ORDER BY EVENT_TIMESTAMP DESC;
+
+📖 Função:
+Exibe todas as ações executadas no schema GOKU.
+
+Exemplos capturados:
+- INSERT
+- UPDATE
+- DELETE
+- ALTER TABLE
+- DROP COLUMN
+
+
+==============================================================================
+5️⃣  🔐 AUDITORIA GLOBAL (USAR COM CAUTELA)
+==============================================================================
+
+------------------------------------------------------------------------------
+5.1 ⚠ Auditoria Completa
+------------------------------------------------------------------------------
+
+SQL:
+AUDIT ALL;
+
+⚠ ALERTA:
+Pode gerar grande volume de logs e impacto em performance.
+
+
+------------------------------------------------------------------------------
+5.2 ✔ Auditoria de DDL por Schema
+------------------------------------------------------------------------------
+
+SQL:
+AUDIT CREATE TABLE BY GOKU;
+AUDIT ALTER TABLE BY GOKU;
+AUDIT DROP TABLE BY GOKU;
+AUDIT TRUNCATE TABLE BY GOKU;
+
+⚠ IMPORTANTE:
+No Oracle 19c sem Unified:
+- DROP pode não ser auditado corretamente.
+- TRUNCATE pode não gerar log tradicional.
+
+
+==============================================================================
+6️⃣  👤 CONFIGURAÇÃO DE PROFILE DE SEGURANÇA
+==============================================================================
+
+🎯 Objetivo:
+Implementar política de senha corporativa segura.
+
+
+------------------------------------------------------------------------------
+6.1 ✔ Consultar Profile ORA_STIG_PROFILE
+------------------------------------------------------------------------------
+
+SQL:
+SELECT
+    PROFILE,
+    RESOURCE_NAME,
+    LIMIT
+FROM DBA_PROFILES
+WHERE PROFILE = 'ORA_STIG_PROFILE'
+ORDER BY RESOURCE_NAME;
+
+
+------------------------------------------------------------------------------
+6.2 ✔ Criar Profile Seguro
+------------------------------------------------------------------------------
+
+SQL:
+CREATE PROFILE corp_secure_profile LIMIT
+  FAILED_LOGIN_ATTEMPTS 5
+  PASSWORD_LOCK_TIME 1
+  PASSWORD_LIFE_TIME 60
+  PASSWORD_GRACE_TIME 7
+  PASSWORD_REUSE_TIME 365
+  PASSWORD_REUSE_MAX 5
+  PASSWORD_VERIFY_FUNCTION ORA12C_STRONG_VERIFY_FUNCTION
+  IDLE_TIME 15
+  CONNECT_TIME 480
+  SESSIONS_PER_USER 2;
+
+📖 O que está sendo aplicado:
+
+✔ Bloqueio após 5 tentativas inválidas
+✔ Expiração de senha em 60 dias
+✔ Verificação de complexidade
+✔ Limite de sessões simultâneas
+✔ Timeout de sessão ociosa
+
+
+==============================================================================
+7️⃣  🧪 TESTES PRÁTICOS DE DDL
+==============================================================================
+
+SQL:
+CREATE TABLE teste (
+    id NUMBER,
+    nome VARCHAR2(50)
+);
+
+ALTER TABLE teste ADD (descricao VARCHAR2(100));
+
+TRUNCATE TABLE teste;
+
+DROP TABLE teste;
+
+📖 Objetivo:
+Validar captura de DDL na auditoria.
+
+
+==============================================================================
+8️⃣  🔄 DESABILITAR AUDITORIA
+==============================================================================
+
+SQL:
+NOAUDIT POLICY POL_AUDIT_DML_GOKU BY GOKU;
+
+📖 Função:
+Remove auditoria específica do usuário.
+
+
+==============================================================================
+✅ CHECKLIST FINAL
+==============================================================================
+
+[ ] Verifiquei tablespaces
+[ ] Confirmei status do Unified Auditing
+[ ] Criei policy de auditoria
+[ ] Habilitei auditoria para GOKU
+[ ] Validei policy ativa
+[ ] Consultei UNIFIED_AUDIT_TRAIL
+[ ] Testei DML (INSERT/UPDATE/DELETE)
+[ ] Testei DDL (CREATE/ALTER/DROP/TRUNCATE)
+[ ] Configurei profile de segurança
+[ ] Documentei evidências
+
+
+================================================================================
+📌 Resultado Esperado:
+Ambiente auditado, controlado e aderente às boas práticas de segurança.
+================================================================================

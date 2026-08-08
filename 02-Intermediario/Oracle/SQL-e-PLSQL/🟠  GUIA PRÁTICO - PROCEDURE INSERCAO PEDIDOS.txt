@@ -1,0 +1,68 @@
+# GUIA PRÁTICO ORACLE
+
+## Criação de Procedure para Inserção de Pedidos
+
+### 1. Criar a Procedure
+
+```sql id="n4btue"
+CREATE OR REPLACE PROCEDURE <PROCEDURE_NAME> (
+    p_cliente NUMBER,
+    p_valor   NUMBER
+)
+IS
+BEGIN
+
+    INSERT INTO <ORDER_TABLE> (
+        id_pedido,
+        id_cliente,
+        valor
+    )
+    VALUES (
+        <SEQUENCE_NAME>.NEXTVAL,
+        p_cliente,
+        p_valor
+    );
+
+    COMMIT;
+
+END;
+/
+```
+
+---
+
+### 2. Validar a Procedure
+
+```sql id="yzt6kt"
+SELECT
+    object_name,
+    object_type,
+    status
+FROM user_objects
+WHERE object_name = UPPER('<PROCEDURE_NAME>');
+```
+
+---
+
+### 3. Executar a Procedure
+
+```sql id="0ytw0f"
+BEGIN
+    <PROCEDURE_NAME>(
+        p_cliente => <CLIENT_ID>,
+        p_valor   => <ORDER_VALUE>
+    );
+END;
+/
+```
+
+---
+
+### 4. Validar o pedido inserido
+
+```sql id="b9r5tt"
+SELECT *
+FROM <ORDER_TABLE>
+WHERE id_cliente = <CLIENT_ID>
+ORDER BY id_pedido DESC;
+```

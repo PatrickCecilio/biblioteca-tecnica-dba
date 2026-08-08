@@ -1,0 +1,13 @@
+// Aula 27 - Configurando as portas no Docker
+
+# docker container run --name web -P -d nginx:alpine
+
+# docker container port web
+
+# docker container inspect web | grep HostPort
+
+# docker container ls
+
+# docker container run --name web2 -p 8080:80 -d nginx:alpine
+
+# docker container ls

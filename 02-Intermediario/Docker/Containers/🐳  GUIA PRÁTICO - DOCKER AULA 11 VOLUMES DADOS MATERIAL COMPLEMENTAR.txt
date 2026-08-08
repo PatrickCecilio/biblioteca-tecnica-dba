@@ -1,0 +1,49 @@
+// Aula 11 - Criação e montagem de volumes de dados
+
+# docker container run --name demo \
+alpine /bin/sh -c 'echo "Isso é um teste" > sample.txt'
+
+# docker container diff demo
+
+$ docker volume create sample
+
+$ docker volume inspect sample
+
+# docker run -it --rm --privileged --pid=host \
+fundamentalsofdocker/nsenter
+
+/ # cd /var/lib/docker/volumes/sample/_data
+/ # ls -l
+
+# docker container rm test
+
+# docker container run --name test -it \
+-v sample:/data \
+alpine /bin/sh
+
+/ # cd /data / # echo "Algum dado" > data.txt
+/ # echo "Some more data" > data2.txt
+/ # exit
+
+$ docker run -it --rm --privileged --pid=host \
+fundamentalsofdocker/nsenter
+
+/ # cd /var/lib/docker/volumes/sample/_data
+/ # ls -l
+
+/ # cat data2.txt
+
+/ # echo "Teste de criação de arquivo" > host-data.txt
+
+$ docker container rm test
+
+$ docker container run --name test2 -it \
+-v sample:/app/data \
+centos:7 /bin/bash
+
+# cd /app/data
+# ls -l
+
+# docker volume rm sample
+
+$ docker container rm -f $(docker container ls -aq)

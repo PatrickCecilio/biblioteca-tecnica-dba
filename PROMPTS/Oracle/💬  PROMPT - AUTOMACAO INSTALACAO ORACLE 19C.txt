@@ -1,0 +1,508 @@
+Atue como um Engenheiro Sênior DevOps, DBA Oracle 19c, Especialista em Shell Script Linux, Automação de Instalação Oracle, RMAN, OPatch, DBCA, NETCA, systemd e documentação técnica.
+
+Quero desenvolver, por etapas, um projeto profissional chamado:
+
+`oracle19-installer`
+
+O objetivo é criar uma ferramenta modular em Shell Script para automatizar a instalação, validação, configuração, pós-instalação e atualização do Oracle Database 19c em Linux.
+
+A ferramenta deve ser inspirada no modelo do Makeself, onde um `build.sh` gera instaladores autoextraíveis com payload embutido.
+
+O projeto será usado para:
+
+* laboratório de estudo Oracle DBA Júnior;
+* treinamento técnico;
+* documentação prática;
+* ambientes corporativos controlados;
+* padronização de instalação Oracle 19c.
+
+## Contexto do ambiente alvo
+
+Considere como base o seguinte ambiente padrão:
+
+```bash
+Sistema Operacional: Oracle Linux / RHEL / Rocky Linux
+Arquitetura: x86_64
+Usuário Oracle: oracle
+Grupo principal: oinstall
+Grupos DBA: dba, oper, backupdba, dgdba, kmdba, racdba
+
+ORACLE_BASE=/u01/app/oracle
+ORACLE_HOME=/u01/app/oracle/product/19.0.0/dbhome_1
+ORACLE_INVENTORY=/u01/app/oraInventory
+ORACLE_SID=ORCL
+ORACLE_UNQNAME=ORCL
+DB_NAME=ORCL
+PDB_NAME=PDB1
+
+DATA_DIR=/u02/oradata
+FRA_DIR=/u02/fast_recovery_area
+BACKUP_DIR=/u02/backup
+
+LISTENER_NAME=LISTENER
+LISTENER_PORT=1521
+CHARACTERSET=AL32UTF8
+TEMPLATE_NAME=General_Purpose.dbc
+```
+
+## Regras obrigatórias
+
+1. Não baixe automaticamente binários protegidos por licença da Oracle.
+2. O administrador deve fornecer manualmente os arquivos Oracle, como:
+
+```bash
+LINUX.X64_193000_db_home.zip
+OPatch atualizado
+RU Oracle 19c
+OJVM, se aplicável
+```
+
+3. Antes de usar qualquer arquivo externo, valide:
+
+* existência do arquivo;
+* permissão de leitura;
+* checksum SHA256;
+* tamanho do arquivo;
+* diretório esperado.
+
+4. Não execute ações destrutivas sem confirmação explícita.
+
+5. Todo comando destrutivo ou sensível deve suportar:
+
+```bash
+--dry-run
+--yes
+--silent
+```
+
+6. O projeto deve ser modular. Não crie um único script gigante.
+
+7. Use boas práticas de Shell Script:
+
+```bash
+set -euo pipefail
+IFS=$'\n\t'
+funções reutilizáveis
+logs organizados
+tratamento de erro
+validação de parâmetros
+mensagens claras
+modo interativo
+modo silent
+modo dry-run
+```
+
+8. Sempre gere código real, funcional, organizado e pronto para copiar.
+
+9. Sempre explique o que cada arquivo e módulo faz.
+
+10. Trabalhe por etapas. Não entregue o projeto inteiro de uma vez.
+
+## Estrutura desejada
+
+Crie a seguinte estrutura:
+
+```bash
+oracle19-installer/
+│
+├── build.sh
+├── VERSION
+├── README.md
+│
+├── src/
+│   ├── bin/
+│   │   ├── oracle19_install.sh
+│   │   ├── oracle19_check.sh
+│   │   └── oracle19_update.sh
+│   │
+│   ├── lib/
+│   │   ├── common.sh
+│   │   ├── os.sh
+│   │   ├── prereq.sh
+│   │   ├── user.sh
+│   │   ├── directories.sh
+│   │   ├── inventory.sh
+│   │   ├── install.sh
+│   │   ├── dbca.sh
+│   │   ├── listener.sh
+│   │   ├── systemd.sh
+│   │   ├── patch.sh
+│   │   ├── checksum.sh
+│   │   ├── validation.sh
+│   │   └── report.sh
+│   │
+│   ├── templates/
+│   │   ├── oracle19.conf.tpl
+│   │   ├── db_install.rsp.tpl
+│   │   ├── dbca.rsp.tpl
+│   │   ├── listener.ora.tpl
+│   │   ├── tnsnames.ora.tpl
+│   │   ├── sqlnet.ora.tpl
+│   │   ├── oracle19c.service.tpl
+│   │   └── oracle19-listener.service.tpl
+│   │
+│   ├── sql/
+│   │   ├── post_install.sql
+│   │   ├── pdb_save_state.sql
+│   │   ├── validation.sql
+│   │   └── registry_sqlpatch.sql
+│   │
+│   └── etc/
+│       ├── oracle19.conf.example
+│       └── checksums.sha256
+│
+└── dist/
+```
+
+## Funcionalidades principais
+
+### 1. Build do instalador
+
+Crie um `build.sh` capaz de gerar:
+
+```bash
+dist/oracle19.tar.gz
+dist/oracle19_install.sh
+dist/oracle19_check.sh
+dist/oracle19_update.sh
+dist/SHA256
+```
+
+Os scripts finais devem ser autoextraíveis e conter:
+
+* payload `.tar.gz`;
+* scripts internos;
+* bibliotecas;
+* templates;
+* SQL;
+* checksums;
+* metadados de versão.
+
+O payload deve ser extraído de forma segura em:
+
+```bash
+/tmp
+```
+
+ou em diretório customizado via:
+
+```bash
+ORACLE19_TMPDIR=/var/tmp
+```
+
+Também deve permitir:
+
+```bash
+./oracle19_install.sh --extract-only /tmp/oracle19-payload
+```
+
+### 2. Instalador interativo
+
+O script `oracle19_install.sh` deve exibir o menu:
+
+```text
+=====================================================
+ Oracle Database 19c Enterprise Installer
+=====================================================
+
+1 - Validar ambiente
+2 - Instalar pré-requisitos
+3 - Configurar usuário oracle
+4 - Criar diretórios
+5 - Preparar arquivos Oracle
+6 - Instalar software Oracle
+7 - Criar Listener
+8 - Criar Database
+9 - Configurar pós-instalação
+10 - Configurar systemd
+11 - Validar instalação
+12 - Gerar relatório HTML
+0 - Sair
+```
+
+### 3. Modo silent
+
+O instalador deve aceitar execução silent:
+
+```bash
+./oracle19_install.sh --silent \
+  --oracle-home /u01/app/oracle/product/19.0.0/dbhome_1 \
+  --oracle-base /u01/app/oracle \
+  --inventory /u01/app/oraInventory \
+  --sid ORCL \
+  --db-name ORCL \
+  --pdb PDB1 \
+  --data-dir /u02/oradata \
+  --fra-dir /u02/fast_recovery_area \
+  --edition EE \
+  --listener-port 1521 \
+  --charset AL32UTF8
+```
+
+### 4. Pré-check do ambiente
+
+Crie o `oracle19_check.sh` para validar:
+
+* sistema operacional;
+* arquitetura x86_64;
+* kernel;
+* RAM;
+* swap;
+* HugePages;
+* Transparent HugePages;
+* SELinux;
+* firewall;
+* hostname;
+* DNS;
+* NTP/Chrony;
+* pacotes necessários;
+* usuário oracle;
+* grupos Oracle;
+* `/tmp`;
+* espaço em `/u01` e `/u02`;
+* Oracle Base;
+* Oracle Home;
+* Oracle Inventory;
+* permissões;
+* ulimits;
+* sysctl;
+* arquivo `/etc/hosts`;
+* arquivo `/etc/oratab`;
+* OPatch;
+* Listener;
+* SQL*Net;
+* TNS;
+* CDB/PDB;
+* FRA;
+* Archive Mode;
+* Flashback;
+* Alert Log;
+* serviços systemd.
+
+O resultado deve seguir este padrão:
+
+```text
+[PASS] Kernel compatível
+[WARNING] HugePages não configurado
+[FAIL] Pacote libaio ausente
+```
+
+No final, gere resumo:
+
+```text
+PASS: X
+WARNING: Y
+FAIL: Z
+```
+
+### 5. Instalação do software Oracle
+
+Crie módulo para:
+
+* validar `LINUX.X64_193000_db_home.zip`;
+* validar checksum;
+* criar Oracle Home;
+* extrair o ZIP dentro do Oracle Home;
+* gerar `db_install.rsp`;
+* executar `runInstaller -silent`;
+* criar ou validar `oraInst.loc`;
+* orientar execução dos scripts root;
+* validar instalação final do Oracle Home.
+
+Comando base:
+
+```bash
+./runInstaller -silent -responseFile <arquivo>
+```
+
+### 6. Listener
+
+Crie módulo para gerar:
+
+```bash
+listener.ora
+tnsnames.ora
+sqlnet.ora
+```
+
+Também deve suportar validação com:
+
+```bash
+lsnrctl status
+tnsping ORCL
+tnsping PDB1
+```
+
+### 7. DBCA
+
+Crie módulo para gerar `dbca.rsp` e criar o banco com:
+
+```bash
+dbca -silent -createDatabase -responseFile <arquivo>
+```
+
+O módulo deve permitir configurar:
+
+* SID;
+* DB_NAME;
+* PDB;
+* Character Set;
+* memória;
+* FRA;
+* Archive Mode;
+* Enterprise Edition;
+* senhas;
+* local dos datafiles;
+* template General Purpose.
+
+Após criar o banco, executar SQLs para:
+
+* abrir PDB;
+* salvar estado do PDB;
+* validar CDB/PDB;
+* validar usuários;
+* validar listener;
+* validar archive/FRA;
+* validar parâmetros básicos.
+
+### 8. Pós-instalação
+
+Automatizar:
+
+* atualização do `/etc/oratab`;
+* configuração de `dbstart`;
+* configuração de `dbshut`;
+* criação de `oracle_env.sh`;
+* inclusão das variáveis no perfil do usuário oracle;
+* criação de serviço systemd para o banco;
+* criação de serviço systemd para o listener;
+* validação de login via SQL*Plus;
+* geração de relatório final.
+
+### 9. Atualização RU/OPatch
+
+Crie o `oracle19_update.sh` com menu:
+
+```text
+================================
+ Oracle Database Update
+================================
+
+1 - Verificar versão Oracle
+2 - Verificar versão OPatch
+3 - Atualizar OPatch
+4 - Executar opatch prereq
+5 - Aplicar RU
+6 - Aplicar OJVM
+7 - Executar datapatch
+8 - Validar patch aplicado
+9 - Rollback
+10 - Gerar relatório
+0 - Sair
+```
+
+Fluxo obrigatório para RU:
+
+1. Verificar se o patch existe localmente.
+2. Validar checksum.
+3. Verificar versão OPatch.
+4. Fazer backup do Inventory.
+5. Fazer backup dos arquivos de configuração.
+6. Executar `opatch prereq`.
+7. Parar listener.
+8. Parar banco.
+9. Aplicar patch com `opatch apply`.
+10. Subir banco.
+11. Executar `datapatch -verbose`.
+12. Validar `dba_registry_sqlpatch`.
+13. Gerar relatório.
+
+### 10. Relatório HTML
+
+Crie `report.sh` para gerar `report.html` contendo:
+
+* Hostname;
+* Sistema operacional;
+* Kernel;
+* usuário oracle;
+* ORACLE_BASE;
+* ORACLE_HOME;
+* ORACLE_SID;
+* versão Oracle;
+* versão OPatch;
+* patch level;
+* Listener;
+* Banco;
+* CDB/PDB;
+* FRA;
+* Archive Mode;
+* Flashback;
+* Inventory;
+* serviços systemd;
+* logs;
+* status final da instalação.
+
+O HTML deve ser simples, limpo e fácil de abrir no navegador.
+
+## Forma obrigatória de trabalho
+
+Não entregue tudo de uma vez.
+
+Trabalhe exatamente nesta ordem:
+
+1. Arquitetura do projeto, fluxo geral, `README.md` inicial e `build.sh`.
+2. `common.sh`, `checksum.sh` e `os.sh`.
+3. `oracle19_check.sh`.
+4. `prereq.sh`, `user.sh`, `directories.sh` e `inventory.sh`.
+5. `install.sh` e template `db_install.rsp.tpl`.
+6. `listener.sh` e templates de rede.
+7. `dbca.sh`, `dbca.rsp.tpl` e SQLs de pós-instalação.
+8. `systemd.sh` e templates de serviços.
+9. `patch.sh` e `oracle19_update.sh`.
+10. `validation.sh` e `report.sh`.
+11. README completo, troubleshooting e plano de testes.
+
+Sempre que gerar um arquivo, entregue neste formato:
+
+```bash
+# caminho/do/arquivo.sh
+conteúdo completo aqui
+```
+
+Depois de cada etapa, explique:
+
+* o que foi criado;
+* como testar;
+* o que será feito na próxima etapa.
+
+## Resultado esperado
+
+Ao final, quero um projeto real e reutilizável contendo:
+
+* instalador único autoextraível;
+* checker de ambiente;
+* instalador interativo;
+* instalador silent;
+* validação de checksums;
+* gerador de response files;
+* instalação silent do Oracle Software;
+* criação de Listener;
+* criação de database via DBCA;
+* pós-instalação;
+* configuração systemd;
+* atualização RU/OPatch;
+* execução de datapatch;
+* validação SQL;
+* relatório HTML;
+* documentação profissional.
+
+Comece apenas pela Etapa 1:
+
+* explique a arquitetura;
+* explique o fluxo geral;
+* gere a estrutura inicial;
+* gere o `VERSION`;
+* gere o `README.md` inicial;
+* gere o `build.sh`.
+
+Não avance para os módulos `common.sh`, `os.sh` ou `checksum.sh` ainda.

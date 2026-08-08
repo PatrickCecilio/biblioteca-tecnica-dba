@@ -1,0 +1,156 @@
+-- Criação de tabelas e sequências
+
+-- Tabela de Departamentos
+CREATE TABLE departments (
+    id NUMBER PRIMARY KEY,
+    department_name VARCHAR2(100) NOT NULL
+);
+
+-- Tabela de Funcionários (Employees)
+CREATE TABLE employees (
+    id NUMBER PRIMARY KEY,
+    name VARCHAR2(100) NOT NULL,
+    salary NUMBER(10,2) NOT NULL,
+    department_id NUMBER,
+    CONSTRAINT fk_department
+      FOREIGN KEY (department_id)
+      REFERENCES departments(id)
+);
+
+-- Tabela de Projetos
+CREATE TABLE projects (
+    id NUMBER PRIMARY KEY,
+    project_name VARCHAR2(100) NOT NULL
+);
+
+839´çgbbbbbbbbbb66666666666666666666666b9	00O´007
+-- Tabela de Relacionamento entre Funcionários e Projetos (Muitos-para-Muitos)
+CREATE TABLE employee_projects (
+    employee_id NUMBER,
+    project_id NUMBER,
+    PRIMARY KEY (employee_id, project_id),
+    CONSTRAINT fk_employee
+      FOREIGN KEY (employee_id)
+      REFERENCES employees(id),
+    CONSTRAINT fk_project
+      FOREIGN KEY (project_id)
+      REFERENCES projects(id)
+);
+
+-- Tabela para Log de Alterações de Salário
+CREATE TABLE salary_logs (
+    log_id NUMBER PRIMARY KEY,
+    employee_id NUMBER,
+    old_salary NUMBER(10,2),
+    new_salary NUMBER(10,2),
+    change_date DATE DEFAULT SYSDATE,
+    CONSTRAINT fk_log_employee
+      FOREIGN KEY (employee_id)
+      REFERENCES employees(id)
+);
+
+-- Sequências para geração de IDs
+CREATE SEQUENCE seq_departments START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE seq_employees START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE seq_projects START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE seq_salary_logs START WITH 1 INCREMENT BY 1;
+
+----------------------------------------------------------
+-- Inserção de Dados Fictícios
+----------------------------------------------------------
+
+-- Inserir Departamentos
+INSERT INTO departments (id, department_name)
+VALUES (seq_departments.NEXTVAL, 'Recursos Humanos');
+
+INSERT INTO departments (id, department_name)
+VALUES (seq_departments.NEXTVAL, 'Tecnologia');
+
+INSERT INTO departments (id, department_name)
+VALUES (seq_departments.NEXTVAL, 'Financeiro');
+
+-- Inserir Funcionários
+INSERT INTO employees (id, name, salary, department_id)
+VALUES (seq_employees.NEXTVAL, 'João Silva', 5000, 2);
+
+INSERT INTO employees (id, name, salary, department_id)
+VALUES (seq_employees.NEXTVAL, 'Maria Oliveira', 7000, 1);
+
+INSERT INTO employees (id, name, salary, department_id)
+VALUES (seq_employees.NEXTVAL, 'Carlos Pereira', 9000, 2);
+
+INSERT INTO employees (id, name, salary, department_id)
+VALUES (seq_employees.NEXTVAL, 'Ana Souza', 8000, 3);
+
+-- Inserir Projetos
+INSERT INTO projects (id, project_name)
+VALUES (seq_projects.NEXTVAL, 'Projeto Alpha');
+
+INSERT INTO projects (id, project_name)
+VALUES (seq_projects.NEXTVAL, 'Projeto Beta');
+
+INSERT INTO projects (id, project_name)
+VALUES (seq_projects.NEXTVAL, 'Projeto Gamma');
+
+-- Associar Funcionários aos Projetos (Exemplo: Many-to-Many)
+INSERT INTO employee_projects (employee_id, project_id)
+VALUES (1, 1); -- João em Projeto Alpha
+
+INSERT INTO employee_projects (employee_id, project_id)
+VALUES (1, 2); -- João em Projeto Beta
+
+INSERT INTO employee_projects (employee_id, project_id)
+VALUES (2, 2); -- Maria em Projeto Beta
+
+INSERT INTO employee_projects (employee_id, project_id)
+VALUES (3, 1); -- Carlos em Projeto Alpha
+
+INSERT INTO employee_projects (employee_id, project_id)
+VALUES (3, 3); -- Carlos em Projeto Gamma
+
+INSERT INTO employee_projects (employee_id, project_id)
+VALUES (4, 3); -- Ana em Projeto Gamma
+
+COMMIT;
+
+----------------------------------------------------------
+-- Criação de Trigger para Log de Alteração de Salário
+----------------------------------------------------------
+CREATE OR REPLACE TRIGGER trg_salary_log
+AFTER UPDATE OF salary ON employees
+FOR EACH ROW
+BEGIN
+    INSERT INTO salary_logs (log_id, employee_id, old_salary, new_salary, change_date)
+    VALUES (seq_salary_logs.NEXTVAL, :OLD.id, :OLD.salary, :NEW.salary, SYSDATE);
+END;
+/
+
+----------------------------------------------------------
+-- Criação de View para Funcionários com Salário Acima de 7000
+----------------------------------------------------------
+CREATE OR REPLACE VIEW high_salary_employees AS
+SELECT * FROM employees
+WHERE salary > 7000;
+/
+
+----------------------------------------------------------
+-- Exercícios Resolvidos
+----------------------------------------------------------
+
+-- 1. Listar todos os funcionários de um departamento específico (ex.: departamento de Tecnologia - id = 2)
+SELECT e.id, e.name, e.salary, d.department_name
+FROM employees e
+INNER JOIN departments d ON e.department_id = d.id
+WHERE d.id = 2;
+
+-- 2. Encontrar o funcionário com o maior salário
+SELECT e.id, e.name, e.salary
+FROM employees e
+WHERE e.salary = (SELECT MAX(salary) FROM employees);
+
+-- 3. Contar quantos projetos cada funcionário está envolvido
+SELECT e.id, e.name, COUNT(ep.project_id) AS total_projects
+FROM employees e
+LEFT JOIN employee_projects ep ON e.id = ep.employee_id
+GROUP BY e.id, e.name
+ORDER BY total_projects DESC;

@@ -1,0 +1,20 @@
+// Aula 22 - Limitar recursos e sistema de somente leitura
+
+$ docker container run --rm -it \
+--name stress-test \
+--memory 512M \
+ubuntu:latest /bin/bash
+
+/ # apt-get update && apt-get install -y stress
+
+# docker stats
+
+/# stress -m 4
+
+$ docker container run --tty -d \
+--name read-only \
+--read-only \
+alpine /bin/sh
+
+$ docker container exec -it read-only \
+sh -c 'echo "Teste de escrita!" > ./sample.txt'

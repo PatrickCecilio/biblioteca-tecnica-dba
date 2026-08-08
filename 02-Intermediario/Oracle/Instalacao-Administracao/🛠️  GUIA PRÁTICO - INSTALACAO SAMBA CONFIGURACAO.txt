@@ -1,0 +1,227 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+Para instalar o **Samba** no Oracle Linux 8 e configurar um compartilhamento para armazenar seus relatórios, siga estes passos:
+
+---
+
+### **1️⃣ Instalar o Samba**
+```bash
+sudo dnf install -y samba samba-common samba-client
+```
+
+### **2️⃣ Criar um Diretório para os Relatórios**
+```bash
+sudo mkdir -p /srv/relatorios_pentest
+sudo chmod 777 /srv/relatorios_pentest  # Permite acesso de leitura e escrita para todos os usuários
+```
+
+### **3️⃣ Configurar o Samba**
+Edite o arquivo de configuração:
+```bash
+sudo nano /etc/samba/smb.conf
+```
+Adicione ao final do arquivo:
+```ini
+[RelatoriosPentest]
+   path = /srv/relatorios_pentest
+   writable = yes
+   guest ok = yes
+   create mask = 0666
+   directory mask = 0777
+```
+Isso cria um compartilhamento **aberto (sem senha)** acessível a partir da rede.
+
+### **4️⃣ Habilitar e Iniciar o Serviço**
+```bash
+sudo systemctl enable smb --now
+sudo systemctl enable nmb --now
+```
+
+### **5️⃣ Permitir o Samba no Firewall**
+```bash
+sudo firewall-cmd --permanent --add-service=samba
+sudo firewall-cmd --reload
+```
+
+### **6️⃣ Testar o Compartilhamento**
+- No Windows, abra o **Executar (Win + R)** e digite:
+  ```
+  \\<IP_DO_SERVIDOR>\RelatoriosPentest
+  ```
+- No Linux:
+  ```bash
+  smbclient -L //<IP_DO_SERVIDOR> -N
+  ```
+
+Agora, qualquer máquina na rede pode acessar os relatórios dentro de `/srv/relatorios_pentest`.
+
+💡 **Quer adicionar autenticação com usuário e senha para maior segurança?** 🔒
+
+=========================================================================================
+Para adicionar **autenticação com usuário e senha** ao compartilhamento Samba no **Oracle Linux 8**, siga estes passos:
+
+---
+
+## **1️⃣ Criar um Usuário para o Samba**
+Crie um usuário do sistema (caso não exista):
+```bash
+sudo useradd -M -s /sbin/nologin pentest
+```
+- `-M`: Não cria diretório home.
+- `-s /sbin/nologin`: Impede login direto no sistema.
+
+Agora, defina uma senha **exclusiva** para o Samba:
+```bash
+sudo smbpasswd -a pentest
+```
+Digite uma senha forte e **anote-a**.
+
+Ative o usuário no Samba:
+```bash
+sudo smbpasswd -e pentest
+```
+
+---
+
+## **2️⃣ Configurar o Samba para Exigir Login**
+Edite o arquivo de configuração:
+```bash
+sudo nano /etc/samba/smb.conf
+```
+
+🔹 **Modifique a configuração do compartilhamento** para exigir login:
+```ini
+[RelatoriosPentest]
+   path = /srv/relatorios_pentest
+   writable = yes
+   guest ok = no
+   valid users = pentest
+   create mask = 0660
+   directory mask = 0770
+```
+Isso significa:
+- Somente o usuário `pentest` pode acessar.
+- Os arquivos criados terão permissões **seguras (0660 e 0770)**.
+
+---
+
+## **3️⃣ Reiniciar o Samba para Aplicar as Mudanças**
+```bash
+sudo systemctl restart smb
+sudo systemctl restart nmb
+```
+
+---
+
+## **4️⃣ Testar o Acesso**
+Agora, ao acessar o compartilhamento, será solicitado login.
+
+### **No Windows** (Executar → `Win + R`):
+Digite:
+```
+\\<IP_DO_SERVIDOR>\RelatoriosPentest
+```
+**Usuário:** `pentest`
+**Senha:** (aquela definida no `smbpasswd`)
+
+### **No Linux**:
+Testar se o compartilhamento aparece:
+```bash
+smbclient -L //<IP_DO_SERVIDOR> -U pentest
+```
+Para conectar e listar arquivos:
+```bash
+smbclient //<IP_DO_SERVIDOR>/RelatoriosPentest -U pentest
+```
+
+---
+
+Agora, apenas o usuário `pentest` pode acessar os relatórios. 🔒
+
+💡 **Quer restringir o acesso a múltiplos usuários ou um grupo específico?** 🚀
+=============================ERROR [sss_cache] [sysdb_domain_cache_connect] (0x0010)=======
+
+Esse erro está relacionado ao **SSSD (System Security Services Daemon)**, que gerencia credenciais e autenticação no sistema. O problema ocorre porque o banco de dados de cache do SSSD está desatualizado.
+
+---
+
+## **🔧 Como Resolver?**
+
+### **1️⃣ Limpar o Cache do SSSD**
+Execute o seguinte comando para remover os arquivos de cache antigos:
+```bash
+sudo rm -rf /var/lib/sss/db/*
+```
+
+### **2️⃣ Reiniciar o Serviço SSSD**
+Agora, reinicie o **SSSD** para recriar o cache atualizado:
+```bash
+sudo systemctl restart sssd
+```
+
+### **3️⃣ Tentar Criar o Usuário Novamente**
+Após a correção, tente criar o usuário **pentest** de novo:
+```bash
+sudo useradd -M -s /sbin/nologin pentest
+```
+
+Se o comando executar sem erros, prossiga com:
+```bash
+sudo smbpasswd -a pentest
+```
+
+Agora seu usuário deve estar pronto para acessar o compartilhamento Samba! 🚀
+
+Se o problema persistir, me avise! 🔧🔒
+========================================================================================
+Não automaticamente! No momento, o script salva os relatórios na **pasta local onde ele é executado**. Para que os relatórios sejam **diretamente salvos no compartilhamento Samba**, você precisa modificar o script para usar o caminho `/srv/relatorios_pentest/`.
+
+---
+
+### **🔧 Como Redirecionar os Relatórios para o Samba?**
+No seu script, substitua os locais onde os relatórios são salvos.
+Por exemplo, altere as linhas onde os arquivos são gerados, como esta:
+```bash
+nmap -O -sV $target -oN "nmap_os_services_$timestamp.txt"
+```
+Para:
+```bash
+nmap -O -sV $target -oN "/srv/relatorios_pentest/nmap_os_services_$timestamp.txt"
+```
+Faça o mesmo para todas as linhas que salvam relatórios, mudando:
+- `nmap_open_ports_<data>.txt`
+- `nikto_scan_<data>.txt`
+- `lynis_scan_<data>.txt`
+- `sqlmap_scan_<data>/`
+
+---
+
+### **🚀 Exemplo de Modificação no Script**
+Aqui está um trecho atualizado com o **novo caminho** para salvar os relatórios dentro do compartilhamento Samba:
+```bash
+# Diretório de destino dos relatórios
+RELATORIOS_DIR="/srv/relatorios_pentest"
+
+# Verifica se o diretório existe, senão cria
+if [ ! -d "$RELATORIOS_DIR" ]; then
+    sudo mkdir -p "$RELATORIOS_DIR"
+    sudo chmod 777 "$RELATORIOS_DIR"  # Garante permissões para escrita
+fi
+
+# Salvando relatórios diretamente no Samba
+nmap -O -sV $target -oN "$RELATORIOS_DIR/nmap_os_services_$timestamp.txt"
+nmap -p- $target -oN "$RELATORIOS_DIR/nmap_open_ports_$timestamp.txt"
+nikto -h $target -output "$RELATORIOS_DIR/nikto_scan_$timestamp.txt"
+lynis audit system --quick --quiet --no-colors --logfile "$RELATORIOS_DIR/lynis_scan_$timestamp.txt"
+```
+
+---
+
+### **✅ Benefícios Dessa Alteração**
+✔ Todos os relatórios serão salvos diretamente no compartilhamento Samba.
+✔ Nenhum arquivo será perdido ou salvo fora da pasta `/srv/relatorios_pentest/`.
+✔ O acesso será mais fácil, já que qualquer usuário com permissão poderá ver os relatórios na rede.
+
+---
+
+💡 **Quer que eu modifique todo o script para você e te envie a versão atualizada?** 🚀

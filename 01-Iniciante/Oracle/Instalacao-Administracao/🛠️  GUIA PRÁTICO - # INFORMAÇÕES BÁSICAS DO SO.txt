@@ -1,0 +1,12 @@
+uname -a > $LOGDIR/os_uname.txt
+cat /etc/os-release > $LOGDIR/os_release.txt
+
+df -h > $LOGDIR/df_h.txt
+mount | egrep -i 'nfs|/u01|/backup|/oradata' > $LOGDIR/mounts.txt
+free -m > $LOGDIR/free_m.txt
+lsblk > $LOGDIR/lsblk.txt
+
+ss -ltnp > $LOGDIR/🛠️  GUIA PRÁTICO - SS LISTENING.txt
+netstat -tulpen > $LOGDIR/🛠️  GUIA PRÁTICO - NETSTAT LIST.txt
+
+ps -ef | egrep 'ora_|pmon|tns|tnslsnr' > $LOGDIR/os_oracle_procs.txt

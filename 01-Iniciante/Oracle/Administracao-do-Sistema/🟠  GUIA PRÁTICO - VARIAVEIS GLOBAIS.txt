@@ -1,0 +1,79 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+LAB
+
+AGORA VAMOS CONFIGURAR AS VARIAVEIS GLOBAIS DO ORACLE, SEJAM CARREGADAS NA MEMORIA
+DO SERVIDOR SEMPRE QUE O SERVIDOR FOR LIGADO, INDEPENDENTEMENTE DE ALGUEM FAZER UM LOGON
+NO LINUX:
+
+Rode sob a conta do user root
+
+sudo nano /etc/profile.d/oracle.sh
+
+export ORACLE_HOME=/app/oracle/product/21c/dbhome_1
+export ORACLE_SID=orcl
+export ORACLE_BASE=/app/oracle/
+export ORACLE_HOSTNAME=cursooraclelocaldomain
+export PATH=$ORACLE_HOME/bin:$PATH
+
+cat /etc/profile.d/oracle.sh
+
+sALVE O ARQUIVO E DE UM REBOOT pelo terminal como root ou moba
+
+reboot
+
+Acesse como root no MOBA e tambem com user oracle e veja as variaveis que foram definidas:
+
+echo $ORACLE_HOME
+echo $ORACLE_SID
+echo $PATH
+echo $ORACLE_BASE
+echo $ORACLE_HOSTNAME
+
+-----
+
+SE VOCE PRECISAR QUE ALGUMA VARIAVEL SEJA CARREGADA NA MEMORIA EM UMA SESSAO DE UM USUARIO
+ESPECIFICO VOCE IRIA USAR OUTRO RECURSO:
+
+Por exemplo, poderia subir uma variavel local para o user root ou user oracle quando este
+fizesse um login e iria ficar apenas definido para ele:
+
+VAMOS NA SESSAO DO USER ORACLE, SUBIR ALGUMAS CONFIGURACOES PERSONALIZADAS.
+PARA ISTO RODE:
+
+nano ~/.bash_profile
+
+Adicione a seguinte linha ao final do arquivo .bash_profile:
+
+export ORACLE_HOME=/app/oracle/product/21c/dbhome_2
+export ORACLE_SID=orcl2
+export PATH=$PATH:/home
+
+Salve as alterações e feche o editor.
+
+e de um boot e se logue como root e oracle pelo MOBA e rode:
+
+echo $ORACLE_HOME
+echo $ORACLE_SID
+echo $PATH
+
+OBS: VEJA AS DEFINICOES LOCAIS TEM PREFERENCIA SOBRE A GERAL, QUANDO ESTABELECEMOS AS MESMAS
+VARIAVEIS, NO CASO $ORACLE_HOME E $ORACLE_SID E O NOVO CAMINHO /home FOI ADICIONADO A LISTA
+GERAL
+
+vAMOS AGORA EDITAR O ARQUIVO .bash_profile E VAMOS DELETAR AS LINHAS DE EXPORT:
+
+export ORACLE_HOME=/app/oracle/product/21c/dbhome_2
+export ORACLE_SID=orcl2
+export PATH=$PATH:/home
+
+nano ~/.bash_profile
+
+VAMOS SALVAR E DAR BOOT NOVAMENTE PELO TERMINAL COM USER ROOT E VAMOS VER NOVAMENTE
+AS VARIAVEIS
+
+echo $ORACLE_HOME
+echo $ORACLE_SID
+echo $PATH
+
+OBS: NO FUTURO, A PARTIR DE UMA NECESSIDADE IREMOS DEFININDO OUTRAS VARIAVEIS.

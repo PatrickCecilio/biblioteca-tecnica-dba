@@ -1,0 +1,66 @@
+git clone
+
+cd Linux/e-shop/monolith/
+
+export FLASK_APP=main.py
+
+curl localhost:5000/catalog?category=bicycles
+
+vim /etc/hosts
+
+ping acme.com
+
+vim Dockerfile
+
+RUN pip install -r requirements.txt
+COPY . .
+EXPOSE 5000
+CMD python main.py
+
+docker image build -t acme/eshop:1.0 .
+
+docker container run --rm -it \
+--name eshop \
+-p 5000:5000 \
+acme/eshop:1.0
+
+curl
+
+curl
+
+cd catalog
+
+docker image build -t acme/catalog:1.0 .
+
+docker run --rm -it --name catalog -p 3000:3000 acme/catalog:1.0
+
+curl
+
+docker container run --rm -d \
+--name catalog \
+--label traefik.enable=true \
+--label traefik.port=3000 \
+--label traefik.priority=10 \
+--label traefik.http.routers.catalog.rule="Host(\"acme.com\")
+&& PathPrefix(\"/catalog\")" \
+acme/catalog:1.0
+
+docker container run --rm -d \
+--name eshop \
+--label traefik.enable=true \
+--label traefik.port=5000 \
+--label traefik.priority=1 \
+--label traefik.http.routers.eshop.rule="Host(\"acme.com\")" \
+acme/eshop:1.0
+
+docker run -d \
+--name traefik \
+-p 8080:8080 \
+-p 80:80 \
+-v /var/run/docker.sock:/var/run/docker.sock \
+traefik:v2.0 --api.insecure=true --providers.docker
+
+curl
+curl
+
+docker container rm -f traefik eshop catalog

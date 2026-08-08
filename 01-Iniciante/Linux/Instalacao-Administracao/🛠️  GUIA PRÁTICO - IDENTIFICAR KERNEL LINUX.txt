@@ -1,0 +1,9 @@
+IDENTIFICAR O KERNEL LINUX
+
+Objetivo: consultar versão, arquitetura e informações gerais do kernel sem alterar o sistema.
+
+uname -a
+uname -r
+uname -m
+
+Validação: registre a versão retornada e compare-a com os requisitos do software que será instalado.

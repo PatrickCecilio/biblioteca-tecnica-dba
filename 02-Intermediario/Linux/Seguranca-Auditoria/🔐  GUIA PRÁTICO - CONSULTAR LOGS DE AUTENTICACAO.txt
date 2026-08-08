@@ -1,0 +1,10 @@
+CONSULTAR LOGS DE AUTENTICAÇÃO NO LINUX
+
+Objetivo: investigar logins e falhas sem expor hashes de senha.
+
+sudo tail -n 100 /var/log/secure
+sudo journalctl -u sshd --since today
+last -a
+lastlog
+
+Validação: correlacione usuário, origem, horário e resultado. Não copie /etc/shadow para relatórios.

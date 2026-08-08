@@ -1,0 +1,11 @@
+docker volume create sample
+
+docker volume inspect sample
+
+docker run -it --rm --privileged --pid=host \
+
+docker container rm test
+
+docker container run --name test2 -it \
+
+docker container rm -f $(docker container ls -aq)

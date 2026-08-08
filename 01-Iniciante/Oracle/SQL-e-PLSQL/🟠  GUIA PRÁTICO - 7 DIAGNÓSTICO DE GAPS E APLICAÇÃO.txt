@@ -1,0 +1,12 @@
+7. diagnóstico de gaps e aplicação de logs
+-- No standby: identifica gaps de archive log
+SELECT * FROM V$ARCHIVE_GAP;
+
+-- No standby: verifica aplicação de logs
+SELECT PROCESS, STATUS, SEQUENCE# FROM V$MANAGED_STANDBY;
+
+-- Histórico de aplicação:
+SELECT SEQUENCE#, APPLIED, COMPLETION_TIME
+FROM   V$ARCHIVED_LOG
+WHERE  DEST_ID=2
+ORDER BY SEQUENCE# DESC;

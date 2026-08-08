@@ -1,0 +1,19 @@
+#!/bin/bash
+set -euo pipefail
+
+read -r n1 n2
+
+soma=$((n1 + n2))
+subtracao=$((n1 - n2))
+multiplicacao=$((n1 * n2))
+
+printf 'Soma: %s\n' "$soma"
+printf 'Subtração: %s\n' "$subtracao"
+printf 'Multiplicação: %s\n' "$multiplicacao"
+
+if ((n2 != 0)); then
+  divisao=$(awk -v a="$n1" -v b="$n2" 'BEGIN { printf "%.2f", a / b }')
+  resto=$((n1 % n2))
+  printf 'Divisão: %s\n' "$divisao"
+  printf 'Resto: %s\n' "$resto"
+fi

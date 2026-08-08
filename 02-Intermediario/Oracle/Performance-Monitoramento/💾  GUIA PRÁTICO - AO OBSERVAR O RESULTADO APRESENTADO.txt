@@ -1,0 +1,13 @@
+SELECT sid, serial#, username, blocking_session, event, wait_class, seconds_in_wait
+FROM v$session
+WHERE blocking_session IS NOT NULL
+ORDER BY seconds_in_wait DESC;
+
+SELECT * FROM dba_blockers;
+
+SELECT * FROM dba_waiters;
+
+SELECT sid, serial#, username, event, seconds_in_wait
+FROM v$session
+WHERE event LIKE 'enq:%'
+ORDER BY seconds_in_wait DESC;

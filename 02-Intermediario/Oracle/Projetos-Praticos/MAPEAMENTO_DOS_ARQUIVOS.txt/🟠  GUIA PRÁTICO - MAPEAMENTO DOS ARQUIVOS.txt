@@ -1,0 +1,136 @@
+PROJETOS ORACLE — ESTRUTURA ORGANIZADA
+==================================================
+
+Os 113 arquivos foram classificados por assunto e cada captura foi colocada em uma única pasta.
+Os nomes originais dos arquivos foram preservados para manter a sequência cronológica.
+
+01 - Implantação e atualização do Oracle Database 19c Multitenant — 21 arquivo(s)
+  - Captura de tela 2026-06-10 15512🖼️  IMAGEM - 3.png
+  - Captura de tela 2026-06-10 15530🖼️  IMAGEM - 3.png
+  - Captura de tela 2026-06-10 15561🖼️  IMAGEM - 3.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 10 160227.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 10 161108.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 10 163709.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 10 164209.png
+  - Captura de tela 2026-06-10 16451🖼️  IMAGEM - 1.png
+  - Captura de tela 2026-06-10 17010🖼️  IMAGEM - 4.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 10 171638.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 10 173046.png
+  - Captura de tela 2026-06-10 17382🖼️  IMAGEM - 4.png
+  - Captura de tela 2026-06-10 17431🖼️  IMAGEM - 3.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 10 174439.png
+  - Captura de tela 2026-06-10 17493🖼️  IMAGEM - 1.png
+  - Captura de tela 2026-06-10 17500🖼️  IMAGEM - 1.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 10 180816.png
+  - Captura de tela 2026-06-10 18102🖼️  IMAGEM - 1.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 10 184249.png
+  - Captura de tela 2026-06-10 18460🖼️  IMAGEM - 1.png
+  - Captura de tela 2026-06-10 18533🖼️  IMAGEM - 5.png
+
+02 - Troubleshooting do Oracle Listener e conectividade — 7 arquivo(s)
+  - Captura de tela 2026-06-10 17251🖼️  IMAGEM - 3.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 10 172638.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 10 172717.png
+  - Captura de tela 2026-06-10 17272🖼️  IMAGEM - 5.png
+  - Captura de tela 2026-06-10 17505🖼️  IMAGEM - 2.png
+  - Captura de tela 2026-06-10 18094🖼️  IMAGEM - 3.png
+  - Captura de tela 2026-06-10 18105🖼️  IMAGEM - 3.png
+
+03 - Provisionamento de schema em Oracle Multitenant — 12 arquivo(s)
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 10 185649.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 10 185738.png
+  - Captura de tela 2026-06-10 18584🖼️  IMAGEM - 4.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 10 190058.png
+  - Captura de tela 2026-06-10 19021🖼️  IMAGEM - 5.png
+  - Captura de tela 2026-06-10 19071🖼️  IMAGEM - 2.png
+  - Captura de tela 2026-06-10 19075🖼️  IMAGEM - 5.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 10 190947.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 10 191306.png
+  - Captura de tela 2026-06-10 19134🖼️  IMAGEM - 5.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 10 191720.png
+  - Captura de tela 2026-06-10 19181🖼️  IMAGEM - 2.png
+
+04 - Migração de schema com Oracle Data Pump — 11 arquivo(s)
+  - Captura de tela 2026-06-10 19245🖼️  IMAGEM - 5.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 10 192536.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 10 192648.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 10 193709.png
+  - Captura de tela 2026-06-10 19384🖼️  IMAGEM - 3.png
+  - Captura de tela 2026-06-10 19402🖼️  IMAGEM - 2.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 10 194050.png
+  - Captura de tela 2026-06-10 19452🖼️  IMAGEM - 1.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 10 195050.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 10 195440.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 10 195620.png
+
+05 - Automação de backups com Oracle RMAN, Shell Script e Cron — 5 arquivo(s)
+  - Captura de tela 2026-06-10 20022🖼️  IMAGEM - 2.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 10 200300.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 10 204240.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 094150.png
+  - Captura de tela 2026-06-11 09460🖼️  IMAGEM - 1.png
+
+06 - Disaster Recovery com Oracle RMAN — 24 arquivo(s)
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 083950.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 084139.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 084248.png
+  - Captura de tela 2026-06-11 08464🖼️  IMAGEM - 5.png
+  - Captura de tela 2026-06-11 08565🖼️  IMAGEM - 3.png
+  - Captura de tela 2026-06-11 09013🖼️  IMAGEM - 3.png
+  - Captura de tela 2026-06-11 09145🖼️  IMAGEM - 4.png
+  - Captura de tela 2026-06-11 09153🖼️  IMAGEM - 1.png
+  - Captura de tela 2026-06-11 09161🖼️  IMAGEM - 1.png
+  - Captura de tela 2026-06-11 09165🖼️  IMAGEM - 1.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 091719.png
+  - Captura de tela 2026-06-11 09193🖼️  IMAGEM - 5.png
+  - Captura de tela 2026-06-11 09201🖼️  IMAGEM - 2.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 092126.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 092307.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 092546.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 092738.png
+  - Captura de tela 2026-06-11 09295🖼️  IMAGEM - 2.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 093029.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 093248.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 093520.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 093547.png
+  - Captura de tela 2026-06-11 09391🖼️  IMAGEM - 2.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 094036.png
+
+07 - Recuperação de PDB com Oracle Flashback Database — 11 arquivo(s)
+  - Captura de tela 2026-06-10 20533🖼️  IMAGEM - 1.png
+  - Captura de tela 2026-06-11 09573🖼️  IMAGEM - 2.png
+  - Captura de tela 2026-06-11 09583🖼️  IMAGEM - 2.png
+  - Captura de tela 2026-06-11 09584🖼️  IMAGEM - 5.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 095906.png
+  - Captura de tela 2026-06-11 10042🖼️  IMAGEM - 1.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 100439.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 100500.png
+  - Captura de tela 2026-06-11 10052🖼️  IMAGEM - 1.png
+  - Captura de tela 2026-06-11 10061🖼️  IMAGEM - 2.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 100659.png
+
+08 - Reorganização de storage, tabelas e índices — 21 arquivo(s)
+  - Captura de tela 2026-06-11 10262🖼️  IMAGEM - 1.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 102700.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 102807.png
+  - Captura de tela 2026-06-11 10294🖼️  IMAGEM - 4.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 103146.png
+  - Captura de tela 2026-06-11 10430🖼️  IMAGEM - 5.png
+  - Captura de tela 2026-06-11 10553🖼️  IMAGEM - 4.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 105630.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 105657.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 105746.png
+  - Captura de tela 2026-06-11 10581🖼️  IMAGEM - 4.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 105937.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 110048.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 110127.png
+  - Captura de tela 2026-06-11 11035🖼️  IMAGEM - 5.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 110806.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 110906.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 111056.png
+  - Captura de tela 2026-06-11 11112🖼️  IMAGEM - 4.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 111139.png
+  - 🖼️  IMAGEM - CAPTURA DE TELA 2026 06 11 111156.png
+
+99 - Arquivo não relacionado - Higgsfield CLI — 1 arquivo(s)
+  - 🎓  MATERIAL DE ESTUDO - CAPTURA DE TELA 2026 06 15 002038.png

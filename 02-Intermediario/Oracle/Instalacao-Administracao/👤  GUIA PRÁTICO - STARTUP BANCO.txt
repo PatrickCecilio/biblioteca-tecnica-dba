@@ -1,0 +1,129 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+1°AJUSTAR O /etc/oratab
+O dbstart/dbshut usa o oratab para decidir o que subir/descer automaticamente.
+-------------------------------------------------------------------------------------------------------------------------------------------
+
+cat /etc/oratab
+sid:oracle_home_directory:[Y|N] selecione a opção Y
+
+vi /etc/oratab
+CDB1:/u01/app/oracle/product/19.3.0/dbhome_1:Y
+
+==========================================================================================================================================
+2° ARQUIVO DE VARIÁVEIS DE AMBIENTE
+-------------------------------------------------------------------------------------------------------------------------------------------
+ mkdir -p /home/oracle/scripts
+ sudo chown -R oracle:oinstall /home/oracle/scripts
+ sudo chmod 775 /home/oracle/scripts
+
+Arquivo:
+ /home/oracle/scripts/setEnv.sh
+
+Conteúdo:
+ #!/bin/bash
+ # Ambiente Oracle - uso em scripts systemd
+
+ export ORACLE_BASE=/u01/app/oracle
+ export ORACLE_HOME=$ORACLE_BASE/product/19.3.0/dbhome_1
+ export ORACLE_SID=CDB1
+ export ORACLE_UNQNAME=CDB1
+
+ export PATH=$ORACLE_HOME/bin:/usr/sbin:/usr/bin:/bin
+ export LD_LIBRARY_PATH=$ORACLE_HOME/lib
+
+ # Carrega ambiente via oratab (padrão Oracle)
+ export ORAENV_ASK=NO
+ . /usr/local/bin/oraenv >/dev/null 2>&1 || \
+ . /usr/bin/oraenv >/dev/null 2>&1
+ export ORAENV_ASK=YES
+
+Permissões:
+ sudo chown oracle:oinstall /home/oracle/scripts/setEnv.sh
+ sudo chmod 775 /home/oracle/scripts/setEnv.sh
+
+==========================================================================================================================================
+3° Criar o script de startup
+-------------------------------------------------------------------------------------------------------------------------------------------
+
+vi /home/oracle/scripts/start_oracle.sh
+
+#!/bin/bash
+export ORACLE_HOME=/u01/app/oracle/product/19.3.0/dbhome_1
+export ORACLE_SID=CDB1
+export PATH=$ORACLE_HOME/bin:$PATH
+
+# Iniciar banco de dados
+$ORACLE_HOME/bin/dbstart $ORACLE_HOME
+
+# Start listener
+$ORACLE_HOME/bin/lsnrctl start
+
+# Abrir banco de dados
+echo "startup;" | $ORACLE_HOME/bin/sqlplus -s / as sysdba
+
+sudo chmod +x /home/oracle/scripts/start_oracle.sh
+
+==========================================================================================================================================
+4° Criar o serviço systemd como root
+-------------------------------------------------------------------------------------------------------------------------------------------
+
+vi /etc/systemd/system/oracle-listener.service
+
+[Unit]
+Description=Oracle Database and Listener
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+ExecStart=/bin/bash /home/oracle/scripts/start_oracle.sh
+ExecStop=/bin/bash -c '/u01/app/oracle/product/19.3.0/dbhome_1/bin/lsnrctl stop && /u01/app/oracle/product/19.3.0/dbhome_1/bin/dbshut /u01/app/oracle/product/19.3.0/dbhome_1'
+User=oracle
+Group=oinstall
+LimitNOFILE=65535
+LimitMEMLOCK=infinity
+Restart=no
+RestartSec=3
+Type=oneshot
+RemainAfterExit=yes
+Environment="ORACLE_HOME=/u01/app/oracle/product/19.3.0/dbhome_1"
+Environment="ORACLE_SID=CDB1"
+TimeoutStartSec=900
+TimeoutStopSec=900
+
+[Install]
+WantedBy=multi-user.target
+
+==========================================================================================================================================
+5° Ativar/Permissionamento do serviço no boot
+-------------------------------------------------------------------------------------------------------------------------------------------
+
+ls -lZ /u01/app/oracle/product/19.3.0/dbhome_1/bin/lsnrctl
+-rwxr-x--x. 1 oracle oinstall unconfined_u:object_r:default_t:s0 188464 jan  9 14:04 /u01/app/oracle/product/19.3.0/dbhome_1/bin/lsnrctl
+
+
+sudo semanage fcontext -a -t bin_t '/u01/app/oracle/product/19\.3\.0/dbhome_1/bin(/.*)?'
+sudo restorecon -Rv /u01/app/oracle/product/19.3.0/dbhome_1/bin
+
+ls -lZ /u01/app/oracle/product/19.3.0/dbhome_1/bin/lsnrctl
+-rwxr-x--x. 1 oracle oinstall unconfined_u:object_r:bin_t:s0 196144 out 27 21:35 /u02/app/oracle/product/21.3.0/dbhome_1/bin/lsnrctl
+
+sudo systemctl daemon-reload
+sudo systemctl enable oracle-listener.service
+sudo systemctl status oracle-listener.service -l
+
+
+==========================================================================================================================================
+ETAPA 6 – CONFIGURAR AUTO-OPEN DOS PDBs (CRÍTICO)
+-------------------------------------------------------------------------------------------------------------------------------------------
+Conectar como oracle:
+ sqlplus / as sysdba
+
+Comandos:
+ SHOW PDBS;
+ ALTER PLUGGABLE DATABASE PDB1 OPEN;
+ ALTER PLUGGABLE DATABASE PDB1 SAVE STATE;
+
+Resultado:
+ - Oracle memoriza o estado do PDB
+ - PDB abre automaticamente após reboot

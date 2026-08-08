@@ -1,0 +1,3 @@
+2. Alteração de parâmetro para habilitar destino
+-- Habilita o destino 3 de transporte de redo para todas as instâncias (RAC ou não)
+ALTER SYSTEM SET log_archive_dest_state_3=ENABLE SCOPE=BOTH SID='*';

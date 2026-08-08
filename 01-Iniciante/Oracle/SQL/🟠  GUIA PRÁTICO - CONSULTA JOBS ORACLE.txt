@@ -1,0 +1,3 @@
+SELECT owner, job_name, enabled, state, last_start_date, next_run_date, job_action
+FROM dba_scheduler_jobs
+ORDER BY owner, job_name;

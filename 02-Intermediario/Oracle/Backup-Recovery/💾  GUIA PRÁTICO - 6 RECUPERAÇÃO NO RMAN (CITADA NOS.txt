@@ -1,0 +1,9 @@
+6. Recuperação no RMAN (citada nos prints de lacuna)
+-- Restaurar archivelogs de uma sequência específica (se disponível no catálogo)
+RESTORE ARCHIVELOG SEQUENCE = <número_da_sequência>;
+
+-- Recuperar banco standby com os arquivos restaurados
+RECOVER STANDBY DATABASE;
+
+-- prever recuperação até SCN para flexibilidade
+RECOVER DATABASE UNTIL SCN <valor>;

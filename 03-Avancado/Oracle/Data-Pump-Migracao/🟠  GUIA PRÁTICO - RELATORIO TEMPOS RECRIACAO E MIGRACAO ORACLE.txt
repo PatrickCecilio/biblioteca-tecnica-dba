@@ -1,0 +1,37 @@
+delete banco as 19:04 termino as 20:27
+criação do banco as 20:30 termino as 21:24
+
+
+gastei 2 horas e 17 minutos para deletar e criar o banco.
+
+3 horas de manutenção de banco
+
+
+exclusão do banco iniciou às 19:04 e foi concluída às 20:27.
+A criação do novo banco começou às 20:30 e terminou às 21:24.
+
+No total, foram 2 horas e 17 minutos e mais 2 horas de manutenção do banco totalizando 4 horas 17 minutos
+
+export full: 02:25:24
+import full: 01:16:21
+import schema:01:14:48
+
+total 2:31
+
+
+A exclusão do banco iniciou às 19:04 e foi concluída às 20:27, seguida pela criação do novo ambiente entre 20:30 e 21:24.
+Além de 2 horas de manutenção, a exportação full levou 2h25, a importação full 1h16 e a importação de schema 1h14.
+No total, o processo demandou 4 horas e 17 minutos para a recomposição do ambiente.
+
+
+A exclusão do banco iniciou às 19:04 e foi concluída às 20:27, totalizando 1h23. Em seguida, a criação do novo ambiente ocorreu entre 20:30 e 21:24, com duração de 54 minutos, somando 2h17 de atividades de manutenção.
+A exportação full levou 2h25, a importação full 1h16 e a importação de schema 1h14, totalizando 4h55 para a recomposição lógica do ambiente.
+foi gasto mais duas horas para configurar e ajustar initdbprod, spfile, sga e pga e  hugepages?
+No total, o processo demandou 9 horas e 12 minutos.
+
+
+Fase da Atividade,Duração,Descrição
+Manutenção de Instância,02h 17min,Exclusão e recriação do ambiente físico.
+Migração de Dados,04h 55min,Exportação Full e Importações (Full e Schema).
+Tuning e Ajustes,02h 00min,"Configuração de memória, SPFILE e HugePages."
+Tempo Total,09h 12min,Conclusão de todo o ciclo de manutenção.

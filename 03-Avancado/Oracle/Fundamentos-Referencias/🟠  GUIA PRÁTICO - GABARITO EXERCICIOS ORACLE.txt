@@ -1,0 +1,207 @@
+Pergunta 1:
+ You need to move your VM Cluster to a different Oracle Cloud Infrastructure (OCI) compartment... If you do this?
+
+R= The VM Cluster and the underlying Exadata Infrastructure will move to the new compartment. All other resources will remain in the existing compartment.
+
+Pergunta 2:
+ Which two statements are true about Network Security Group Rules?
+
+They can be applied to the Client and Backup Network.
+Explicação
+NSG rules can be applied to VNICs in specific subnets, including client and backup networks.
+
+They can be applied to a Subnet of VNICs.
+Explicação
+NSGs are attached to individual VNICs, not the entire subnet.
+
+Pergunta 3:
+What is true about scaling your Exadata Infrastructure in the cloud?
+
+Resposta correta
+You can expand a Quarter Rack and a Half Rack X8 by adding Compute servers or Storage servers online.
+
+Pergunta 4:
+With Exadata Database Service, what is true about the available licensing models?
+Sua resposta está correta
+You can switch between licensing models as many times as you like online.
+
+
+Pergunta 5:
+Which method must you use to patch databases on Exadata Database Service with the least amount of downtime?
+
+Sua resposta está correta
+Move the database to a new Home with the desired patch level.
+Explicação
+The "Move Database" operation to a pre-patched Oracle Home typically incurs the least downtime compared to in-place patching.
+
+
+Which is NOT a prerequisite for patching the Grid Infrastructure or Database Homes when using the console?
+
+Sua resposta está correta
+Ensuring that the Clusterware is down on the VM Cluster.
+Explicação
+This is NOT a prerequisite. For rolling patches, the clusterware should be up. You do not need to shut down the entire clusterware.
+
+
+Pergunta 7:
+Which two statements are true when enabling Data Guard on Exadata Database Service?
+Sua seleção está correta
+
+You can enable Data Guard to support your Standby or Disaster Recovery (DR) needs with a single API call or mouse click in the UI using cloud automation.
+Explicação
+OCI provides automated Data Guard setup.
+
+Seleção correta
+You can use Active Data Guard, which extends Oracle Data Guard capabilities by providing read/write functionality on the Standby or Disaster Recovery.
+
+Pergunta 8:
+The /u02 directory containing Oracle Homes (OH) is 80% utilized and you need to free up space in it... Which two actions must you perform?
+
+Sua seleção está correta
+Schedule a downtime window with the team using the 193B database.
+Explicação
+You will need downtime to move the database.
+
+Sua seleção está correta
+Use the Move Database option from the console to relocate the database to the target Oracle Home.
+Explicação
+The "Move Database" feature in the OCI console is the supported method to relocate a database to a different Oracle Home.
+
+Pergunta 9:
+What can you use to enable an on-premises Enterprise Manager instance to monitor Exadata Database Service in a Private Oracle Cloud Infrastructure (OCI) Subnet?
+Sua resposta está correta
+FastConnect
+Explicação
+A FastConnect private peering connection provides a secure, dedicated network link from on-premises to the OCI VCN, allowing Enterprise Manager to reach the private subnet.
+
+Pergunta 10:
+Which network is used to facilitate the secure monitoring and administration of Oracle-managed infrastructure components in Exadata Cloud@Customer?
+
+Sua resposta está correta
+Cloud operations network
+Explicação
+The Cloud Operations Network is a separate, secure channel used by Oracle to manage the underlying Exadata@Customer infrastructure.
+
+Pergunta 11:
+You want to protect all the network communications between your organization network and Oracle Cloud using secure encryption and integrity algorithms. Which statements are correct?
+Resposta correta
+You should consider leveraging Fastconnect.
+
+Pergunta 12:
+Which two statements are true about to recommend subnet configurations for Exadata Database Service?
+Sua seleção está correta
+Use a Private Subnet for Client and a Private Subnet for Backup.
+Explicação
+It is a security best practice to use private subnets for both client and backup traffic.
+Sua seleção está correta
+Use Regional Subnets for both Client and Backup.
+Explicação
+Regional subnets span ADs and are recommended for high availability.
+
+Pergunta 13:
+What three capabilities does the database Rest summary provide?
+View database log entries
+
+Sua seleção está correta
+Compare database performance metrics over time.
+Explicação
+The Fleet Summary allows performance comparison.
+
+Sua seleção está correta
+View the status of the databases.
+Explicação
+The Fleet Summary shows the status (e.g., Available, Stopped) of databases.
+Sua seleção está correta
+View the current database resource usage.
+Explicação
+The Fleet Summary shows resource utilization like CPU and Storage.
+
+Pergunta 14:
+Which NOSQL Database Cloud Service table consistency policy requires the allocation of 1 read unit?
+
+Sua resposta está correta
+Eventually
+Explicação
+Eventual consistency requires only 1 read unit per consistent read.
+
+Pergunta 15:
+Why is a dynamic group required as part of installing and configuring management agents for OCI Database Management Service?
+
+Resposta correta
+To let the management agents carry on the communication with the OCI Monitoring service via Instance Principals
+
+Pergunta 16:
+For a database running on Exadata Database Service on Dedicated Infrastructure in the public cloud, which statement is true about Performance Hub?
+
+Sua resposta está correta
+Performance Hub is enabled when the Database Management Service is enabled.
+
+Pergunta 17:
+You want to check if cloud tools are up-to-date in Exadata Database Service. Which two steps should you perform to obtain the current version of cloud tooling on a database server?
+Sua seleção está correta
+You must first connect to Exadata Cloud Service as opc and sudo to the root user.
+Explicação
+You connect as the opc user and use sudo for root privileges.
+Seleção correta
+Run the dbascli patch tools list command.
+
+Pergunta 18:
+Which tool can be used to monitor a storage server in Exadata Database Service?
+
+Sua resposta está correta
+exacli
+Explicação
+The exacli command is used for monitoring and managing Exadata storage servers.
+
+Pergunta 19:
+What is the BlockSQL interface NOT used for?
+
+Sua resposta está correta
+To set the row retention time
+Explicação
+The row retention time is a table-level property set during DDL operations, not via the BlockSQL query interface.
+
+Pergunta 20:
+After you have provision a virtual DB system, What action can you take after provisioning a virtual machine (VM) database system to meet changes in block storage requirements?
+
+Sua resposta está correta
+If a VM DB system requires more block storage, you can increase the storage at any time without impacting the system.
+Explicação
+You can scale up (increase) block storage for a VM DB system online without downtime.
+
+Pergunta 21:
+Resources are allocated to the DB system based on the shape selected. Which are options for a DB system?
+Sua resposta está incorreta
+
+Resposta correta
+Single-Node Virtual Machine with Local Storage
+A 2-node RAC system requires ASM for shared storage management.
+
+Pergunta 22:
+Which two statements are you about changing the shape of a virtual machine (VM) database system to adapt to changes in performance needs?
+Seleção correta
+It is possible to change the shape of a VM DB system with a higher number of CPUs. However, reducing the number of CPUs is not permitted.
+
+Sua seleção está correta
+It is possible to change the shape of a VM DB system without impacting the amount of storage available to the DB system.
+
+Pergunta 23:
+What feature does Optimizer Statistics in Database Management not perform?
+
+Sua resposta está correta
+Configuration of SPM Evolve Advisor tasks
+Explicação
+SPM Evolve Advisor is a separate feature from Optimizer Statistics management.
+
+Pergunta 24:
+Which statement is true about scaling OCPUs for a Virtual Machine DB System?
+Sua resposta está correta
+Scaling the OCPUs of a Virtual Machine DB System requires that the shape of the DB system be changed.
+Explicação
+Changing the OCPU count is done by selecting a new shape with the desired number of OCPUs.
+
+Pergunta 25:
+What statement is FALSE about terminating a Virtual Machine DB System?
+
+Sua resposta está correta
+Terminating a DB system removes all Full On-Demand backups of the DB system from Oracle Cloud Infrastructure Object Storage.

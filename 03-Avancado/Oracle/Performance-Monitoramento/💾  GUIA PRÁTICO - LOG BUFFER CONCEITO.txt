@@ -1,0 +1,54 @@
+2. LOG_BUFFER
+
+
+O redo log buffer é um buffer circular na SGA (System Global Area) que fica na memória RAM,
+que mantem informações sobre as mudanças feitas no banco de dados.
+Estas informações são persistidas de forma assincrona nos arquivos de redo_log no disco.
+Como já vimos anteriormente informacoes no redo_log são necessária para reconstruir,
+ou refazer mudanças feitas no banco de dados pelas operaçãos
+INSERT, UPDATE, DELETE, CREATE, ALTER, ou DROP.
+Entradas de Redo se necessário são usados para recuperação do banco de dados.
+
+O log writer process (LGWR) é responsável por gerenciamento e escrita do redo log buffer para
+o redo log file (arquivo de redo) no disco e basicamente
+faz a gravação para o redo_log no disco, imediatamente quando uma operação é comitada,
+a Cada 3 segundos e quando o redo log buffer alcança 1/3 do total.
+
+O LOG_BUFFER é um parâmetro de inicialização do Oracle que define o tamanho do buffer usado
+para armazenar
+informações de log temporariamente antes de serem gravadas nos arquivos de redo log.
+Este parâmetro afeta o desempenho do sistema em termos de gravação de transações no redo log.
+
+Grandes operacoes de inserts, updates e deletes que estejam rodando em aberto, e nao tenham sido
+aplicados o comando commit, se houver um log buffer
+pequeno, o Oracle irá comecar a gravar as transacoes no file do redo_log sem os commits, porque não
+houve tempo de reciclar o buffer do redo log, porque
+as transacoes ainda estavam em abertas, trazendo assim uma perda relativa de performance,
+porque as novas transacoes estão sendo gravados no disco.
+Neste caso será interessante aumentar o log bugger.
+
+A recomendação para o tamanho do buffer de redo log no Oracle Database depende do ambiente e da carga
+de trabalho específica do banco de dados, mas há algumas orientações gerais que podem ser seguidas:
+
+Parâmetro LOG_BUFFER: Este parâmetro controla o tamanho do buffer de redo log. O valor padrão pode
+variar com base na versão do Oracle Database e na configuração do hardware, mas geralmente é adequado
+para a maioria dos ambientes de produção.
+
+Tamanho Mínimo: Em ambientes de produção, um valor mínimo recomendado para o LOG_BUFFER é de 4 MB.
+No entanto, em sistemas de alto desempenho ou com alta taxa de transação, esse valor pode precisar
+ser significativamente maior.
+
+Monitoramento e Ajustes: É importante monitorar a eficiência do buffer de redo log. Indicadores como o
+número de waits por LGWR (Log Writer) e a frequência de commits podem ajudar a determinar se o tamanho
+do LOG_BUFFER é adequado. Se houver muitos waits por LGWR ou se o log buffer estiver sendo
+constantemente sobrecarregado, considere aumentar o LOG_BUFFER.
+
+Cálculo Baseado em Memória Disponível: O tamanho do LOG_BUFFER deve ser configurado levando em
+consideração a memória total disponível no sistema. Alocar memória demais para o LOG_BUFFER pode
+prejudicar outras operações do banco de dados, enquanto alocar muito pouca pode causar gargalos
+no desempenho.
+
+Exemplos de Valores para comecar :
+Ambientes de teste/desenvolvimento: 4 MB a 16 MB.
+Ambientes de produção com baixa/média carga: 16 MB a 64 MB.
+Ambientes de produção com alta carga transacional: 64 MB ou mais.

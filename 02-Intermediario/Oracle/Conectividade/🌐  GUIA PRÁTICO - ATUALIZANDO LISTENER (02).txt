@@ -1,0 +1,29 @@
+############################################
+# Arquivo: listener.ora (Configurações do Listener)
+############################################
+
+# Entrar no SQL*Plus
+sqlplus / as sysdba
+
+-- Verificar status do banco de dados
+SELECT instance_name, status FROM v$instance;
+
+# Status deve ser OPEN.
+
+############################################
+# Configurar registro automático no listener
+############################################
+
+SHOW PARAMETER local_listener;
+
+# Se estiver vazio ou incorreto, configure:
+ALTER SYSTEM SET local_listener='LISTENER' SCOPE=BOTH;
+
+# Forçar o registro no listener:
+ALTER SYSTEM REGISTER;
+
+############################################
+# Verificar os serviços registrados
+############################################
+
+lsnrctl status

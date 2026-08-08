@@ -1,0 +1,41 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+export ORACLE_SID=<SID>
+export ORACLE_HOME=<ORACLE_HOME>
+export PATH="$ORACLE_HOME/bin:$ORACLE_HOME/OPatch:$PATH"
+
+sqlplus -V
+
+$ORACLE_HOME/OPatch/opatch version
+
+$ORACLE_HOME/OPatch/opatch lspatches
+
+$ORACLE_HOME/OPatch/opatch prereq CheckConflictAgainstOHWithDetail -phBaseDir <PATCH_DIRECTORY>
+
+lsnrctl stop
+
+sqlplus / as sysdba
+
+SHUTDOWN IMMEDIATE;
+
+EXIT;
+
+$ORACLE_HOME/OPatch/opatch apply <PATCH_DIRECTORY>
+
+sqlplus / as sysdba
+
+STARTUP;
+
+EXIT;
+
+$ORACLE_HOME/OPatch/datapatch -verbose
+
+sqlplus / as sysdba
+
+SELECT patch_id, action, status, action_time, description
+FROM dba_registry_sqlpatch
+ORDER BY action_time DESC;
+
+EXIT;
+
+lsnrctl start

@@ -1,0 +1,8 @@
+SELECT username
+FROM dba_users
+WHERE username = '<SCHEMA_NAME>';
+
+SELECT table_name
+FROM dba_tables
+WHERE owner = '<SCHEMA_NAME>'
+ORDER BY table_name;

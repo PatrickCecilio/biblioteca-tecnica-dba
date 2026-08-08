@@ -1,0 +1,26 @@
+@echo off
+setlocal
+
+:: Altere aqui para a pasta raiz dos seus .txt
+set "ROOT=G:\Iniciar backup\aprendizado\Acessos"
+
+:: Arquivo de saída
+set "TARGET=%ROOT%\unificado.txt"
+
+:: Se já existir, apaga sem perguntar
+if exist "%TARGET%" del /q "%TARGET%"
+
+:: Loop recursivo (usa %%F porque está dentro de um .bat)
+for /R "%ROOT%" %%F in (*.txt) do (
+  if /I not "%%~fF"=="%TARGET%" (
+    echo ==== %%~nxF ====>>"%TARGET%"
+    type "%%~fF">>"%TARGET%"
+    echo.>>"%TARGET%"
+  )
+)
+
+echo.
+echo Concatenação concluída em:
+echo   %TARGET%
+echo.
+endlocal

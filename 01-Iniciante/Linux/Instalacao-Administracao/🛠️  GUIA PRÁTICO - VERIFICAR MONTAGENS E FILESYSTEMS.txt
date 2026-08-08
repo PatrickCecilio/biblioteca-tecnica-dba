@@ -1,0 +1,7 @@
+VERIFICAR MONTAGENS E FILESYSTEMS
+
+findmnt
+findmnt -D
+mount | column -t
+
+Validação: confirme origem, destino, tipo de filesystem e opções de montagem.

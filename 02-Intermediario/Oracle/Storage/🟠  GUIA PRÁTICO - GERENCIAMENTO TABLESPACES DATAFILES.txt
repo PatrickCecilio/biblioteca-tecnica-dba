@@ -1,0 +1,141 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+# GUIA PRÁTICO ORACLE
+
+## Gerenciamento de Tablespaces e Datafiles
+
+### 1. Configurar saída do SQL*Plus
+
+```sql
+SET LINES 200
+SET PAGES 200
+COLUMN tablespace_name FORMAT A20
+COLUMN file_name       FORMAT A50
+COLUMN allocated_mb    FORMAT 999,999
+COLUMN free_mb         FORMAT 999,999
+COLUMN used_mb         FORMAT 999,999
+COLUMN pct_free        FORMAT 999
+COLUMN pct_used        FORMAT 999
+COLUMN max_mb          FORMAT 999,999
+```
+
+---
+
+### 2. Verificar utilização das tablespaces
+
+```sql
+SELECT
+    df.tablespace_name,
+    ROUND(df.total_bytes / 1024 / 1024, 2) AS allocated_mb,
+    ROUND(NVL(fs.free_bytes, 0) / 1024 / 1024, 2) AS free_mb,
+    ROUND((df.total_bytes - NVL(fs.free_bytes, 0)) / 1024 / 1024, 2) AS used_mb,
+    ROUND((NVL(fs.free_bytes, 0) / df.total_bytes) * 100, 2) AS pct_free,
+    ROUND(((df.total_bytes - NVL(fs.free_bytes, 0)) / df.total_bytes) * 100, 2) AS pct_used,
+    ROUND(df.max_bytes / 1024 / 1024, 2) AS max_mb
+FROM
+    (
+        SELECT
+            tablespace_name,
+            SUM(bytes) AS total_bytes,
+            SUM(CASE
+                    WHEN maxbytes < bytes THEN bytes
+                    ELSE maxbytes
+                END) AS max_bytes
+        FROM dba_data_files
+        GROUP BY tablespace_name
+    ) df
+LEFT JOIN
+    (
+        SELECT
+            tablespace_name,
+            SUM(bytes) AS free_bytes
+        FROM dba_free_space
+        GROUP BY tablespace_name
+    ) fs
+ON df.tablespace_name = fs.tablespace_name
+ORDER BY pct_used DESC;
+```
+
+---
+
+### 3. Verificar datafiles da tablespace
+
+```sql
+SELECT
+    df.file_name,
+    df.tablespace_name,
+    ROUND(df.bytes / 1024 / 1024, 2) AS alocado_mb,
+    ROUND((df.bytes - SUM(NVL(fs.bytes, 0))) / 1024 / 1024, 2) AS usado_mb,
+    ROUND(SUM(NVL(fs.bytes, 0)) / 1024 / 1024, 2) AS livre_mb,
+    ROUND(((df.bytes - SUM(NVL(fs.bytes, 0))) / df.bytes) * 100, 2) AS pct_usado,
+    ROUND(df.maxbytes / 1024 / 1024, 2) AS max_size_mb,
+    df.autoextensible AS auto_ext
+FROM dba_data_files df
+LEFT JOIN dba_free_space fs
+    ON df.file_id = fs.file_id
+WHERE df.tablespace_name = '<TABLESPACE_NAME>'
+GROUP BY
+    df.file_name,
+    df.tablespace_name,
+    df.bytes,
+    df.maxbytes,
+    df.autoextensible
+ORDER BY df.file_name;
+```
+
+---
+
+### 4. Verificar se a tablespace é BIGFILE ou SMALLFILE
+
+```sql
+SELECT tablespace_name, bigfile
+FROM dba_tablespaces
+WHERE tablespace_name = '<TABLESPACE_NAME>';
+```
+
+---
+
+### 5. Adicionar datafile com caminho explícito
+
+```sql
+ALTER TABLESPACE <TABLESPACE_NAME>
+ADD DATAFILE '<DATAFILE_PATH>'
+SIZE 10G
+AUTOEXTEND ON NEXT 1G MAXSIZE 32G;
+```
+
+---
+
+### 6. Adicionar datafile utilizando OMF
+
+```sql
+ALTER TABLESPACE <TABLESPACE_NAME>
+ADD DATAFILE SIZE 10G
+AUTOEXTEND ON NEXT 1G MAXSIZE 32G;
+```
+
+---
+
+### 7. Redimensionar datafile
+
+```sql
+ALTER DATABASE DATAFILE '<DATAFILE_PATH>'
+RESIZE 31G;
+```
+
+---
+
+### 8. Remover datafile
+
+```sql
+ALTER TABLESPACE <TABLESPACE_NAME>
+DROP DATAFILE '<DATAFILE_PATH>';
+```
+
+---
+
+### 9. Remover usuário e objetos
+
+```sql
+DROP USER <USERNAME> CASCADE;
+```

@@ -1,0 +1,69 @@
+# GUIIA PRÁTICO ORACLE
+
+## Backup Full do Banco de Dados com RMAN
+
+### 1. Carregar o ambiente Oracle
+
+```bash
+. oraenv
+```
+
+Informar:
+
+```text
+<ORACLE_SID>
+```
+
+---
+
+### 2. Acessar o RMAN
+
+```bash
+rman
+```
+
+Caso o executável não esteja disponível no `PATH`:
+
+```bash
+<ORACLE_HOME>/bin/rman
+```
+
+---
+
+### 3. Conectar ao banco TARGET
+
+Dentro do RMAN:
+
+```rman
+CONNECT TARGET <USERNAME>/<PASSWORD>;
+```
+
+---
+
+### 4. Executar o backup completo do banco
+
+```rman
+BACKUP DATABASE;
+```
+
+Aguardar a conclusão do backup e verificar se não ocorreram erros durante a execução.
+
+---
+
+### 5. Encerrar o RMAN
+
+```rman
+EXIT;
+```
+
+---
+
+### 6. Localização dos backups
+
+No ambiente apresentado no material, os backups são direcionados para a **Fast Recovery Area (FRA)**.
+
+Diretório a considerar no ambiente:
+
+```text
+<FAST_RECOVERY_AREA>
+```

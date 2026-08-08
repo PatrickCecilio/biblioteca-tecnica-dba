@@ -1,0 +1,12 @@
+Sist. Arq.      Tam. Usado Disp. Uso% Montado em
+devtmpfs        5,1G     0  5,1G   0% /dev
+tmpfs           5,1G     0  5,1G   0% /dev/shm
+tmpfs           5,1G  9,2M  5,1G   1% /run
+tmpfs           5,1G     0  5,1G   0% /sys/fs/cgroup
+/dev/sda7        30G  7,0G   24G  24% /
+/dev/sda1        38G   14G   24G  38% /u01
+/dev/sda6       3,8G  178M  3,6G   5% /home
+/dev/sda5       4,2G   78M  4,2G   2% /tmp
+/dev/sda3       5,6G  1,6G  4,1G  28% /var
+tmpfs           1,1G   12K  1,1G   1% /run/user/42
+tmpfs           1,1G  4,0K  1,1G   1% /run/user/0

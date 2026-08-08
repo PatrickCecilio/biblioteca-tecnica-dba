@@ -1,0 +1,184 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+================================================================================
+                    📘 GUIA PRÁTICO – ORACLE DBA JÚNIOR
+          Gerenciamento de Tablespaces, Datafiles e Manutenção
+================================================================================
+ Data de Atualização: Dezembro/2025
+ Público-alvo:        DBA Júnior / Analista em Formação
+================================================================================
+
+
+================================================================================
+📌 1. PRÉ-REQUISITOS & PREPARAÇÃO
+================================================================================
+
+ [ ] Usuário com privilégios DBA (SYSDBA ou similar)
+ [ ] Banco de dados em modo OPEN
+ [ ] Espaço em disco verificado (ex: df -h no Linux)
+ [ ] Nome da tablespace alvo identificado
+
+ ⚙️  CONFIGURAÇÃO DE AMBIENTE (SQL*Plus)
+ -------------------------------------------------------------------------------
+ Para melhor visualização dos outputs no terminal:
+
+ SET LINES 200
+ SET PAGES 200
+ COLUMN tablespace_name FORMAT A20
+ COLUMN file_name       FORMAT A50
+ COLUMN allocated_mb    FORMAT 999,999
+ COLUMN free_mb         FORMAT 999,999
+ COLUMN used_mb         FORMAT 999,999
+ COLUMN pct_free        FORMAT 999
+ COLUMN pct_used        FORMAT 999
+ COLUMN max_mb          FORMAT 999,999
+
+
+================================================================================
+📊 2. DIAGNÓSTICO E MONITORAMENTO
+================================================================================
+
+ 🔎 VISÃO GERAL DE USO (Por Tablespace)
+ -------------------------------------------------------------------------------
+ Objetivo: Identificar tablespaces críticas próximas do limite.
+
+ SELECT
+     df.tablespace_name,
+     ROUND(df.total_bytes / 1024 / 1024, 2) AS allocated_mb,
+     ROUND(NVL(fs.free_bytes, 0) / 1024 / 1024, 2) AS free_mb,
+     ROUND((df.total_bytes - NVL(fs.free_bytes, 0)) / 1024 / 1024, 2) AS used_mb,
+     ROUND((NVL(fs.free_bytes, 0) / df.total_bytes) * 100, 2) AS pct_free,
+     ROUND(((df.total_bytes - NVL(fs.free_bytes, 0)) / df.total_bytes) * 100, 2) AS pct_used,
+     ROUND(df.max_bytes / 1024 / 1024, 2) AS max_mb
+ FROM
+     (SELECT tablespace_name,
+             SUM(bytes) AS total_bytes,
+             SUM(CASE WHEN maxbytes < bytes THEN bytes ELSE maxbytes END) AS max_bytes
+      FROM dba_data_files
+      GROUP BY tablespace_name) df
+ LEFT JOIN
+     (SELECT tablespace_name,
+             SUM(bytes) AS free_bytes
+      FROM dba_free_space
+      GROUP BY tablespace_name) fs
+ ON df.tablespace_name = fs.tablespace_name
+ ORDER BY pct_used DESC;
+
+
+ 📁 DETALHE POR DATAFILE (Tablespace Específica)
+ -------------------------------------------------------------------------------
+ Objetivo: Ver o uso detalhado de cada arquivo físico.
+
+ SELECT
+     df.file_name,
+     df.tablespace_name,
+     ROUND(df.bytes / 1024 / 1024, 2) AS alocado_mb,
+     ROUND((df.bytes - SUM(NVL(fs.bytes, 0))) / 1024 / 1024, 2) AS usado_mb,
+     ROUND(SUM(NVL(fs.bytes, 0)) / 1024 / 1024, 2) AS livre_mb,
+     ROUND(((df.bytes - SUM(NVL(fs.bytes, 0))) / df.bytes) * 100, 2) AS pct_usado,
+     ROUND(df.maxbytes / 1024 / 1024, 2) AS max_size_mb,
+     df.autoextensible AS auto_ext
+ FROM dba_data_files df
+ LEFT JOIN dba_free_space fs ON df.file_id = fs.file_id
+ WHERE df.tablespace_name = 'INFOSAUDE_DATA'  -- < Alterar Nome
+ GROUP BY df.file_name, df.tablespace_name, df.bytes, df.maxbytes, df.autoextensible
+ ORDER BY df.file_name;
+
+
+ ❓ VERIFICAR TIPO DE ARQUIVO (Bigfile vs Smallfile)
+ -------------------------------------------------------------------------------
+ SELECT tablespace_name, bigfile
+ FROM dba_tablespaces
+ WHERE tablespace_name = 'INFOSAUDE_DATA';
+
+ Interpretação:
+ YES / TRUE  = Bigfile (Não aceita adicionar novo arquivo, apenas resize)
+ NO  / FALSE = Smallfile (Aceita múltiplos datafiles ✅)
+
+
+================================================================================
+➕ 3. OPERAÇÃO: ADICIONAR DATAFILE (Expansão)
+================================================================================
+
+ CENÁRIO A: Caminho Explícito (Recomendado para controle)
+ -------------------------------------------------------------------------------
+ ALTER TABLESPACE INFOSAUDE_DATA
+   ADD DATAFILE '/u02/app/oracle/oradata/CDBAULAS/pdbaulas/INFOSAUDE_DATA02.DBF'
+   SIZE 10G
+   AUTOEXTEND ON NEXT 1G MAXSIZE 32G;
+
+ CENÁRIO B: Oracle Managed Files (Sem informar caminho)
+ -------------------------------------------------------------------------------
+ ALTER TABLESPACE INFOSAUDE_DATA
+   ADD DATAFILE SIZE 10G
+   AUTOEXTEND ON NEXT 1G MAXSIZE 32G;
+
+ 📝 Notas dos Parâmetros:
+    * SIZE 10G        -> Tamanho inicial.
+    * NEXT 1G         -> Quanto cresce quando enche.
+    * MAXSIZE 32G     -> Trava de segurança para não lotar o disco.
+    * UNLIMITED       -> Use com cautela (pode lotar o filesystem).
+
+
+================================================================================
+📏 4. OPERAÇÃO: MANUTENÇÃO DE DATAFILES
+================================================================================
+
+ 📐 REDIMENSIONAR DATAFILE (Resize)
+ -------------------------------------------------------------------------------
+ ALTER DATABASE DATAFILE '/u01/oradata/DBPROD/infosaude_data03.dbf'
+ RESIZE 31G;
+
+ ⚠️ Atenção:
+    - Para AUMENTAR: Precisa ter espaço em disco.
+    - Para DIMINUIR: O tamanho novo deve ser maior que os dados contidos nele.
+    - Executar preferencialmente fora do horário de pico.
+
+ ➖ REMOVER DATAFILE
+ -------------------------------------------------------------------------------
+ ALTER TABLESPACE "INFOSAUDE_DATA"
+ DROP DATAFILE '/u01/oradata/DBPROD/infosaude_data09.dbf';
+
+ ⚠️ Requisitos Críticos:
+    - O datafile deve estar VAZIO (sem dados/segmentos).
+    - Se houver dados, é necessário movê-los antes.
+
+
+================================================================================
+🚨 5. OPERAÇÕES CRÍTICAS (PERIGO)
+================================================================================
+
+ ☠️  DROP USER (Remover Usuário e Objetos)
+ -------------------------------------------------------------------------------
+ DROP USER infosaude CASCADE;
+
+ O que isso faz?
+    -> Remove o usuário INFOSAUDE.
+    -> Remove TODOS os objetos (Tabelas, Views, Procedures).
+    -> É IRREVERSÍVEL sem backup.
+
+ DICA DE SEGURANÇA:
+    Antes de rodar, verifique 3 vezes se está no banco correto (PROD vs DEV).
+
+
+================================================================================
+✅ 6. CHECKLIST FINAL DE SEGURANÇA
+================================================================================
+
+ [ ] Conferiu o espaço em disco atual?
+ [ ] Validou se é BIGFILE ou SMALLFILE?
+ [ ] Verificou se a aplicação permite parada (se necessário)?
+ [ ] Executou o comando de expansão/alteração?
+ [ ] Rodou a query de validação para confirmar o novo tamanho?
+ [ ] Documentou a alteração no Runbook/Ticket?
+
+================================================================================
+🧠 OBSERVAÇÕES FINAIS
+================================================================================
+ - BIGFILE não aceita múltiplos datafiles (use Resize).
+ - Tablespace SYSTEM é sagrada: Evite objetos de aplicação nela.
+ - Sempre faça backup antes de operações destrutivas (DROP).
+
+================================================================================
+                           FIM DO GUIA
+================================================================================

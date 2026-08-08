@@ -1,0 +1,11 @@
+grep -E '^[^#].*:' /etc/oratab
+
+findmnt -no TARGET,OPTIONS <ORACLE_HOME>
+
+ls -l <ORACLE_HOME>/bin/oracle
+
+ldd <ORACLE_HOME>/bin/oracle
+
+rpm -q libaio libnsl
+
+ls -ld /tmp

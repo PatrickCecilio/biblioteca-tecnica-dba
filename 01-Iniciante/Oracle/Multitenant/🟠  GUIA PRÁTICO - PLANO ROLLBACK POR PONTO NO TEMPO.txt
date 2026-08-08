@@ -1,0 +1,82 @@
+Plano de Rollback por Ponto no Tempo (UNTIL TIME)
+
+1️⃣ Listar serviços disponíveis
+--------------------------------
+Mostra todos os serviços registrados no banco, com o nome e PDB associados.
+------------------------------------------------------------
+COL NAME FORMAT A25
+COL NETWORK_NAME FORMAT A25
+COL PDB FORMAT A15;
+
+SELECT name, network_name, pdb
+FROM v$services
+ORDER BY name;
+
+
+2️⃣ Listar apenas serviços ativos
+--------------------------------
+Relaciona os serviços realmente ativos (v$active_services) e suas PDBs correspondentes.
+------------------------------------------------------------
+COL PDB FORMAT A15
+COL NAME FORMAT A25
+COL NETWORK_NAME FORMAT A25;
+
+SELECT s.pdb, s.name, s.network_name
+FROM   v$services s
+JOIN   v$active_services a
+       ON a.name = s.name  -- alternativa: a.service_id = s.service_id (depende da release)
+ORDER  BY s.pdb, s.name;
+
+
+3️⃣ Acessar a PDB alvo
+--------------------------------
+Troca o contexto da sessão para a PDB específica (exemplo: PDBAULAS).
+------------------------------------------------------------
+ALTER SESSION SET CONTAINER = PDBAULAS;
+
+
+4️⃣ Parar o serviço da PDB
+--------------------------------
+Interrompe o serviço antes de executar o rollback ou outras ações sensíveis.
+------------------------------------------------------------
+BEGIN
+  DBMS_SERVICE.STOP_SERVICE('XEPDB1');  -- substitua pelo nome exato do service_name
+END;
+/
+
+
+5️⃣ Confirmar se o serviço foi parado
+--------------------------------
+Após o comando acima, este SQL deve retornar vazio para indicar que o serviço não está mais ativo.
+------------------------------------------------------------
+SELECT s.pdb, s.name
+FROM   v$services s
+JOIN   v$active_services a ON a.name = s.name
+ORDER  BY s.pdb, s.name;
+
+
+6️⃣ Reiniciar o serviço
+--------------------------------
+Após o rollback ou manutenção, reative o serviço normalmente.
+------------------------------------------------------------
+BEGIN
+  DBMS_SERVICE.START_SERVICE('APP_PDBAULAS1');
+END;
+/
+
+
+7️⃣ Verificar novamente os serviços da PDB
+--------------------------------
+Confirma que o serviço voltou ao estado ativo.
+------------------------------------------------------------
+SELECT pdb, name, network_name
+FROM   v$services
+WHERE  pdb = 'PDBAULAS'
+ORDER  BY name;
+
+
+8️⃣ Fechar a PDB (opcional)
+--------------------------------
+Use somente se for parte do processo de rollback ou desligamento planejado.
+------------------------------------------------------------
+ALTER PLUGGABLE DATABASE CLOSE;

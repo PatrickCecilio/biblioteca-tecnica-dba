@@ -1,0 +1,18 @@
+alter pluggable database PDBMIRACEMA_HOMOLOG close;
+
+alter pluggable database PDBMIRACEMA_HOMOLOG open restricted;
+
+alter session set container=PDBMIRACEMA_HOMOLOG;
+
+alter pluggable database rename global_name to PDBHRM_HOMOLOG;
+
+alter pluggable database close immediate;
+
+alter pluggable database open;
+
+BANCO-VENEZA-WINTH
+High
+PROBLEM
+Blocked Session > 2 BANCO-VENEZA-WINTH
+14 minutos
+09 fev 2026 16:22:09

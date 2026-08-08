@@ -1,0 +1,43 @@
+BEGIN
+    DBMS_SCHEDULER.CREATE_JOB (
+            job_name => '"C##LUSMON"."KILL_INACTIVE_SESSIONS"',
+            job_type => 'PLSQL_BLOCK',
+            job_action => 'declare
+v_sql clob;
+
+begin
+for i in (select sid, serial# from gv$session where status=''INACTIVE'' and type=''USER'' and last_call_et > 3600)
+loop
+   v_sql := q''[alter system kill session '':sid, :serial'' immediate]'';
+   v_sql := replace(replace (v_sql,'':sid'',i.sid),'':serial'',i.serial#);
+ begin
+   execute immediate v_sql;
+ exception
+ when others
+ then null;
+ end;
+
+end loop;
+
+end;',
+            number_of_arguments => 0,
+            start_date => NULL,
+            repeat_interval => 'FREQ=HOURLY;BYDAY=MON,TUE,WED,THU,FRI,SAT,SUN',
+            end_date => NULL,
+            enabled => FALSE,
+            auto_drop => FALSE,
+            comments => 'JOB DE MATAR SESSÕES INATIVAS A MAIS DE 1 HORA');
+
+
+    DBMS_SCHEDULER.SET_ATTRIBUTE(
+             name => '"C##LUSMON"."KILL_INACTIVE_SESSIONS"',
+             attribute => 'store_output', value => TRUE);
+    DBMS_SCHEDULER.SET_ATTRIBUTE(
+             name => '"C##LUSMON"."KILL_INACTIVE_SESSIONS"',
+             attribute => 'logging_level', value => DBMS_SCHEDULER.LOGGING_OFF);
+
+
+    DBMS_SCHEDULER.enable(
+             name => '"C##LUSMON"."KILL_INACTIVE_SESSIONS"');
+END;
+/

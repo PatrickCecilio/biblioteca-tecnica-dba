@@ -1,0 +1,29 @@
+SET LINESIZE 200
+SET PAGESIZE 200
+
+SELECT df.tablespace_name,
+       ROUND(df.total_bytes / 1024 / 1024, 2) AS allocated_mb,
+       ROUND(NVL(fs.free_bytes, 0) / 1024 / 1024, 2) AS free_mb,
+       ROUND((df.total_bytes - NVL(fs.free_bytes, 0)) / 1024 / 1024, 2) AS used_mb,
+       ROUND((NVL(fs.free_bytes, 0) / df.total_bytes) * 100, 2) AS pct_free
+FROM (
+    SELECT tablespace_name, SUM(bytes) AS total_bytes
+    FROM dba_data_files
+    GROUP BY tablespace_name
+) df
+LEFT JOIN (
+    SELECT tablespace_name, SUM(bytes) AS free_bytes
+    FROM dba_free_space
+    GROUP BY tablespace_name
+) fs
+  ON fs.tablespace_name = df.tablespace_name
+ORDER BY pct_free;
+
+SELECT file_id, tablespace_name, file_name, bytes / 1024 / 1024 AS size_mb, autoextensible, maxbytes / 1024 / 1024 AS max_mb
+FROM dba_data_files
+WHERE tablespace_name = UPPER('<TABLESPACE_NAME>')
+ORDER BY file_id;
+
+ALTER TABLESPACE <TABLESPACE_NAME> ADD DATAFILE '<DATAFILE_PATH>' SIZE <INITIAL_SIZE> AUTOEXTEND ON NEXT <AUTOEXTEND_SIZE> MAXSIZE <MAX_SIZE>;
+
+ALTER DATABASE DATAFILE '<DATAFILE_PATH>' RESIZE <NEW_SIZE>;

@@ -1,0 +1,38 @@
+select * from empregados2
+
+Escreva uma consulta para exibir o nome completo do empregado (concatenando NOME e SOBRENOME com um
+espaço), um alias NOME_COMPLETO para essa coluna e o salário total (SALARIO + BONUS). Use um
+
+select concat (nome, concat (' ' , sobrenome) ) NOME_COMPLETO, salario+bonus SALARIO TOTAL from empregados2
+
+select distinct id_empregado from empregados2;
+
+select '"O empregado '| |
+from empregados2
+
+=======================================PARTE 2 ===========================================
+
+4 - utilizamos o like e a caracter coringa '%' que substitui um grupo de caracteres
+7 - utilizamos a clausula Fetch (empacotar) para obtermos o resultado solicitado. lembrando que pode ser usuado o FETCH FIRST ou FETCH NEXT
+
+select nome
+
+select nome ||' '|| sobrenome NOME_COMPLETO from empregados where salario >=6000
+
+select nome ||' '|| sobrenome NOME_COMPLETO from empregados where salario between 5000 and 7500
+
+select nome ||' '|| sobrenome NOME_COMPLETO from empregados
+where id departamento=(select id_departamento from departamentos where nome='Financeiro')
+
+select nome Il' '|| sobrenome NOME_COMPLETO from empregados
+where nome like 'M$'
+
+select nome ||' '| | sobrenome NOME_COMPLETO from empregados where bonus is null
+
+select nome ||' '|l sobrenome NOME_COMPLETO, salario, ID_DEPARTAMENTO from empregados
+where (salario > 5000 and id_departamento=(select id_departamento from departamentos where nome='TI') )
+or (bonus is not null and id departamento=(select id_departamento from departamentos where nome='Financeiro') )
+
+select nome I|' '|l sobrenome NOME_COMPLETO, salario from empregados
+order by salario desc
+fetch first 3 rows only

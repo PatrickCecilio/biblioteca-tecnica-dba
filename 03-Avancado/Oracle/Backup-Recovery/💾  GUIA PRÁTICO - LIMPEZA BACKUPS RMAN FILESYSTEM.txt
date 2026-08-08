@@ -1,0 +1,9 @@
+find <BACKUP_PATH> -type f -name '*.bkp' -mtime +<RETENTION_DAYS> -print
+
+find <BACKUP_PATH> -type f -name '*.bkp' -mtime +<RETENTION_DAYS> -delete
+
+rman target /
+
+CROSSCHECK BACKUP;
+
+DELETE NOPROMPT EXPIRED BACKUP;

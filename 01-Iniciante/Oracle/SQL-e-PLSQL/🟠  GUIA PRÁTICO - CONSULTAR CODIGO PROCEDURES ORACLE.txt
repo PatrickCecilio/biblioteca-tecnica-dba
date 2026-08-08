@@ -1,0 +1,23 @@
+SET LONG 100000
+SET PAGES 200
+SET LINES 200
+
+SELECT text
+FROM all_source
+WHERE owner = 'INFOSAUDE'
+  AND name  = 'INSERE_CEPS'
+  AND type  = 'PROCEDURE'
+ORDER BY line;
+
+
+SELECT line, position, text
+FROM dba_errors
+WHERE owner = 'INFOSAUDE'
+  AND name  = 'INSERE_CEPS'
+ORDER BY sequence;
+
+
+SELECT owner, object_name, object_type, status
+FROM dba_objects
+WHERE owner = 'INFOSAUDE'
+  AND object_name = 'PR_RAST_PROCESSOS';

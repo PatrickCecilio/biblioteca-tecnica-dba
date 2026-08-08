@@ -1,0 +1,24 @@
+sudo dnf install -y epel-release
+
+sudo yum install -y perl-App-cpanminus
+sudo cpanm IPC::Run
+
+sudo yum install -y
+
+sudo dnf module reset postgresql -y
+sudo dnf module enable postgresql:16 -y
+sudo dnf module disable postgresql:16 -y
+
+sudo dnf install postgresql16 postgresql16-server postgresql16-contrib -y
+
+sudo systemctl status postgresql-16
+sudo systemctl start postgresql-16
+sudo systemctl enable postgresql-16
+
+sudo systemctl status postgresql-16.service
+
+ALTER USER postgres PASSWORD '<PASSWORD>';
+
+psql --version
+
+ss -lntp | grep postgres

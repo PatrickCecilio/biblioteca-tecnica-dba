@@ -1,0 +1,13 @@
+lsnrctl status
+
+lsnrctl services
+
+tnsping <SERVICE_NAME>
+
+sqlplus / as sysdba
+
+SHOW PARAMETER local_listener;
+
+ALTER SYSTEM REGISTER;
+
+lsnrctl services

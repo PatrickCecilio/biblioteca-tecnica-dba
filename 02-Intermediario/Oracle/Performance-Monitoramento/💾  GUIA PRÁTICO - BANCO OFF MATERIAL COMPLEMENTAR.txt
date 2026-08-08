@@ -1,0 +1,31 @@
+=====================erro ao acessar o banco==============================================
+se caso quando você tentar acessar o banco e aparecer a seguinte mensagem de erro “comando não encontrado” ao executar sqlplus ou lsnrctl indicam que as variáveis de ambiente do Oracle não estão configuradas corretamente "ou não foram carregadas no seu shell atual". Em geral, isso acontece porque o caminho para o binário do Oracle não está no PATH, ou a variável ORACLE_HOME não está setada.
+
+Você pode configurar as variáveis diretamente no seu shell. Por exemplo:
+export ORACLE_HOME=/opt/oracle/product/23ai/dbhomeFree
+export PATH=$PATH:$ORACLE_HOME/bin
+
+=======================================err ORA-12162=======================================
+
+e se caso voltar erro.:ORA-12162 TNS:net service name is incorrectly specified
+Esse erro geralmente acontece quando a variável de ambiente ORACLE_SID não está definida ou não está configurada corretamente no ambiente onde você está rodando o SQL*Plus. Quando você usa a conexão local (/ as sysdba), o Oracle precisa saber qual instância (SID) usar para autenticar a conexão.
+
+Verifique a variável ORACLE_SID
+echo $ORACLE_SID
+Se não houver saída ou se o valor estiver incorreto, você deve defini-la corretamente. Por exemplo, se o SID do seu banco for orcl:
+export ORACLE_SID=orcl
+echo $ORACLE_HOME
+
+===========================erro ORA-46362==================================================
+ORA-46362: Environment variable ORACLE_BASE is not defined.
+
+indica que a variável de ambiente ORACLE_BASE não está definida, e essa variável é necessária para que o Oracle saiba onde estão os arquivos de base e de configuração do banco de dados.
+
+Defina a variável de ambiente ORACLE_BASE
+
+sudo vi ~/.bash_profile ou ~/.bashrc
+
+adicionar no final do script
+export ORACLE_BASE=/opt/oracle
+
+===========================================================================================

@@ -1,0 +1,15 @@
+docker container run -d --name trivia fundamentalsofdocker/trivia:ed2
+
+export CONTAINER_ID=$(docker container ls -a | grep trivia | awk '{print $1}')
+
+docker container stop $CONTAINER_ID
+
+docker container start trivia
+
+docker container rm <container ID>
+
+docker container rm <container name>
+
+docker container inspect trivia
+
+docker container inspect -f "{{json .State}}" trivia | jq .

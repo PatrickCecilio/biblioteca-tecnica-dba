@@ -1,0 +1,257 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+====================================================================
+                GUIA PRÁTICO DBA - STATSPACK ORACLE
+====================================================================
+
+Objetivo:
+Configurar, administrar, manter e remover o Statspack
+de forma organizada e segura.
+
+====================================================================
+1) PRÉ-REQUISITOS
+====================================================================
+
+[✔] Acesso ao servidor Oracle
+[✔] Permissão SYSDBA
+[✔] Identificar se está em CDB ou PDB
+[✔] Espaço em disco disponível
+
+⚠ IMPORTANTE:
+Sempre confirme se está no PDB correto antes de instalar.
+
+--------------------------------------------------------------------
+
+Conectar como SYS:
+------------------
+
+sqlplus / as sysdba
+
+Se ambiente Multitenant:
+
+ALTER SESSION SET CONTAINER = PDB1;
+
+Verificar container atual:
+
+SHOW CON_NAME;
+
+====================================================================
+2) CRIAÇÃO DA TABLESPACE PERFSTAT
+====================================================================
+
+Exemplo padrão:
+
+CREATE TABLESPACE PERFSTAT
+DATAFILE '/u01/oradata/CDB1/PDB1/perfstat01.dbf'
+SIZE 50M
+AUTOEXTEND ON
+NEXT 100M
+MAXSIZE 5G;
+
+O que cada parâmetro faz:
+-------------------------
+SIZE        -> tamanho inicial
+AUTOEXTEND  -> crescimento automático
+NEXT        -> incremento de crescimento
+MAXSIZE     -> limite máximo
+
+💡 DICA:
+Ambientes médios/grandes podem iniciar com 500M.
+
+====================================================================
+3) INSTALAÇÃO DO STATSPACK
+====================================================================
+
+Executar:
+
+@?/rdbms/admin/spcreate.sql
+
+Durante a instalação informar:
+
+- Senha do usuário PERFSTAT
+- Default tablespace: PERFSTAT
+- Temporary tablespace: TEMP
+
+Após instalar, coletar estatísticas:
+
+EXEC DBMS_STATS.GATHER_SCHEMA_STATS('PERFSTAT');
+
+====================================================================
+4) SNAPSHOTS - COLETA DE DADOS
+====================================================================
+
+Gerar snapshot manual:
+
+EXEC STATSPACK.SNAP;
+
+--------------------------------------------------------------------
+NÍVEIS DE COLETA
+--------------------------------------------------------------------
+
+Nível 0  -> Estatísticas básicas
+Nível 5  -> SQL de alto consumo (padrão)
+Nível 6  -> + Plano de execução (RECOMENDADO)
+Nível 7  -> Estatísticas por segmento
+Nível 10 -> Child Latches
+
+💡 Boa prática: usar nível 6.
+
+Snapshot nível 10 (pontual):
+
+EXEC STATSPACK.SNAP(i_snap_level=>10);
+
+Alterar nível padrão para 6:
+
+EXEC STATSPACK.SNAP(i_snap_level=>6, i_modify_parameter=>'true');
+
+====================================================================
+5) CONSULTAR SNAPSHOTS
+====================================================================
+
+Listar snapshots:
+
+SELECT snap_id,
+       snap_level,
+       TO_CHAR(snap_time,'DD/MM/YYYY HH24:MI:SS') snap_time
+FROM stats$snapshot
+ORDER BY snap_id;
+
+Consultar estatísticas gerais:
+
+SELECT MIN(snap_id) menor_snap,
+       MAX(snap_id) maior_snap,
+       COUNT(*) total_snapshots
+FROM stats$snapshot;
+
+====================================================================
+6) PURGE DE SNAPSHOTS
+====================================================================
+
+⚠ ATENÇÃO:
+Não existe rollback após purge.
+
+--------------------------------------------------------------------
+Método 1 - Script oficial
+--------------------------------------------------------------------
+
+@?/rdbms/admin/sppurge.sql
+
+Informar:
+- Lo Snap Id
+- Hi Snap Id
+
+--------------------------------------------------------------------
+Método 2 - Via Procedure
+--------------------------------------------------------------------
+
+EXEC statspack.purge(
+     i_begin_snap => 1,
+     i_end_snap   => 36553);
+
+Se ocorrer erro:
+
+ORA-20200: Snapshot não existe
+
+Verifique antes:
+
+SELECT snap_id
+FROM stats$snapshot
+ORDER BY snap_id;
+
+====================================================================
+7) RETENÇÃO AUTOMÁTICA (BOA PRÁTICA)
+====================================================================
+
+Criar procedure personalizada:
+
+CREATE OR REPLACE PROCEDURE PERFSTAT.STATSPACKPURGE IS
+BEGIN
+   statspack.purge(
+      i_begin_snap => 1,
+      i_end_snap   => (
+         SELECT MAX(snap_id)
+         FROM stats$snapshot
+         WHERE snap_time < sysdate-30
+      )
+   );
+END;
+/
+
+Retenção configurada:
+sysdate-30  -> mantém 30 dias
+Ajustar conforme necessidade.
+
+--------------------------------------------------------------------
+Criar Job Automático
+--------------------------------------------------------------------
+
+DECLARE
+  my_job NUMBER;
+BEGIN
+  DBMS_JOB.SUBMIT(
+     job => my_job,
+     what => 'perfstat.statspackpurge;',
+     next_date => sysdate+1,
+     interval => 'sysdate+1'
+  );
+END;
+/
+
+Validar job:
+
+SELECT job,
+       what,
+       next_date,
+       broken,
+       failures
+FROM dba_jobs
+WHERE schema_user='PERFSTAT';
+
+====================================================================
+8) LIMPEZA DO STATSPACK
+====================================================================
+
+--------------------------------------------------------------------
+Apenas limpar dados (truncate)
+--------------------------------------------------------------------
+
+@?/rdbms/admin/sptrunc.sql
+
+--------------------------------------------------------------------
+Remover completamente
+--------------------------------------------------------------------
+
+sqlplus / as sysdba
+
+Se Oracle 12c+:
+
+ALTER SESSION SET "_oracle_script"=TRUE;
+
+Executar:
+
+@?/rdbms/admin/spdrop.sql
+@@?/rdbms/admin/spdusr.sql
+
+Remover tablespace:
+
+DROP TABLESPACE PERFSTAT INCLUDING CONTENTS AND DATAFILES;
+
+====================================================================
+9) CHECKLIST FINAL
+====================================================================
+
+[ ] Conectou no PDB correto
+[ ] Criou tablespace PERFSTAT
+[ ] Instalou via spcreate.sql
+[ ] Gerou snapshot manual
+[ ] Validou snapshots
+[ ] Ajustou nível para 6
+[ ] Testou purge manual
+[ ] Criou retenção automática
+[ ] Validou job
+[ ] Documentou retenção
+[ ] Monitorou crescimento da tablespace
+
+====================================================================
+FIM DO GUIA
+====================================================================

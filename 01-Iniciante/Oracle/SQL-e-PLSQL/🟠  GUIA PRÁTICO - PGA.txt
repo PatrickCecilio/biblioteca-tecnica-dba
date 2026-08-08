@@ -1,0 +1,43 @@
+========================================VALOR DO PGA NO BANCO==============================
+select name, value/1024/1024 VALUE_MB
+ from v$parameter
+ where name in ('memory_max_target','memory_target','sga_max_size','sga_target','pga_aggregate_limit','pga_aggregate_target')
+ order by 1;
+
+=======================TOTAL USADO POR USUARIO==========================================
+SELECT s.username,
+       ROUND(SUM(ss.value)/1024/1024,2) AS total_pga_mb
+FROM v$session s
+  JOIN v$sesstat ss ON s.sid = ss.sid
+  JOIN v$statname sn ON ss.statistic# = sn.statistic#
+WHERE sn.name = 'session pga memory'
+  AND s.username IS NOT NULL
+  AND s.type = 'USER'
+GROUP BY s.username
+ORDER BY total_pga_mb DESC;
+==================================Detalhado==================================================
+SELECT
+    s.username         AS usuario,
+    s.sid              AS session_id,
+    s.serial#          AS session_serial,
+    ROUND(ss.value/1024/1024, 2) AS pga_mb
+FROM
+    v$session s
+  JOIN
+    v$sesstat ss
+      ON s.sid = ss.sid
+  JOIN
+    v$statname sn
+      ON ss.statistic# = sn.statistic#
+WHERE
+    sn.name = 'session pga memory'
+ORDER BY
+    pga_mb DESC;
+===========================================FORMATAÇÃO===========================================
+SET LINESIZE 200;
+SET PAGESIZE 50;
+SET WRAP OFF;
+COL EVENT_TIMESTAMP FOR A30;
+COL ACTION_NAME FOR A10;
+COL OBJECT_NAME FOR A20;
+COL DBUSERNAME FOR A20;

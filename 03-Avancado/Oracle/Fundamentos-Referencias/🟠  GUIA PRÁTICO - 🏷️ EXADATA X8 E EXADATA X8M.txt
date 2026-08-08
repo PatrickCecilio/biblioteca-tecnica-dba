@@ -1,0 +1,13 @@
+Exadata X8 e Exadata X8M: arquitetura, características e principais diferenças
+
+Os sistemas Oracle Exadata foram criados para entregar alto desempenho, escalabilidade e disponibilidade para workloads de banco de dados Oracle. Dentro dessa linha, as gerações Exadata X8 e Exadata X8M marcaram passos importantes na evolução da plataforma. As duas seguem a mesma ideia central, mas diferem em pontos que afetam diretamente a velocidade de acesso a dados e a capacidade de expansão.
+
+O Exadata X8 surgiu como uma evolução natural da geração anterior. Ele usa InfiniBand como rede interna, tecnologia que a Oracle utilizou por muitos anos por oferecer boa largura de banda e baixa latência entre servidores de banco de dados e de armazenamento. Essa geração veio equipada com processadores Intel Xeon 8260, oferecendo um conjunto sólido de OCPUs para cargas exigentes. O modelo de implantação segue o formato tradicional da Oracle, com racks pré-definidos e pouca flexibilidade para crescer fora dessas configurações.
+
+O Exadata X8M, por outro lado, trouxe mudanças mais profundas. Embora mantenha a mesma linha de processadores (Intel Xeon 8268, com capacidade parecida à dos 8260), a grande virada está na rede interna. e versões posteriores como X9M e X11M A Oracle substituiu o InfiniBand por RoCE (RDMA over Converged Ethernet) de 100 Gbps. Essa mudança reduz a latência e permite acesso direto à memória remota, sem cópias extras de dados, tirando carga do sistema operacional. Além disso, o X8M introduziu Persistent Memory (PMEM) nos servidores de armazenamento, o que acelera leituras e gravações e muda completamente a forma como o sistema lida com I/O.
+
+O modelo de expansão também mudou no X8M. Em vez de depender de racks fechados e tamanhos fixos, é possível aumentar OCPUs e adicionar servidores de forma mais granular. Isso dá mais liberdade para crescer aos poucos e também permite alcançar um volume maior de OCPUs do que nas configurações rígidas do X8.
+
+A diferença mais marcante entre as duas gerações está na interconexão. O X8 segue com InfiniBand. O X8M adota RoCE e abandona o modelo anterior por completo. Por isso, qualquer afirmação de que ambos usam InfiniBand não condiz com a arquitetura publicada pela Oracle.
+
+Em resumo, X8 e X8M têm bases semelhantes no que diz respeito ao processamento, mas se afastam bastante nos pontos que mais influenciam desempenho e escalabilidade: a interconexão e o uso de memória persistente. O X8M é um salto arquitetural, oferecendo menor latência, mais flexibilidade e novas formas de acelerar operações de banco de dados. Por esses motivos, ele costuma ser a opção indicada para workloads mais sensíveis a latência e throughput de I/O.

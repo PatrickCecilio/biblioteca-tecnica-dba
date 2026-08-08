@@ -1,0 +1,9 @@
+#!/bin/bash
+#AUDIT
+find /u01/app/oracle/admin/CDB1/adump -name \*.aud -mtime +1 -exec rm -f {} \;
+
+#ALERTS,TRACES
+find /u01/app/oracle/diag/rdbms/cdb1/CDB1/alert    -name \*.xml    -mtime +1 -exec rm -f {} \;
+find /u01/app/oracle/diag/rdbms/cdb1/CDB1/incident -name \*.tr[cm] -mtime +1 -exec rm -f {} \;
+find /u01/app/oracle/diag/rdbms/cdb1/CDB1/trace    -name \*.tr[cm] -mtime +1 -exec rm -f {} \;
+find /u01/app/oracle/diag/tnslsnr/localhost/listener/alert -name 'log_*'  -mtime +1 -exec rm -f {} \;

@@ -1,0 +1,9 @@
+docker image prune -f
+
+docker container rm <container-id>
+
+docker container prune --force
+
+docker volume prune
+
+docker volume rm <volume-name>

@@ -1,0 +1,9 @@
+SELECT occupant_name, schema_name, space_usage_kbytes / 1024 AS space_usage_mb, move_procedure
+FROM v$sysaux_occupants
+ORDER BY space_usage_kbytes DESC;
+
+SELECT owner, segment_name, segment_type, bytes / 1024 / 1024 AS size_mb
+FROM dba_segments
+WHERE tablespace_name = 'SYSAUX'
+ORDER BY bytes DESC
+FETCH FIRST 30 ROWS ONLY;

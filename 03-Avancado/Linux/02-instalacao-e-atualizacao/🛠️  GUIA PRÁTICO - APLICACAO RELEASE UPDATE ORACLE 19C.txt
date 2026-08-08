@@ -1,0 +1,177 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+# GUIA PRÁTICO ORACLE
+
+## Aplicação de Release Update (RU) — Oracle Database 19c
+
+### 1. Definir o ambiente Oracle
+
+```bash
+export ORACLE_SID=<ORACLE_SID>
+export ORACLE_HOME=<ORACLE_HOME>
+export PATH=$ORACLE_HOME/bin:$ORACLE_HOME/OPatch:$PATH
+```
+
+---
+
+### 2. Validar a versão do SQL*Plus
+
+```bash
+sqlplus -V
+```
+
+---
+
+### 3. Validar a versão do banco
+
+```bash
+sqlplus / as sysdba <<EOF
+SELECT banner_full FROM v\$version;
+EXIT
+EOF
+```
+
+---
+
+### 4. Verificar espaço em disco
+
+```bash
+df -h $ORACLE_HOME
+```
+
+```bash
+df -h /tmp
+```
+
+---
+
+### 5. Atualizar o OPatch
+
+```bash
+cd <PATCH_DIR>
+```
+
+```bash
+unzip -oq <OPATCH_ZIP> -d $ORACLE_HOME
+```
+
+---
+
+### 6. Validar versão do OPatch
+
+```bash
+$ORACLE_HOME/OPatch/opatch version
+```
+
+---
+
+### 7. Descompactar o Release Update
+
+```bash
+cd <PATCH_DIR>
+```
+
+```bash
+unzip -oq <RU_ZIP>
+```
+
+```bash
+ls <RU_PATCH_ID>
+```
+
+---
+
+### 8. Verificar conflitos
+
+```bash
+$ORACLE_HOME/OPatch/opatch prereq CheckConflictAgainstOHWithDetail \
+-ph <PATCH_DIR>/<RU_PATCH_ID>
+```
+
+---
+
+### 9. Parar o banco
+
+```bash
+sqlplus / as sysdba <<EOF
+SHUTDOWN IMMEDIATE;
+EXIT
+EOF
+```
+
+---
+
+### 10. Validar processos PMON
+
+```bash
+ps -ef | grep pmon | grep -v grep
+```
+
+---
+
+### 11. Aplicar o Release Update
+
+```bash
+cd <PATCH_DIR>/<RU_PATCH_ID>
+```
+
+```bash
+$ORACLE_HOME/OPatch/opatch apply
+```
+
+---
+
+### 12. Iniciar o banco
+
+```bash
+sqlplus / as sysdba <<EOF
+STARTUP;
+EXIT
+EOF
+```
+
+---
+
+### 13. Executar o Datapatch
+
+```bash
+cd $ORACLE_HOME/OPatch
+```
+
+```bash
+./datapatch -verbose
+```
+
+---
+
+### 14. Validar o Datapatch
+
+```bash
+sqlplus / as sysdba <<EOF
+SELECT patch_id,
+       action,
+       status
+FROM dba_registry_sqlpatch
+ORDER BY action_time;
+EXIT
+EOF
+```
+
+---
+
+### 15. Validar o Release Update no Oracle Home
+
+```bash
+$ORACLE_HOME/OPatch/opatch lsinventory | grep "Release Update"
+```
+
+---
+
+### 16. Validar as PDBs
+
+```bash
+sqlplus / as sysdba <<EOF
+SHOW PDBS;
+EXIT
+EOF
+```

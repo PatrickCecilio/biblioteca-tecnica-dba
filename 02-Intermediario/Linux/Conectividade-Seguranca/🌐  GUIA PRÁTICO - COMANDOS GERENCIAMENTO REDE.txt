@@ -1,0 +1,106 @@
+============================================================
+🖥️ COMANDOS DE REDE — CONSULTA RÁPIDA
+============================================================
+🌐 1. INTERFACES DE REDE E ENDEREÇOS IP
+=======================================
+
+🔹 Exibir interfaces de rede no formato tradicional:
+
+```
+ifconfig
+```
+
+🔹 Exibir interfaces, endereços IP e informações detalhadas:
+
+```
+ip a
+```
+
+============================================================
+🛣️ 2. ROTAS DE REDE
+====================
+
+🔹 Exibir tabela de rotas no formato tradicional:
+
+```
+route -n
+```
+
+🔹 Exibir rotas configuradas no sistema:
+
+```
+ip route
+```
+
+============================================================
+🔎 3. TESTES E CONSULTAS DNS
+============================
+
+🔹 Consultar resolução DNS do domínio google.com:
+
+```
+nslookup google.com
+```
+
+🔹 Consultar informações DNS do domínio google.com.br:
+
+```
+dig google.com.br
+```
+
+============================================================
+📡 4. CONEXÕES E PORTAS DE REDE
+===============================
+
+🔹 Exibir informações gerais de conexões de rede:
+
+```
+netstat
+```
+
+🔹 Exibir portas TCP/UDP em escuta:
+
+```
+netstat -tuln
+```
+
+🔹 Exibir portas TCP/UDP em escuta usando ss:
+
+```
+ss -tuln
+```
+
+============================================================
+🌍 5. TESTE HTTP / HTTPS
+========================
+
+🔹 Consultar cabeçalhos HTTP de uma URL:
+
+```
+curl -I
+```
+
+============================================================
+🧩 6. TABELA ARP
+================
+
+🔹 Exibir tabela ARP com dispositivos conhecidos na rede local:
+
+```
+arp -a
+```
+
+============================================================
+✅ OBSERVAÇÕES
+=============
+
+• ifconfig pode não vir instalado em algumas distribuições Linux.
+• O comando ip é mais moderno e recomendado.
+• netstat pode ser substituído por ss em sistemas mais recentes.
+• nslookup e dig são úteis para testar resolução de nomes DNS.
+• curl -I mostra apenas os cabeçalhos da resposta HTTP/HTTPS.
+• arp -a ajuda a visualizar dispositivos identificados na rede local.
+
+============================================================
+📁 FIM DA LISTA
+===============

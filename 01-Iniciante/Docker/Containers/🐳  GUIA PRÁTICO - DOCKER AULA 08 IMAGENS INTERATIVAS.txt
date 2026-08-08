@@ -1,0 +1,13 @@
+docker container run -it \
+--name sample \
+alpine:3.10 /bin/sh
+
+docker container ls -a | grep sample
+
+docker container diff sample
+
+docker container commit sample my-alpine
+
+docker image ls
+
+docker image history my-alpine

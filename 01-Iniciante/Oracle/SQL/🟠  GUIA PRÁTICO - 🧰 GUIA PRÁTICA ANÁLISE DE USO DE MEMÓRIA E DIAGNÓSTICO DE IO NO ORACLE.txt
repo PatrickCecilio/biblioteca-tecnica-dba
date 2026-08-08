@@ -1,0 +1,14 @@
+iostat -x 1 10
+
+SELECT sql_id, disk_reads, buffer_gets, elapsed_time, executions
+FROM v$sql
+WHERE executions > 0
+ORDER BY disk_reads DESC
+FETCH FIRST 10 ROWS ONLY;
+
+SELECT sql_id, plan_hash_value
+FROM v$sql
+WHERE sql_id = '<SQL_ID>';
+
+SELECT *
+FROM TABLE(dbms_xplan.display_cursor('<SQL_ID>', NULL, 'ALLSTATS LAST'));

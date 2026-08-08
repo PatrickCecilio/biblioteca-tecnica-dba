@@ -1,0 +1,2 @@
+alter system set db_recovery_file_dest=/u01/app/oracle/fast_recovery_area scope=both;
+alter system set db_recovery_file_dest_size=100G scope=both;

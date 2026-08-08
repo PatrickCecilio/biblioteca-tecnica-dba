@@ -1,0 +1,23 @@
+mkdir -p /u01/oradata/CDB1/PDB1
+
+chown oracle:oinstall /u01/oradata/CDB1/PDB1/
+
+chmod 775 /u01/oradata/CDB1/PDB1/
+
+sqlplus / as sysdba
+
+show pdbs;
+
+ALTER SESSION SET CONTAINER = PDB$SEED;
+
+SELECT file_name FROM dba_data_files WHERE tablespace_name = 'SYSTEM';
+
+ALTER SESSION SET CONTAINER = CDB$ROOT;
+
+CREATE PLUGGABLE DATABASE PDB1 ADMIN USER goku IDENTIFIED BY "Pa2974"
+
+FILE_NAME_CONVERT=('/u01/oradata/CDB1/pdbseed/','/u01/oradata/CDB1/PDB1');
+
+ALTER PLUGGABLE DATABASE PDB1 open;
+
+ALTER PLUGGABLE DATABASE PDB1 SAVE STATE;

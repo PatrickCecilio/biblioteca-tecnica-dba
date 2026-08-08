@@ -1,0 +1,15 @@
+Verificar parâmetros:
+SHOW PARAMETER db_recovery_file_dest;
+SHOW PARAMETER db_recovery_file_dest_size;
+
+Configurar FRA:
+ALTER SYSTEM SET db_recovery_file_dest_size = 50G SCOPE=BOTH;
+ALTER SYSTEM SET db_recovery_file_dest = '/u01/oracle/fast_recovery_area' SCOPE=BOTH;
+
+Criar diretório:
+mkdir -p /u01/oracle/fast_recovery_area
+chown oracle:oinstall /u01/oracle/fast_recovery_area
+chmod 750 /u01/oracle/fast_recovery_area
+
+Confirmar:
+SELECT name, space_limit, space_used, space_reclaimable FROM v$recovery_file_dest;

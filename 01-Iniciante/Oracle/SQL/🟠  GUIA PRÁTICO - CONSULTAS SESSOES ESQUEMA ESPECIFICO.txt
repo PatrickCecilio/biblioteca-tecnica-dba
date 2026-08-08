@@ -1,0 +1,11 @@
+SELECT *
+FROM   v$session
+WHERE  username = 'INFOSAUDE';
+
+SELECT sql_id, sql_fulltext
+FROM   v$sql
+WHERE  parsing_schema_name = 'INFOSAUDE';
+
+SELECT *
+FROM   v$session
+WHERE  username = 'INFOSAUDE';

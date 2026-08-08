@@ -1,0 +1,6 @@
+VERIFICAR MEMÓRIA NO LINUX
+
+free -h
+free -m
+
+Validação: observe MemAvailable e o uso de swap. Cache não representa, isoladamente, falta de memória.

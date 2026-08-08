@@ -1,0 +1,20 @@
+CONEXÃO E DIAGNÓSTICO INICIAL COM RMAN
+
+Objetivo
+Conectar ao banco local por autenticação do sistema operacional e revisar a configuração atual do RMAN.
+
+Pré-requisitos
+- Ambiente Oracle configurado com ORACLE_HOME e ORACLE_SID corretos.
+- Usuário do sistema operacional autorizado a administrar o banco.
+
+Procedimento
+
+rman target /
+
+SHOW ALL;
+
+Validação
+- Confirme que o RMAN identifica o DBID e o banco esperado.
+- Revise política de retenção, destino de control file e paralelismo antes de qualquer alteração.
+
+ATENÇÃO: prefira autenticação do sistema operacional ou wallet. Não informe senha diretamente na linha de comando.

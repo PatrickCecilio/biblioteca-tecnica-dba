@@ -1,0 +1,11 @@
+-- Consultar parâmetros de memória
+SHOW PARAMETER sga;
+SHOW PARAMETER pga;
+
+-- Ajustar SGA e PGA (70% SGA / 30% PGA da memória total)
+ALTER SYSTEM SET sga_target=1024M SCOPE=SPFILE;
+ALTER SYSTEM SET pga_aggregate_target=512M SCOPE=SPFILE;
+
+-- Reiniciar instância com novo SPFILE
+-- (após alterações de memória)
+startup;

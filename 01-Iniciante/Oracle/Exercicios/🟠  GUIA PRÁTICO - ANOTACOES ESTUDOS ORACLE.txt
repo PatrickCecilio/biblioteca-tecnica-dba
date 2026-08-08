@@ -1,0 +1,354 @@
+===============================================================================
+📌 ORACLE MULTITENANT — COMANDOS + PONTOS QUE A PROVA AMA
+===============================================================================
+
+✅ 1) CRIAÇÃO E CONTROLE DE PDB (COMANDOS ESSENCIAIS)
+-------------------------------------------------------------------------------
+
+🧱 Criar PDB (a partir do PDB$SEED)
+----------------------------------
+CREATE PLUGGABLE DATABASE pdb1
+  ADMIN USER admin IDENTIFIED BY "<SENHA_ORACLE>"
+  FILE_NAME_CONVERT = ('/pdbseed/', '/pdb1/');
+
+🔓 Abrir PDB
+------------
+ALTER PLUGGABLE DATABASE pdb1 OPEN;
+
+💾 Salvar estado (AUTO OPEN após restart)
+----------------------------------------
+ALTER PLUGGABLE DATABASE pdb1 SAVE STATE;
+
+🔁 Comandos rápidos (abrir/fechar/todos)
+---------------------------------------
+ALTER PLUGGABLE DATABASE pdb1 OPEN;
+ALTER PLUGGABLE DATABASE pdb1 CLOSE IMMEDIATE;
+ALTER PLUGGABLE DATABASE ALL OPEN;
+
+
+===============================================================================
+❓ PERGUNTA 1 (TIPO PROVA)
+===============================================================================
+
+📌 Um DBA quer garantir que um PDB seja aberto automaticamente após o restart
+da instância. Qual comando ele deve usar?
+
+✅ Resposta: C) ALTER PLUGGABLE DATABASE SAVE STATE;
+
+
+===============================================================================
+2) 2️⃣ COMPONENTES QUE A ORACLE AMA COBRAR
+===============================================================================
+
+📦 2.1 Containers (conceito que cai MUITO)
+-------------------------------------------------------------------------------
+| Container   | Função            | Observação de prova                      |
+|----------- |------------------- |------------------------------------------|
+| CDB$ROOT   | Metadados comuns   | Onde ficam usuários comuns               |
+| PDB$SEED   | Template           | Read Only, nunca altere                  |
+| PDB        | Banco isolado      | Pode ser aberto/fechado individualmente  |
+
+
+🔐 2.2 Usuários comuns x locais (CAI!)
+-------------------------------------------------------------------------------
+
+👤 Common User (Usuário Comum)
+- Criado no ROOT
+- Prefixo obrigatório: C##
+- Existe em todos os PDBs
+
+Exemplo:
+  CREATE USER C##MONITOR IDENTIFIED BY Oracle_123 CONTAINER=ALL;
+
+👤 Local User (Usuário Local)
+- Criado dentro do PDB
+- Existe só naquele PDB
+
+Exemplo:
+  CREATE USER app_user IDENTIFIED BY Oracle_123;
+
+
+📌 Pergunta típica:
+"Qual usuário pode administrar todos os PDBs?"
+✅ Resposta: Common User
+
+
+🧠 Mnemonic da multitenant (decora!)
+-------------------------------------------------------------------------------
+• CDB  = casa
+• ROOT = regras
+• SEED = molde
+• PDB  = morador
+
+
+===============================================================================
+🏗️ 2.4 Application PDB (nível prova)
+===============================================================================
+
+😈 A Oracle ama isso.
+
+✅ O que é?
+- Modelo para padronizar aplicações
+
+✅ Permite:
+- Patching centralizado
+- Upgrade coordenado
+- Menos downtime
+
+🧩 Componentes:
+- Application Root
+- Application PDB
+- Application Seed (opcional)
+
+📌 Conceito-chave:
+Você aplica o patch UMA vez no Application Root
+→ e ele propaga para todos os Application PDBs
+
+
+===============================================================================
+⚠️ 2.5 Onde executar comandos (PEGADINHA #1)
+===============================================================================
+
+| Ação                  | Onde executar |
+|----------------------|---------------|
+| Criar Common User     | ROOT          |
+| Criar Local User      | PDB           |
+| Criar PDB             | ROOT          |
+| Abrir/Fechar PDB      | ROOT          |
+| Criar objetos da app  | PDB           |
+
+
+===============================================================================
+🚚 2.6 Upgrade e transporte de PDB (conceito)
+===============================================================================
+
+✅ A prova cobra conceito, não script longo.
+
+✔️ PDB pode ser:
+- Plugado / desplugado
+- Upgradado isoladamente
+- Transportado entre CDBs compatíveis
+
+📌 Regras importantes:
+- Versão de destino ≥ versão de origem
+- Compatibilidade de charset
+- PDB$SEED nunca é transportado
+
+
+===============================================================================
+🧨 RESUMO BRUTAL (DECORA ISSO)
+===============================================================================
+
+🔹 ROOT        = controle
+🔹 PDB         = dados
+🔹 Common User = todos
+🔹 Local User  = um só
+🔹 SAVE STATE  = auto open
+🔹 Application PDB = escala corporativa
+
+===============================================================================
+
+===============================================================================
+🔥 MODO PROVA HARD — ORACLE MULTITENANT (INTERATIVO)
+===============================================================================
+
+🎮 REGRA DO JOGO
+-------------------------------------------------------------------------------
+✅ Eu respondo ANTES
+🧠 Você corrige + explica a pegadinha
+📌 Vamos por blocos: 1 → 2 → 3 (com questões reais)
+
+===============================================================================
+1️⃣ QUESTÕES REAIS DE MULTITENANT (NÍVEL PROVA)
+===============================================================================
+
+🧠 Questão 1 (clássica Oracle)
+-------------------------------------------------------------------------------
+Um DBA criou um novo PDB chamado `PDB_FIN`.
+Após o restart do CDB, o PDB permaneceu **MOUNTED**.
+
+❓ Qual ação garante que o PDB seja aberto automaticamente após futuros restarts?
+
+A) `ALTER DATABASE SAVE STATE;`
+B) `ALTER PLUGGABLE DATABASE PDB_FIN OPEN READ WRITE;`
+C) `ALTER PLUGGABLE DATABASE PDB_FIN SAVE STATE;`
+D) `ALTER SYSTEM SET pdb_open = true;`
+
+👉 Resposta: ___C_____
+
+-------------------------------------------------------------------------------
+
+🧠 Questão 2 (container errado)
+-------------------------------------------------------------------------------
+❓ Qual comando **falha** quando executado no `CDB$ROOT`?
+
+A) `CREATE PLUGGABLE DATABASE pdb_teste ...;`
+B) `CREATE USER C##AUDITOR IDENTIFIED BY x CONTAINER=ALL;`
+C) `CREATE TABLE clientes (id NUMBER);`
+D) `ALTER PLUGGABLE DATABASE ALL OPEN;`
+
+👉 Resposta: _C_______
+
+-------------------------------------------------------------------------------
+
+🧠 Questão 3 (usuários)
+-------------------------------------------------------------------------------
+❓ Qual afirmação é **VERDADEIRA** sobre usuários comuns?
+
+A) Existem apenas no ROOT
+B) Devem ter prefixo `C##`
+C) Não podem receber privilégios
+D) São criados dentro do PDB
+
+👉 Resposta: ___B_____
+
+-------------------------------------------------------------------------------
+📌 INSTRUÇÃO
+Responda as 3 (ex: C, C, B)
+Depois seguimos.
+===============================================================================
+
+
+===============================================================================
+2️⃣ APPLICATION PDB — PROFUNDIDADE (NÍVEL DIFÍCIL)
+===============================================================================
+
+⚠️ Aqui é onde muita gente cai.
+
+🎯 O que a prova quer MESMO
+-------------------------------------------------------------------------------
+❌ Não é sintaxe
+✅ É entender o ciclo de vida da aplicação
+
+-------------------------------------------------------------------------------
+🏗️ Arquitetura correta
+-------------------------------------------------------------------------------
+CDB
+ └── Application Root
+      ├── Application Seed (opcional)
+      └── Application PDBs
+
+📌 Regra de ouro
+-------------------------------------------------------------------------------
+✅ Objetos da aplicação vivem no **Application Root**
+✅ Dados vivem nos **Application PDBs**
+
+-------------------------------------------------------------------------------
+🔁 Ciclo de vida da aplicação (CAI!)
+-------------------------------------------------------------------------------
+1️⃣ Criar Application Root
+2️⃣ Instalar aplicação (BEGIN INSTALL)
+3️⃣ Criar Application PDBs
+4️⃣ Finalizar versão (END INSTALL)
+
+Exemplo conceitual:
+  ALTER PLUGGABLE DATABASE APPLICATION app_sales BEGIN INSTALL '1.0';
+
+Depois:
+  ALTER PLUGGABLE DATABASE APPLICATION app_sales END INSTALL;
+
+🎯 Pegadinha
+-------------------------------------------------------------------------------
+⚠️ Sem `END INSTALL`, a versão **NÃO é registrada**
+
+-------------------------------------------------------------------------------
+🩹 Patch e upgrade de Application
+-------------------------------------------------------------------------------
+✅ Patch aplicado no **Application Root**
+✅ Propagado automaticamente
+✅ Application PDBs entram em:
+   - `APPLICATION PATCH`
+   - `APPLICATION SYNC`
+
+📌 Pergunta clássica:
+Onde aplicar o patch?
+👉 **Application Root**
+
+-------------------------------------------------------------------------------
+🚫 Erros comuns de prova
+-------------------------------------------------------------------------------
+❌ Criar tabelas da aplicação direto no Application PDB
+❌ Aplicar patch em cada PDB
+❌ Confundir Application Root com CDB$ROOT
+
+-------------------------------------------------------------------------------
+🧠 Mini-questão (Application)
+-------------------------------------------------------------------------------
+Para atualizar uma aplicação usada por múltiplos PDBs, o DBA deve:
+
+A) Aplicar o patch em cada PDB
+B) Aplicar no CDB$ROOT
+C) Aplicar no Application Root
+D) Aplicar no PDB$SEED
+
+👉 Resposta: ___C_____
+
+===============================================================================
+
+
+===============================================================================
+3️⃣ UPGRADE + TRANSPORT PDB (CENÁRIOS REAIS)
+===============================================================================
+
+🏢 Aqui a Oracle simula ambiente corporativo.
+
+-------------------------------------------------------------------------------
+⬆️ Upgrade de PDB (isolado)
+-------------------------------------------------------------------------------
+✔️ Um PDB pode ser:
+- Plugado em um CDB mais novo
+- Upgradado sem parar outros PDBs
+
+Fluxo conceitual:
+1) Unplug PDB
+2) Plug no novo CDB
+3) Upgrade do PDB
+
+📌 Regra:
+✅ Versão do CDB destino ≥ versão do PDB
+
+-------------------------------------------------------------------------------
+🚚 Transport PDB (CAI!)
+-------------------------------------------------------------------------------
+Pode transportar:
+- Dados
+- Metadados
+- Entre hosts diferentes
+
+⚠️ Restrições cobradas:
+- Charset compatível
+- Endianness compatível (ou conversão)
+- Mesmo `COMPATIBLE`
+
+-------------------------------------------------------------------------------
+🧠 Questão de cenário (difícil)
+-------------------------------------------------------------------------------
+Um DBA deseja mover um PDB Oracle 19c para um CDB Oracle 23ai.
+Sem downtime dos outros PDBs.
+
+Qual abordagem é correta?
+
+A) Export/Import completo
+B) RMAN Duplicate
+C) Unplug/Plug PDB
+D) Data Pump Full Database
+
+👉 Resposta: ____D____
+
+
+===============================================================================
+🎯 PRÓXIMO PASSO (RESPOSTA EM UMA LINHA)
+===============================================================================
+
+• Questão 1:
+• Questão 2:
+• Questão 3:
+• Application mini-questão:
+• Upgrade cenário:
+
+Depois eu:
+✅ corrijo
+✅ explico as pegadinhas
+✅ fecho Managing Multitenant Architecture
+✅ te levo direto para RMAN (20% da prova) 🚀
+===============================================================================

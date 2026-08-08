@@ -1,0 +1,12 @@
+SELECT username, account_status, expiry_date
+FROM dba_users
+WHERE username = UPPER('<USERNAME>');
+
+SELECT username
+FROM dba_users
+ORDER BY username;
+
+SELECT owner, table_name
+FROM dba_tables
+WHERE owner = UPPER('<SCHEMA_NAME>')
+  AND table_name = UPPER('<TABLE_NAME>');

@@ -1,0 +1,61 @@
+// Aula 10 - Construindo uma imagem do zero
+
+$ mkdir -p ~/fod/test && cd ~/fod/test
+
+$ mkdir sample1 && cd sample1
+
+# vim Dockerfile
+
+FROM centos:7
+RUN yum install -y wget
+
+# docker image build -t my-centos .
+
+$ docker image build -t my-centos -f Dockerfile .
+
+vim hello.c
+
+#include <stdio.h>
+int main (void)
+{
+	printf ("Hello, world!\n");
+	return 0;
+}
+
+# vim Dockerfile
+
+FROM alpine:3.7
+RUN apk update &&
+apk add --update alpine-sdk
+RUN mkdir /app
+WORKDIR /app
+COPY . /app
+RUN mkdir bin
+RUN gcc -Wall hello.c -o bin/hello
+CMD /app/bin/hello
+
+$ docker image build -t hello-world .
+
+$ docker image ls | grep hello-world
+
+FROM alpine:3.7 AS build
+RUN apk update && \
+apk add --update alpine-sdk
+RUN mkdir /app
+WORKDIR /app
+COPY . /app
+RUN mkdir bin
+RUN gcc hello.c -o bin/hello
+FROM alpine:3.7
+COPY --from=build /app/bin/hello /app/hello
+CMD /app/hello
+
+# docker image build -t hello-world-small .
+
+# docker image ls | grep hello-world
+
+# mkdir backup
+
+$ docker image save -o ./backup/my-alpine.tar my-alpine
+
+# docker image load -i ./backup/my-alpine.tar

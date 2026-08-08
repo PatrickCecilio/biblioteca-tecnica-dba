@@ -1,0 +1,17 @@
+# Exibir variáveis atuais
+echo $PATH
+echo $ORACLE_HOME
+echo $ORACLE_BASE
+echo $ORACLE_SID
+
+# Corrigir erro "sqlplus: comando não encontrado"
+export PATH=$ORACLE_HOME/bin:$PATH
+
+# Definir ORACLE_HOME, ORACLE_BASE e ORACLE_SID se não estiverem definidos
+echo "Configurando variáveis de ambiente..."
+export ORACLE_HOME=/app/oracle/product/21c/dbhome_1
+export ORACLE_BASE=/app/oracle
+export ORACLE_SID=ORCL
+
+# Verificar instalação do SQL*Plus
+which sqlplus

@@ -1,0 +1,9 @@
+PATH=/usr/local/bin:$PATH
+export PATH
+. /usr/local/bin/oraenv <<EOF
+CDB1
+EOF
+rman target / <<EOF
+delete noprompt force archivelog all completed before "sysdate-1";
+exit;
+EOF

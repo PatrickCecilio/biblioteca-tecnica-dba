@@ -1,0 +1,77 @@
+-- ===============================
+-- 1. Preparação do Ambiente
+-- ===============================
+ALTER SESSION SET CONTAINER = PDBGUARAI;
+CREATE OR REPLACE DIRECTORY DUMP_DIR AS '/u01/dump/PDBGUARAI';
+
+-- ===============================
+-- 2. Ajustes do PDB para Upgrade
+-- ===============================
+ALTER PLUGGABLE DATABASE XEPDB1 CLOSE IMMEDIATE;
+ALTER PLUGGABLE DATABASE XEPDB1 OPEN;
+
+ALTER SESSION SET CONTAINER = PDBUMM05;
+
+-- ===============================
+-- 3. Início do Upgrade de Timezone
+-- ===============================
+EXEC DBMS_DST.BEGIN_UPGRADE(35);
+
+-- ===============================
+-- 4. Execução do Upgrade
+-- ===============================
+VAR numfail NUMBER;
+
+BEGIN
+   DBMS_DST.UPGRADE_DATABASE(:numfail,
+       parallel                  => TRUE,
+       log_errors                => TRUE,
+       log_errors_table          => 'SYS.DST$ERROR_TABLE',
+       log_triggers_table        => 'SYS.DST$TRIGGER_TABLE',
+       error_on_overlap_time     => TRUE,
+       error_on_nonexisting_time => TRUE);
+   DBMS_OUTPUT.PUT_LINE('Number of tables failed to upgrade: ' || :numfail);
+END;
+/
+
+-- ===============================
+-- 5. Finalização do Upgrade
+-- ===============================
+VAR numfail NUMBER;
+
+BEGIN
+   DBMS_DST.END_UPGRADE(:numfail);
+   DBMS_OUTPUT.PUT_LINE('Number of tables failed to upgrade: ' || :numfail);
+END;
+/
+
+-- ===============================
+-- 6. Validação do Timezone
+-- ===============================
+SELECT * FROM v$timezone_file;
+
+-- ===============================
+-- 7. Reabertura do PDB
+-- ===============================
+ALTER PLUGGABLE DATABASE PDBGUARAI CLOSE IMMEDIATE;
+ALTER PLUGGABLE DATABASE PDBGUARAI OPEN;
+
+-- ===============================
+-- 8. Ajustes de NLS_DATE_FORMAT
+-- ===============================
+SELECT value
+FROM v$nls_parameters
+WHERE parameter = 'NLS_DATE_FORMAT';
+
+ALTER SYSTEM SET NLS_DATE_FORMAT = 'DD/MM/RRRR' SCOPE = SPFILE;
+
+ALTER PLUGGABLE DATABASE PDBUMM05 CLOSE IMMEDIATE;
+ALTER PLUGGABLE DATABASE PDBUMM05 OPEN;
+
+-- ===============================
+-- 9. Criação de Tablespace
+-- ===============================
+CREATE TABLESPACE "INFOSAUDE_DATA"
+DATAFILE SIZE 8G
+AUTOEXTEND ON NEXT 100M
+MAXSIZE UNLIMITED;

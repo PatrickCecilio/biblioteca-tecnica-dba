@@ -1,0 +1,23 @@
+tail -f /u01/app/oracle/diag/rdbms/*/*/trace/alert_*.log | grep -i "kill session"
+
+
+Verifique se os usuários estão sendo desconectados por PROFILE com IDLE_TIME
+
+SELECT username, profile FROM dba_users WHERE account_status = 'OPEN';
+
+SELECT profile, resource_name, limit
+FROM dba_profiles
+WHERE resource_name = 'IDLE_TIME';
+
+
+Ver se há TRIGGER de logon/logout automatizando desconexão:
+
+
+SELECT owner, trigger_name, triggering_event, status
+FROM dba_triggers
+WHERE triggering_event LIKE '%LOGON%' OR triggering_event LIKE '%LOGOFF%' OR triggering_event LIKE '%LOGON, LOGOFF%';
+
+-- Para ver o código da trigger
+SELECT trigger_name, trigger_type, triggering_event, description, trigger_body
+FROM dba_triggers
+WHERE trigger_body LIKE '%KILL%' OR trigger_body LIKE '%SESSION%';

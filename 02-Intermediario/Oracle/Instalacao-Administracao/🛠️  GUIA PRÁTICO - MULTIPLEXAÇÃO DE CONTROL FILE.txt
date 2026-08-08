@@ -1,0 +1,8 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+ALTER SYSTEM SET control_files='C:\APP\ORACLE\CONTROL01.CTL', 'C:\secondcontrolfile\CONTROL02.CTL' SCOPE=SPFILE;
+
+Reinício:
+SHUTDOWN IMMEDIATE;
+STARTUP NOMOUNT;
+RESTORE CONTROLFILE FROM AUTOBACKUP;

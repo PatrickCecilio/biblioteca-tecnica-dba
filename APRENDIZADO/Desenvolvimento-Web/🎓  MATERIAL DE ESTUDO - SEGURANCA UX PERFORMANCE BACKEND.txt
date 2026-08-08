@@ -1,0 +1,204 @@
+================================================================================
+🔒 GUIA DE MELHORIAS – SEGURANÇA, UX, PERFORMANCE E BACK-END
+================================================================================
+
+📦 OBJETIVO
+--------------------------------------------------------------------------------
+Consolidar as principais áreas de melhoria do sistema (site/e-commerce) para
+evoluir em segurança, usabilidade, desempenho e escalabilidade.
+
+================================================================================
+🔒 1. SEGURANÇA & INFRAESTRUTURA
+================================================================================
+
+🧱 Reforçar Content Security Policy (CSP)
+  - Aplicar nonce em scripts críticos
+  - Reduzir domínios liberados
+  - Definir CSP distinta para páginas públicas x admin
+
+🔐 HTTPS obrigatório
+  - Redirecionar HTTP → HTTPS
+  - Ativar HSTS (Strict-Transport-Security)
+
+🧩 Headers de segurança
+  - X-Content-Type-Options: nosniff
+  - Referrer-Policy mais restritiva
+
+🧠 Proteção de rotas administrativas
+  - Validar em cada request se o usuário ainda possui papel de admin
+
+📋 Logs de segurança
+  - Registrar tentativas de login suspeitas
+  - Logar acessos a rotas sensíveis (admin, upload etc.) com IP + user-agent
+
+================================================================================
+👤 2. AUTENTICAÇÃO, SESSÕES & CONTA
+================================================================================
+
+✅ Já implementado:
+  - Sessão com Redis
+  - Proteção anti brute-force
+  - Refresh token funcional
+  - Histórico de sessões por dispositivo
+
+🚀 Melhorias sugeridas:
+  - Página “Segurança da Conta” no perfil
+      • Mostrar últimas tentativas de login (IP, sucesso/falha)
+      • Botão “Encerrar todas as sessões”
+  - Alerta de login em novo dispositivo (via e-mail)
+  - Implementar 2FA (Google Authenticator ou e-mail)
+  - Recuperação de senha robusta
+      • Token de reset com expiração curta
+      • Tela dedicada com validação forte
+
+================================================================================
+🛒 3. FUNCIONALIDADES DE E-COMMERCE
+================================================================================
+
+🖼️ Página de produto (PDP) aprimorada
+  - Zoom na imagem
+  - Variações: cor, tamanho, modelo
+  - Avaliações (nota + comentário)
+  - Botão “Comprar agora”
+
+🚚 Frete por CEP
+  - Integração com API (Correios/transportadora)
+  - Cálculo dinâmico de prazo e valor
+  - Simulação na PDP e no carrinho
+
+🛍️ Checkout convidado + opções PIX/cartão
+💖 Wishlist / Favoritos
+  - Salvar itens no localStorage ou banco
+
+🧠 Carrinho inteligente
+  - Cupons e frete grátis por valor mínimo
+  - Salvar no banco (recuperável em outro dispositivo)
+
+================================================================================
+🎨 4. UX / UI & NAVEGAÇÃO
+================================================================================
+
+📱 Responsividade mobile
+  - Revisar fluxos: login, cadastro, carrinho, perfil
+  - Aumentar área de toque de botões e ícones
+
+📌 Sticky Elements
+  - Botão fixo “Ver carrinho” no mobile
+  - Header fixo com logo e ícones principais
+
+💬 Feedbacks mais claros
+  - Mensagens amigáveis (“Ops, esse e-mail já existe 💅”)
+  - Loading states melhores (spinners/skeletons)
+
+♿ Acessibilidade
+  - Foco visível, contraste adequado
+  - aria-label, role e alt em imagens importantes
+
+================================================================================
+⚙️ 5. BACK-END, BANCO & MODELAGEM
+================================================================================
+
+🗄️ Migrar dados de produtos para banco
+  - Tabelas: products, categories, tags, images, reviews
+
+⚡ Índices e performance
+  - Índices em colunas de busca e e-mails
+  - Índices em IDs de pedidos e chaves estrangeiras
+
+🧾 Auditoria
+  - Logs para ações de admin e alterações de preço/status
+
+🧹 Jobs de limpeza
+  - Remover sessões e tokens expirados
+  - Limpar logs antigos periodicamente
+
+================================================================================
+📈 6. PAINEL ADMIN & DASHBOARD
+================================================================================
+
+📊 Dashboard completo
+  - Vendas por período, ticket médio
+  - Produtos mais vendidos
+  - Abandono de carrinho
+
+🧰 Gestão de produtos
+  - CRUD completo via painel
+  - Upload com preview
+  - Ativar/desativar produtos sem excluir
+
+📦 Gestão de pedidos
+  - Timeline (recebido → enviado → entregue)
+  - Integração com código de rastreio
+
+💬 Moderação de comentários/fórum
+  - Aprovação/rejeição
+  - Bloqueio de usuários tóxicos
+
+================================================================================
+🚀 7. PERFORMANCE & PWA
+================================================================================
+
+🖼️ Otimização de imagens
+  - Converter para WebP/AVIF
+  - loading="lazy" em imagens
+  - Thumbnails menores
+
+🧩 Bundling / Minificação
+  - Agrupar e minificar JS/CSS
+  - Remover código morto
+
+📱 Progressive Web App (PWA)
+  - Manifest + service worker
+  - Cache para modo offline (catálogo/carrinho)
+  - Ícone instalável no celular
+
+================================================================================
+🔍 8. SEO, MARKETING & CONTEÚDO
+================================================================================
+
+🔗 URLs Amigáveis
+  - /produto/colecao-floral-aquarela
+
+📄 Metas dinâmicas
+  - Title e meta description por página
+
+📤 Open Graph & WhatsApp
+  - Imagem destacada por produto
+
+📚 Schema.org
+  - Product, Offer, Review, BreadcrumbList
+
+📊 Integração com Analytics / Tag Manager
+  - Acompanhar funil: visita → produto → checkout → compra
+
+================================================================================
+🧪 9. TESTES & QUALIDADE
+================================================================================
+
+🧩 Testes automáticos básicos
+  - Rotas principais (login, cadastro, pedidos)
+  - Componentes JS críticos (carrinho, filtros)
+
+🚨 Monitoramento de erros
+  - Integração com Sentry (capturar erros em produção)
+
+🧾 Checklists de deploy
+  - Testes, migrações e backup antes de publicar
+
+================================================================================
+📌 PRÓXIMO PASSO
+================================================================================
+
+Escolha uma área prioritária para iniciarmos melhorias práticas:
+  1️⃣ Frete por CEP
+  2️⃣ UX Mobile
+  3️⃣ Segurança Avançada
+  4️⃣ Dashboard Admin
+  5️⃣ PWA / Performance
+
+Em seguida, posso:
+  - Detalhar as etapas de implementação
+  - Gerar os arquivos corrigidos/prontos
+  - Entregar em formato ZIP para testes locais
+
+================================================================================

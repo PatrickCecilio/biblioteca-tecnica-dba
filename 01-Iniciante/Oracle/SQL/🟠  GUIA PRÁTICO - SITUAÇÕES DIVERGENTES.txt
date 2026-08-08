@@ -1,0 +1,21 @@
+delete archivelog until time 'sysdate -5';
+
+show parameter remote_login_passwordfile;
+CONFIGURE CONTROLFILE AUTOBACKUP FORMAT FOR DEVICE TYPE DISK TO '/mnt/backupoda/rman/cdbmpro/ctl_%F';
+
+SELECT ID_USUARIO,
+       NM_LOGIN,
+       DS_EMAIL,
+       TP_SITUACAO_CONTA_USUARIO,
+       DT_CADASTRO_USUARIO,
+       DT_BLOQUEIO_SENHA
+FROM   INFOSAUDE.USUARIO
+WHERE  UPPER(NM_LOGIN) = 'SUPERVISOR';
+
+
+SELECT *
+FROM   INFOSAUDE.USUARIO
+WHERE  UPPER(NM_LOGIN) = 'SUPERVISOR';
+
+
+CONFIGURE CONTROLFILE AUTOBACKUP FORMAT FOR DEVICE TYPE DISK TO '/mnt/backupoda/rman/cdbmpro/ctl_%F';

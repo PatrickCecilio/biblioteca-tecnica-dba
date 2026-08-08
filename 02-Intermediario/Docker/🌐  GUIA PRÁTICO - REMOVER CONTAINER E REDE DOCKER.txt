@@ -1,0 +1,10 @@
+REMOVER CONTAINER E REDE DOCKER
+
+ATENÇÃO: os comandos removem recursos. Confirme nomes, dependências e persistência de dados.
+
+docker container inspect web
+docker network inspect test-net
+docker container rm --force web
+docker network rm test-net
+
+Validação: docker container ls -a e docker network ls não devem listar os recursos removidos.

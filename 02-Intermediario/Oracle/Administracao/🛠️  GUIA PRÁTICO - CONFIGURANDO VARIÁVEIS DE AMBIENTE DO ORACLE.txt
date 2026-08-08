@@ -1,0 +1,22 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+Globais (para todo o sistema) – como root:
+nano /etc/profile.d/oracle.sh
+
+export ORACLE_HOME=/app/oracle/product/21c/dbhome_1
+export ORACLE_SID=orcl
+export ORACLE_BASE=/app/oracle
+export ORACLE_HOSTNAME=cursooraclelocaldomain
+export PATH=$ORACLE_HOME/bin:$PATH
+
+Após editar:
+chmod +x /etc/profile.d/oracle.sh
+reboot
+
+Locais (para o usuário oracle):
+nano ~/.bash_profile
+
+# Adicione ao final
+export ORACLE_HOME=/app/oracle/product/21c/dbhome_2
+export ORACLE_SID=orcl2
+export PATH=$PATH:/home

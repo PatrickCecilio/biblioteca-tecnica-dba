@@ -1,0 +1,59 @@
+select
+    'alter system kill session ' || a.SID || ',' || a.serial# || ' immediate;'
+FROM  v$session a
+  WHERE
+ type = 'USER'
+ and username = 'TASY'
+ ORDER BY
+ blocking_session;
+
+
+SELECT 'ALTER SYSTEM KILL SESSION '''||sid||','||serial#||''' IMMEDIATE;'
+FROM v$session
+where status='INACTIVE' and type='USER' and seconds_in_wait > 900;
+
+
+SELECT
+    'ALTER SYSTEM KILL SESSION ''' || a.SID || ',' || a.serial# || ''' IMMEDIATE;'
+FROM
+    v$session a
+WHERE
+    a.username = 'TASY'
+    AND a.type = 'USER'
+    AND a.status = 'ACTIVE'
+  AND a.seconds_in_wait > 3600
+ORDER BY
+    a.SID;
+
+
+SELECT
+ blocking_session,
+ sid,
+ serial#,
+ wait_class,
+ seconds_in_wait
+ FROM
+ v$session
+ WHERE
+ blocking_session IS NOT NULL
+ ORDER BY
+ blocking_session;
+
+
+ SELECT 'ALTER SYSTEM KILL SESSION '||''''|| a.SID|| ','|| a.serial#|| ''||' immediate' FROM  v$session a
+  WHERE
+ blocking_session IS NOT NULL
+AND seconds_in_wait > 3600
+ ORDER BY
+ blocking_session;
+
+
+ select
+    'alter system kill session ' || a.SID || ',' || a.serial# || ' immediate;'
+FROM  v$session a
+  WHERE
+ blocking_session IS NOT NULL
+ and type = 'USER'
+ and username = 'TASY'
+ ORDER BY
+ blocking_session;

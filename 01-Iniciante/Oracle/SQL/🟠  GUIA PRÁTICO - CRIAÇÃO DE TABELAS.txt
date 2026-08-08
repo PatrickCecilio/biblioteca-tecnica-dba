@@ -1,0 +1,35 @@
+CREATE TABLE departamentos (
+  id_departamento NUMBER PRIMARY KEY,
+  nome          VARCHAR2(50) NOT NULL
+);
+
+CREATE TABLE empregados (
+  id_empregado    NUMBER PRIMARY KEY,
+  nome            VARCHAR2(50)  NOT NULL,
+  sobrenome       VARCHAR2(50)  NOT NULL,
+  salario         NUMBER        NOT NULL,
+  id_departamento NUMBER,
+    FOREIGN KEY (id_departamento)
+    REFERENCES departamentos(id_departamento)
+);
+
+INSERT INTO departamentos (id_departamento, nome) VALUES (1, 'TI');
+INSERT INTO departamentos (id_departamento, nome) VALUES (2, 'Financeiro');
+INSERT INTO departamentos (id_departamento, nome) VALUES (3, 'RH');
+
+INSERT INTO empregados (id_empregado, nome, sobrenome, salario, bonus, id_departamento)
+VALUES (1, 'João', 'Silva', 7000, 500, 1);
+
+INSERT INTO empregados (id_empregado, nome, sobrenome, salario, bonus, id_departamento)
+VALUES (2, 'Maria', 'Souza', 5000, NULL, 2);
+
+INSERT INTO empregados (id_empregado, nome, sobrenome, salario, bonus, id_departamento)
+VALUES (3, 'Carlos', 'Pereira', 7500, 250, 2);
+
+INSERT INTO empregados (id_empregado, nome, sobrenome, salario, bonus, id_departamento)
+VALUES (4, 'Marta', 'Oliveira', 4800, NULL, 3);
+
+INSERT INTO empregados (id_empregado, nome, sobrenome, salario, bonus, id_departamento)
+VALUES (5, 'Marcelo', 'Lima', 8000, 1000, 1);
+
+COMMIT;

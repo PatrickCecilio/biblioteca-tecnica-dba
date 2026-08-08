@@ -1,0 +1,47 @@
+############################################
+# Arquivo: tnsnames.ora (Configurações de conexões)
+############################################
+
+# Verificando serviços disponíveis no banco
+lsnrctl status
+sqlplus / as sysdba
+
+SELECT name, network_name, pdb, enabled, aq_ha_notifications
+FROM dba_services
+ORDER BY pdb, name;
+
+exit
+
+# Caminho do arquivo de configuração
+cd /u01/app/oracle/product/19.0.0/dbhome_1/network/admin
+
+# Editar o arquivo
+vi tnsnames.ora
+
+# Exemplos de entradas
+PDB1 =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = localhost)(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVICE_NAME = pdb1)
+    )
+  )
+
+PDB2 =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = localhost)(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVICE_NAME = pdb2)
+    )
+  )
+
+# Testar conexão
+tnsping PDB1
+
+# Atualizar registro no listener
+ALTER SYSTEM REGISTER;
+
+-- Conferir novamente serviços
+SELECT name, network_name, pdb, enabled, aq_ha_notifications
+FROM dba_services
+ORDER BY pdb, name;

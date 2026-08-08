@@ -1,0 +1,10 @@
+sudo dnf install -y git ruby rubygems
+
+sudo gem install bundler
+
+sudo git clone <CAMINHO_REPOSITORIO_APROVADO> /opt/metasploit-framework
+cd /opt/metasploit-framework
+
+sudo bundle install
+
+sudo ./msfconsole

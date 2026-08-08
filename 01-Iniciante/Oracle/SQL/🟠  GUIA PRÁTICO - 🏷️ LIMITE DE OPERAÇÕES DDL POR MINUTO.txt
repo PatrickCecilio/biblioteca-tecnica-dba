@@ -1,0 +1,13 @@
+Limite de operações DDL por minuto: entendendo a questão “mislabeled” no simulado
+
+Em alguns simulados de certificação do Oracle Cloud Infrastructure aparece uma pergunta que costuma gerar dúvida: “What is the maximum number of DDL operations per minute allowed by the MySQL Database Cloud Service?”
+
+O gabarito aponta 4 operações por minuto, mas esse número não corresponde ao comportamento real do MySQL Database Service. Tudo indica que a questão foi rotulada de forma errada.
+
+Pela documentação oficial da Oracle, o limite de 4 operações DDL por minuto é do Oracle NoSQL Database Cloud Service, não do MySQL. O NoSQL tem restrições específicas de throughput para operações administrativas, como mudanças de schema. Já o MySQL Database Service — na versão padrão ou no HeatWave — não usa esse limite reduzido. Ele segue o funcionamento normal do MySQL, sem esse tipo de restrição artificial.
+
+Mesmo com o erro, a experiência com simulados e dumps mostra que, se a pergunta aparecer na prova usando o termo “MySQL”, a resposta esperada ainda será 4. Aparentemente o enunciado foi copiado de uma questão sobre NoSQL sem ajustar o nome do serviço.
+
+Por isso, a recomendação é simples: saiba que há um erro de categorização, mas responda conforme o padrão que costuma aparecer no exame. Se o enunciado mencionar “MySQL”, marque 4 — mesmo sabendo que isso não reflete o funcionamento real do serviço.
+
+Entender esse detalhe evita confusão na hora da prova e reforça a importância de conhecer tanto o comportamento técnico correto quanto as peculiaridades dos simulados e materiais de estudo.

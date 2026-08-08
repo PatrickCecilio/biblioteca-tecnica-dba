@@ -1,0 +1,21 @@
+# GUIA PRÁTICO ORACLE
+
+## Consultar Triggers Alteradas por Data
+
+### 1. Consultar triggers pela data da última alteração
+
+```sql
+SELECT
+    t.owner,
+    t.trigger_name,
+    t.table_name,
+    t.status,
+    TO_CHAR(o.last_ddl_time, 'YYYY-MM-DD HH24:MI:SS') AS last_ddl_time
+FROM dba_triggers t
+JOIN dba_objects o
+    ON t.trigger_name = o.object_name
+   AND t.owner = o.owner
+WHERE o.object_type = 'TRIGGER'
+  AND TRUNC(o.last_ddl_time) = TO_DATE('<YYYY-MM-DD>', 'YYYY-MM-DD')
+ORDER BY o.last_ddl_time DESC;
+```

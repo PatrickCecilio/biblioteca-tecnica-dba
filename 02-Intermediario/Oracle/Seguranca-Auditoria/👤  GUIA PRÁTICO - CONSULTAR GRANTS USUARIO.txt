@@ -1,0 +1,55 @@
+# GUIA PRÁTICO ORACLE
+
+## Consultar Grants de Usuário
+
+### 1. Ajustar saída do SQL*Plus
+
+```sql
+SET LONG 10000
+SET PAGESIZE 100
+SET LINESIZE 150
+```
+
+---
+
+### 2. Alterar para o PDB
+
+```sql
+ALTER SESSION SET CONTAINER = <PDB_NAME>;
+```
+
+---
+
+### 3. Consultar privilégios de sistema
+
+```sql
+SELECT DBMS_METADATA.GET_GRANTED_DDL(
+    'SYSTEM_GRANT',
+    '<USERNAME>'
+) AS system_grants
+FROM dual;
+```
+
+---
+
+### 4. Consultar roles
+
+```sql
+SELECT DBMS_METADATA.GET_GRANTED_DDL(
+    'ROLE_GRANT',
+    '<USERNAME>'
+) AS role_grants
+FROM dual;
+```
+
+---
+
+### 5. Consultar privilégios de objetos
+
+```sql
+SELECT DBMS_METADATA.GET_GRANTED_DDL(
+    'OBJECT_GRANT',
+    '<USERNAME>'
+) AS object_grants
+FROM dual;
+```

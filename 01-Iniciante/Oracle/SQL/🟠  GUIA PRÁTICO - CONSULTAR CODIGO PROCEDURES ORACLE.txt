@@ -1,0 +1,16 @@
+SET LONG 100000
+SET PAGESIZE 200
+SET LINESIZE 200
+
+SELECT text
+FROM all_source
+WHERE owner = UPPER('<SCHEMA_NAME>')
+  AND name = UPPER('<PROCEDURE_NAME>')
+  AND type = 'PROCEDURE'
+ORDER BY line;
+
+SELECT line, position, text
+FROM dba_errors
+WHERE owner = UPPER('<SCHEMA_NAME>')
+  AND name = UPPER('<PROCEDURE_NAME>')
+ORDER BY sequence;

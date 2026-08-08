@@ -1,0 +1,11 @@
+docker network create --driver overlay <NETWORK_NAME>
+
+docker volume create <VOLUME_NAME>
+
+docker service create --name <DB_SERVICE_NAME> --network <NETWORK_NAME> --mount type=volume,src=<VOLUME_NAME>,dst=/var/lib/postgresql/data <DB_IMAGE>:<IMAGE_TAG>
+
+docker service create --name <WEB_SERVICE_NAME> --network <NETWORK_NAME> --publish published=<HOST_PORT>,target=3000 --replicas 3 <WEB_IMAGE>:<IMAGE_TAG>
+
+docker service ls
+
+docker service ps <WEB_SERVICE_NAME>

@@ -1,0 +1,30 @@
+set pagesize 100;
+set linesize 300;
+
+select name, value/1024/1024 VALUE_MB
+ from v$parameter
+ where name in ('memory_max_target','memory_target','sga_max_size','sga_target','pga_aggregate_limit','pga_aggregate_target')
+ order by 1;
+
+alter system set memory_max_target=0 scope=spfile;
+alter system set memory_target=0 scope=spfile;
+
+alter system set sga_max_size=8G scope=spfile;
+alter system set sga_target=7G scope=spfile;
+
+alter system set pga_aggregate_limit=4096M scope=spfile;
+alter system set pga_aggregate_target=500M scope=spfile;
+
+startup pfile=/app/oracle/admin/orcl/pfile/init.ora.022202593330';
+
+set pagesize 100;
+set linesize 300;
+
+select name, value/1024/1024 VALUE_MB
+ from v$parameter
+ where name in ('memory_max_target','memory_target','sga_max_size','sga_target','pga_aggregate_limit','pga_aggregate_target')
+ order by 1;
+
+create spfile from pfile='/app/oracle/admin/orcl/pfile/init.ora.022202593330';
+
+startup;

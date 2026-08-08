@@ -1,0 +1,10 @@
+NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINT
+sda      8:0    0   90G  0 disk
+├─sda1   8:1    0 37,3G  0 part /u01
+├─sda2   8:2    0  9,3G  0 part [SWAP]
+├─sda3   8:3    0  5,6G  0 part /var
+├─sda4   8:4    0    1K  0 part
+├─sda5   8:5    0  4,2G  0 part /tmp
+├─sda6   8:6    0  3,7G  0 part /home
+└─sda7   8:7    0   30G  0 part /
+sr0     11:0    1 1024M  0 rom

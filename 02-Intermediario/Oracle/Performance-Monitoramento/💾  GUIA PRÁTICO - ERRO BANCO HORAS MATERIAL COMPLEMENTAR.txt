@@ -1,0 +1,12 @@
+erro:
+
+VKTM detected a forward time drift
+
+dnf install -y chrony
+systemctl enable chronyd
+systemctl start chronyd
+
+timedatectl status
+chronyc tracking
+timedatectl set-local-rtc 0
+hwclock --systohc

@@ -1,0 +1,28 @@
+SELECT s.sid,
+       s.serial#,
+       s.username,
+       s.status,
+       s.machine,
+       s.program,
+       s.sql_id,
+       p.spid AS os_pid,
+       ROUND(st.value / 100, 2) AS cpu_seconds
+FROM v$session s
+JOIN v$process p
+  ON p.addr = s.paddr
+JOIN v$sesstat st
+  ON st.sid = s.sid
+JOIN v$statname sn
+  ON sn.statistic# = st.statistic#
+WHERE sn.name = 'CPU used by this session'
+  AND s.username IS NOT NULL
+ORDER BY st.value DESC
+FETCH FIRST 10 ROWS ONLY;
+
+SELECT *
+FROM TABLE(dbms_xplan.display_cursor('<SQL_ID>', NULL, 'ALLSTATS LAST'));
+
+SELECT owner, table_name, last_analyzed
+FROM dba_tables
+WHERE owner = UPPER('<SCHEMA_NAME>')
+  AND table_name = UPPER('<TABLE_NAME>');

@@ -1,0 +1,59 @@
+# GUIA PRÁTICO ORACLE
+
+## Criação e Consulta de Profile de Segurança
+
+### 1. Consultar configuração de um Profile
+
+```sql
+SELECT
+    profile,
+    resource_name,
+    limit
+FROM dba_profiles
+WHERE profile = UPPER('<PROFILE_NAME>')
+ORDER BY resource_name;
+```
+
+---
+
+### 2. Criar Profile de segurança
+
+```sql
+CREATE PROFILE <PROFILE_NAME> LIMIT
+    FAILED_LOGIN_ATTEMPTS    5
+    PASSWORD_LOCK_TIME       1
+    PASSWORD_LIFE_TIME       60
+    PASSWORD_GRACE_TIME      7
+    PASSWORD_REUSE_TIME      365
+    PASSWORD_REUSE_MAX       5
+    PASSWORD_VERIFY_FUNCTION ORA12C_STRONG_VERIFY_FUNCTION
+    IDLE_TIME                15
+    CONNECT_TIME             480
+    SESSIONS_PER_USER        2;
+```
+
+---
+
+### 3. Validar os parâmetros do Profile criado
+
+```sql
+SELECT
+    profile,
+    resource_name,
+    limit
+FROM dba_profiles
+WHERE profile = UPPER('<PROFILE_NAME>')
+ORDER BY resource_name;
+```
+
+---
+
+### 4. Verificar status de um usuário
+
+```sql
+SELECT
+    username,
+    account_status
+FROM dba_users
+WHERE username = UPPER('<USERNAME>');
+```

@@ -1,0 +1,157 @@
+# GUIA PRÁTICO ORACLE
+
+## Configuração e Validação de Paralelismo
+
+### 1. Conectar como SYSDBA
+
+```bash
+sqlplus / as sysdba
+```
+
+---
+
+### 2. Verificar PARALLEL_DEGREE_POLICY
+
+```sql
+SELECT
+    name,
+    value
+FROM v$parameter
+WHERE name = 'parallel_degree_policy';
+```
+
+---
+
+### 3. Configurar política AUTO
+
+```sql
+ALTER SYSTEM SET parallel_degree_policy=AUTO;
+```
+
+### 4. Validar
+
+```sql
+SELECT
+    name,
+    value
+FROM v$parameter
+WHERE name = 'parallel_degree_policy';
+```
+
+---
+
+### 5. Configurar política MANUAL
+
+```sql
+ALTER SYSTEM SET parallel_degree_policy=MANUAL;
+```
+
+### 6. Validar
+
+```sql
+SELECT
+    name,
+    value
+FROM v$parameter
+WHERE name = 'parallel_degree_policy';
+```
+
+---
+
+### 7. Configurar política LIMITED
+
+```sql
+ALTER SYSTEM SET parallel_degree_policy=LIMITED;
+```
+
+### 8. Validar
+
+```sql
+SELECT
+    name,
+    value
+FROM v$parameter
+WHERE name = 'parallel_degree_policy';
+```
+
+---
+
+### 9. Forçar Parallel Query na sessão
+
+```sql
+ALTER SESSION FORCE PARALLEL QUERY;
+```
+
+---
+
+### 10. Desabilitar Parallel Query na sessão
+
+```sql
+ALTER SESSION DISABLE PARALLEL QUERY;
+```
+
+---
+
+### 11. Alterar para a PDB
+
+```sql
+ALTER SESSION SET CONTAINER=<PDB_NAME>;
+```
+
+---
+
+### 12. Configurar paralelismo em uma tabela
+
+```sql
+ALTER TABLE <SCHEMA>.<TABLE_NAME>
+PARALLEL (DEGREE <PARALLEL_DEGREE>);
+```
+
+---
+
+### 13. Configurar paralelismo em um índice
+
+```sql
+ALTER INDEX <SCHEMA>.<INDEX_NAME>
+PARALLEL (DEGREE <PARALLEL_DEGREE>);
+```
+
+---
+
+### 14. Remover paralelismo da tabela
+
+```sql
+ALTER TABLE <SCHEMA>.<TABLE_NAME> NOPARALLEL;
+```
+
+Alternativa existente no material:
+
+```sql
+ALTER TABLE <SCHEMA>.<TABLE_NAME>
+PARALLEL (DEGREE 1);
+```
+
+---
+
+### 15. Remover paralelismo do índice
+
+```sql
+ALTER INDEX <SCHEMA>.<INDEX_NAME> NOPARALLEL;
+```
+
+---
+
+### 16. Retornar ao CDB$ROOT
+
+```sql
+ALTER SESSION SET CONTAINER=CDB$ROOT;
+```
+
+### 17. Validar o Container
+
+```sql
+SELECT
+    name,
+    cdb
+FROM v$database;
+```

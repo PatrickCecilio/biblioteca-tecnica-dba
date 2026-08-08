@@ -1,0 +1,152 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+============================================================
+          GUIA PRÁTICO – FLASHBACK DATABASE ORACLE
+          Versão: Nível Júnior DBA – Passo a Passo
+------------------------------------------------------------
+PRÉ-REQUISITOS
+------------------------------------------------------------
+1) Verificar se o banco está em ARCHIVELOG
+------------------------------------------------------------
+SQL> SELECT log_mode FROM v$database;
+
+Esperado: ARCHIVELOG
+
+Se não estiver:
+
+SQL> SHUTDOWN IMMEDIATE;
+SQL> STARTUP MOUNT;
+SQL> ALTER DATABASE ARCHIVELOG;
+SQL> ALTER DATABASE OPEN;
+
+Dica: ARCHIVELOG permite usar flashback e restores point.
+
+------------------------------------------------------------
+2) Verificar se o Flashback está ligado
+------------------------------------------------------------
+SQL> SELECT flashback_on FROM v$database;
+
+Esperado: YES
+
+Se estiver NO:
+
+SQL> SHUTDOWN IMMEDIATE;
+SQL> STARTUP MOUNT;
+SQL> ALTER DATABASE FLASHBACK ON;
+SQL> ALTER DATABASE OPEN;
+
+Observação: Flashback só pode ser ativado com banco em MOUNT.
+
+------------------------------------------------------------
+3) Verificar FRA e espaço
+------------------------------------------------------------
+SQL> SHOW PARAMETER db_recovery_file_dest;
+SQL> SHOW PARAMETER db_recovery_file_dest_size;
+
+SQL> SELECT space_limit/1024/1024/1024 AS FRA_GB,
+            space_used/1024/1024/1024 AS USED_GB
+     FROM v$recovery_file_dest;
+
+Se não configurado:
+
+SQL> ALTER SYSTEM SET db_recovery_file_dest='/u01/fra' SCOPE=BOTH;
+SQL> ALTER SYSTEM SET db_recovery_file_dest_size=10G SCOPE=BOTH;
+
+Linux (se precisar criar a pasta):
+mkdir -p /u01/fra
+chown -R oracle:oinstall /u01/fra
+chmod 750 /u01/fra
+
+Dica: FRA é onde ficam armazenados os Flashback logs.
+
+------------------------------------------------------------
+4) Realizar backup antes (boa prática)
+------------------------------------------------------------
+RMAN> BACKUP DATABASE TAG 'CDBAULAS';
+
+------------------------------------------------------------
+5) Criar Restore Point (recomendado)
+------------------------------------------------------------
+SQL> CREATE RESTORE POINT CDBAULAS GUARANTEE FLASHBACK DATABASE;
+
+Dica: GUARANTEE impede Oracle de apagar os logs usados para voltar aqui.
+
+============================================================
+EXECUÇÃO
+============================================================
+1) Validar informações
+------------------------------------------------------------
+SQL> SELECT name, time, guarantee_flashback_database FROM v$restore_point;
+SQL> SELECT current_scn FROM v$database;
+SQL> SELECT scn_to_timestamp(<SCN>) FROM dual;
+SQL> SELECT timestamp_to_scn(to_timestamp('YYYY-MM-DD HH24:MI:SS')) FROM dual;
+
+------------------------------------------------------------
+2) Colocar banco em MOUNT
+------------------------------------------------------------
+SQL> SHUTDOWN IMMEDIATE;
+SQL> STARTUP MOUNT;
+
+------------------------------------------------------------
+3) Executar Flashback
+------------------------------------------------------------
+Por Restore Point:
+SQL> FLASHBACK DATABASE TO RESTORE POINT CDBAULAS;
+
+Por Tempo:
+SQL> FLASHBACK DATABASE TO TIME "to_timestamp('YYYY-MM-DD HH24:MI:SS','YYYY-MM-DD HH24:MI:SS')";
+
+Por SCN:
+SQL> FLASHBACK DATABASE TO SCN <SCN_VALUE>;
+
+Dica:
+- SCN = checkpoint exato do banco (mais preciso que horário).
+- Use timestamp_to_scn para descobrir o SCN exato de uma data.
+
+------------------------------------------------------------
+4) Abrir banco com RESETLOGS
+------------------------------------------------------------
+SQL> ALTER DATABASE OPEN RESETLOGS;
+
+Importante: RESETLOGS cria uma nova linha do tempo do banco.
+Nunca esqueça disso após flashback.
+
+============================================================
+VALIDAÇÃO FINAL
+============================================================
+
+SQL> SELECT name, open_mode, log_mode, flashback_on FROM v$database;
+SQL> SELECT current_scn, systimestamp FROM v$database;
+
+Se não usar mais o restore point:
+SQL> DROP RESTORE POINT CDBAULAS;
+
+Backup após flashback:
+RMAN> BACKUP DATABASE PLUS ARCHIVELOG TAG 'AFTER_FLASHBACK';
+
+============================================================
+DICAS ÚTEIS
+============================================================
+
+- Flashback NÃO substitui backup
+- Precisa de ARCHIVELOG + FRA configurada
+- Sempre faça backup antes e depois
+- Restore Point garantido preserva logs necessários
+- Flashback só funciona se ativado antes do problema
+
+============================================================
+CHECKLIST FINAL – CONFIRA ANTES DE SAIR
+============================================================
+
+[ ] Banco em ARCHIVELOG
+[ ] FRA configurada e com espaço
+[ ] Flashback ON
+[ ] Backup pré-flashback feito
+[ ] Restore point criado (opcional)
+[ ] Banco em MOUNT para flashback
+[ ] Flashback executado com sucesso
+[ ] Banco aberto com RESETLOGS
+[ ] Restore point removido (se aplicável)
+[ ] Backup pós-flashback realizado
+
+============================================================

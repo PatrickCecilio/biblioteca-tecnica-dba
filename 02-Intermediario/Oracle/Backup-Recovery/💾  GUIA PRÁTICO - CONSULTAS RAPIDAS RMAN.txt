@@ -1,0 +1,8 @@
+CONSULTAS RÁPIDAS NO RMAN
+
+LIST BACKUP SUMMARY;
+CROSSCHECK BACKUP;
+REPORT SCHEMA;
+REPORT OBSOLETE;
+
+Validação: confirme DBID, incarnation e banco de destino antes de interpretar os resultados.

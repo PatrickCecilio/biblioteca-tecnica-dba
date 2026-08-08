@@ -1,0 +1,11 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+systemctl stop postgresql
+
+systemctl start postgresql
+
+sudo systemctl stop postgresql
+
+rm -rf /var/lib/pgsql/14/data/*
+
+sudo systemctl start postgresql

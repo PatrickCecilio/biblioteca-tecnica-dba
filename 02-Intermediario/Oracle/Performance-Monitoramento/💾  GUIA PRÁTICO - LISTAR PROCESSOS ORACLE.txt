@@ -1,0 +1,6 @@
+LISTAR PROCESSOS ORACLE
+
+ps -ef | grep '[o]ra_'
+ps -ef | grep '[t]nslsnr'
+
+Validação: confirme proprietário, SID embutido no nome do processo e horário de inicialização. Não encerre processos sem diagnóstico e autorização.

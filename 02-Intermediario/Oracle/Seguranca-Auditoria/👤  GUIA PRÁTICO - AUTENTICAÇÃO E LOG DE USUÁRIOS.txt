@@ -1,0 +1,18 @@
+autenticação e log de usuários
+
+cd /var/log
+ls
+lastb root
+lastb pcecilio
+lastcomm root
+ac root
+cd
+desmg
+desmg | grep USB
+tail -n 10 /var/log/secure
+lastlog
+usermod -s /usr/sbin/nologin user2
+passwd -l user2
+passwd -u user2
+passwd -S user2
+cat /etc/shadow | grep root

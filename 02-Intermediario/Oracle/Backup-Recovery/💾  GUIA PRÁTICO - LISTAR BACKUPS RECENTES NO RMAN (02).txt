@@ -1,0 +1,5 @@
+-- Listar backups recentes no RMAN
+LIST BACKUP SUMMARY;
+
+-- Validar backups
+VALIDATE BACKUP DATABASE;

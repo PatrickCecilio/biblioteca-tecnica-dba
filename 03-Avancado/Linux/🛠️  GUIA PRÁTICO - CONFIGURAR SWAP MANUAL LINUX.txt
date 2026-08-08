@@ -1,0 +1,7 @@
+free -m
+
+chmod 600 /root/meuswap
+chown root:root /root/meuswap
+
+echo "/root/meuswap swap swap defaults 0 0" >> /etc/fstab
+systemctl daemon-reexec

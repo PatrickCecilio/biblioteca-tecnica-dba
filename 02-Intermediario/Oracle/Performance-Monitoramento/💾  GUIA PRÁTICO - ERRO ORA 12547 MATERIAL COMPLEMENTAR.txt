@@ -1,0 +1,7 @@
+ERRO ORA-12547.
+CDB1:/u01/app/oracle/product/19.3.0/dbhome_1:N
+[root@localhost ~]# sudo chown oracle:oinstall /u01/app/oracle/product/19.3.0/dbhome_1/bin/oracle
+[root@localhost ~]# sudo chmod 6751            /u01/app/oracle/product/19.3.0/dbhome_1/bin/oracle
+[root@localhost ~]# findmnt -no TARGET,OPTIONS /u01/app/oracle/product/19.3.0/dbhome_1
+[root@localhost ~]# sudo chmod 1777 /tmp
+[root@localhost ~]# sudo dnf install -y libaio libnsl

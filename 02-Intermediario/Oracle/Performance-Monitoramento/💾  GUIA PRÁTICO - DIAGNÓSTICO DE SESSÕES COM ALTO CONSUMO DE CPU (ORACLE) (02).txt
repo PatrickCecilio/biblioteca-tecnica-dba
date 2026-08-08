@@ -1,0 +1,13 @@
+SELECT sid, serial#, username, status, sql_id, event, wait_class, seconds_in_wait
+FROM v$session
+WHERE username IS NOT NULL
+ORDER BY seconds_in_wait DESC;
+
+SELECT s.sid, s.serial#, s.username, s.sql_id, p.spid, p.pname, p.program
+FROM v$session s
+JOIN v$process p ON p.addr = s.paddr
+WHERE s.sid = <SID>
+  AND s.serial# = <SERIAL_NUMBER>;
+
+SELECT *
+FROM TABLE(dbms_xplan.display_cursor('<SQL_ID>', NULL, 'ALLSTATS LAST'));

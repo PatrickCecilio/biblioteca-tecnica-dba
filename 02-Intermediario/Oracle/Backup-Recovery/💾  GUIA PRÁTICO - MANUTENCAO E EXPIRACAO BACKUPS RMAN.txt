@@ -1,0 +1,11 @@
+MANUTENÇÃO E EXPIRAÇÃO DE BACKUPS RMAN
+
+ATENÇÃO: DELETE remove registros e, conforme o estado, arquivos. Execute apenas após revisar retenção e catálogo.
+
+CROSSCHECK BACKUP;
+LIST EXPIRED BACKUP;
+REPORT OBSOLETE;
+DELETE EXPIRED BACKUP;
+DELETE OBSOLETE;
+
+Validação: execute LIST BACKUP SUMMARY e confirme que os backups necessários permanecem disponíveis.

@@ -1,0 +1,215 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+# GUIA PRÁTICO ORACLE
+
+## Startup e Shutdown Automático do Oracle Database com systemd
+
+### 1. Verificar o `/etc/oratab`
+
+```bash
+cat /etc/oratab
+```
+
+```bash
+vi /etc/oratab
+```
+
+```text
+<ORACLE_SID>:<ORACLE_HOME>:Y
+```
+
+---
+
+### 2. Criar o diretório de scripts
+
+```bash
+mkdir -p /home/oracle/scripts
+```
+
+```bash
+chown -R oracle:<ORACLE_OS_GROUP> /home/oracle/scripts
+```
+
+```bash
+chmod 750 /home/oracle/scripts
+```
+
+---
+
+### 3. Criar o arquivo de ambiente
+
+```bash
+vi /home/oracle/scripts/setEnv.sh
+```
+
+```bash
+#!/bin/bash
+
+export ORACLE_BASE=<ORACLE_BASE>
+export ORACLE_HOME=<ORACLE_HOME>
+export ORACLE_SID=<ORACLE_SID>
+export ORACLE_UNQNAME=<DB_UNIQUE_NAME>
+
+export PATH=$ORACLE_HOME/bin:/usr/sbin:/usr/bin:/bin
+export LD_LIBRARY_PATH=$ORACLE_HOME/lib
+
+export ORAENV_ASK=NO
+. /usr/local/bin/oraenv >/dev/null 2>&1 || \
+. /usr/bin/oraenv >/dev/null 2>&1
+export ORAENV_ASK=YES
+```
+
+```bash
+chown oracle:<ORACLE_OS_GROUP> /home/oracle/scripts/setEnv.sh
+```
+
+```bash
+chmod 750 /home/oracle/scripts/setEnv.sh
+```
+
+---
+
+### 4. Criar o script de startup
+
+```bash
+vi /home/oracle/scripts/start_all.sh
+```
+
+```bash
+#!/bin/bash
+
+. /home/oracle/scripts/setEnv.sh
+
+$ORACLE_HOME/bin/dbstart $ORACLE_HOME
+$ORACLE_HOME/bin/lsnrctl start <LISTENER_NAME>
+```
+
+```bash
+chown oracle:<ORACLE_OS_GROUP> /home/oracle/scripts/start_all.sh
+```
+
+```bash
+chmod 750 /home/oracle/scripts/start_all.sh
+```
+
+---
+
+### 5. Criar o script de shutdown
+
+```bash
+vi /home/oracle/scripts/stop_all.sh
+```
+
+```bash
+#!/bin/bash
+
+. /home/oracle/scripts/setEnv.sh
+
+$ORACLE_HOME/bin/lsnrctl stop <LISTENER_NAME>
+$ORACLE_HOME/bin/dbshut $ORACLE_HOME
+```
+
+```bash
+chown oracle:<ORACLE_OS_GROUP> /home/oracle/scripts/stop_all.sh
+```
+
+```bash
+chmod 750 /home/oracle/scripts/stop_all.sh
+```
+
+---
+
+### 6. Criar o serviço systemd
+
+```bash
+vi /etc/systemd/system/oracle-db.service
+```
+
+```ini
+[Unit]
+Description=Oracle Database Startup/Shutdown Service
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+User=oracle
+Group=<ORACLE_OS_GROUP>
+
+ExecStart=/bin/bash /home/oracle/scripts/start_all.sh
+ExecStop=/bin/bash /home/oracle/scripts/stop_all.sh
+
+LimitNOFILE=65535
+LimitMEMLOCK=infinity
+Restart=no
+TimeoutStartSec=900
+TimeoutStopSec=900
+
+[Install]
+WantedBy=multi-user.target
+```
+
+---
+
+### 7. Ativar o serviço
+
+```bash
+systemctl daemon-reload
+```
+
+```bash
+systemctl enable oracle-db.service
+```
+
+```bash
+systemctl start oracle-db.service
+```
+
+```bash
+systemctl status oracle-db.service -l
+```
+
+---
+
+### 8. Configurar abertura automática da PDB
+
+```bash
+sqlplus / as sysdba
+```
+
+```sql
+SHOW PDBS;
+```
+
+```sql
+ALTER PLUGGABLE DATABASE <PDB_NAME> OPEN;
+```
+
+```sql
+ALTER PLUGGABLE DATABASE <PDB_NAME> SAVE STATE;
+```
+
+---
+
+### 9. Validar
+
+```bash
+systemctl status oracle-db.service -l
+```
+
+```bash
+$ORACLE_HOME/bin/lsnrctl status <LISTENER_NAME>
+```
+
+```bash
+ps -ef | grep [p]mon
+```
+
+```bash
+sqlplus / as sysdba
+```
+
+```sql
+SHOW PDBS;
+```

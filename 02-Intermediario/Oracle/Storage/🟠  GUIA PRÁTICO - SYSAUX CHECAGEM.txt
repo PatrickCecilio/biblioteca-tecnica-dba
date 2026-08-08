@@ -1,0 +1,232 @@
+================================================================================
+🧰 GUIA TÉCNICO — DIAGNÓSTICO & OTIMIZAÇÃO DA TABLESPACE SYSAUX (ORACLE XE)
+================================================================================
+
+📘 ESCOPO
+--------------------------------------------------------------------------------
+Diagnosticar o crescimento anormal da SYSAUX no Oracle XE, executar limpezas
+seguras (Advisors e Estatísticas), reorganizar segmentos internos (WRI$*),
+e decidir com critério se deve ou não aumentar a SYSAUX — respeitando o limite
+de 12 GB imposto pela edição XE.
+
+================================================================================
+🎯 OBJETIVOS
+--------------------------------------------------------------------------------
+✔ Entender as causas do crescimento (SM/ADVISOR, SM/OPTSTAT, etc.)
+✔ Liberar espaço com segurança (purge / retention / reorg)
+✔ Manter o banco saudável dentro do limite de 12 GB
+
+================================================================================
+🧩 PRÉ-REQUISITOS
+================================================================================
+🔐 Permissões necessárias:
+  - Acesso SYSDBA (operaremos objetos internos e dicionário de dados)
+  - Permissão para executar DBMS_STATS e DBMS_ADVISOR
+
+🧠 Conhecimento mínimo:
+  - Noções de tablespaces, datafiles e visões V$/DBA_* (nível DBA Júnior+)
+
+🧪 Ambiente seguro:
+  - Teste primeiro em ambiente não-produtivo
+  - Tenha backup recente (RMAN ou Data Pump)
+
+⚠️ Limites críticos do Oracle XE:
+  - Teto de ~12 GB de dados de usuário por banco
+  - Ao atingir o limite, o banco não permite novas alocações (ORA-12954)
+  - Autoextend pode falhar — planeje folga antes dos 12 GB
+
+================================================================================
+⚙️ CONFIGURAÇÃO INICIAL (CDB/PDB)
+================================================================================
+📍 Conecte-se corretamente ao PDB (exemplo: XEPDB1)
+
+SQL> sqlplus sys/<senha>@localhost:1521/XEPDB1 as sysdba
+-- ou, se conectado ao CDB:
+SQL> ALTER SESSION SET CONTAINER = XEPDB1;
+
+================================================================================
+🔍 ETAPA 1 – DIAGNÓSTICO INICIAL
+================================================================================
+1️⃣ Ver ocupantes da SYSAUX:
+----------------------------------------
+SQL> SET LINESIZE 200
+SQL> COL OCCUPANT_NAME FORMAT A30
+SQL> SELECT OCCUPANT_NAME, SPACE_USAGE_KBYTES
+     FROM V$SYSAUX_OCCUPANTS
+     ORDER BY SPACE_USAGE_KBYTES DESC;
+
+2️⃣ Ver maiores segmentos da SYSAUX:
+----------------------------------------
+SQL> COL SEGMENT_NAME FORMAT A30
+SQL> COL OWNER FORMAT A10
+SQL> COL SEGMENT_TYPE FORMAT A15
+SQL> SELECT * FROM (
+       SELECT SEGMENT_NAME, OWNER, SEGMENT_TYPE,
+              BYTES/1024/1024 AS SIZE_MB
+       FROM   DBA_SEGMENTS
+       WHERE  TABLESPACE_NAME='SYSAUX'
+       ORDER  BY BYTES DESC
+     ) WHERE ROWNUM <= 10;
+
+3️⃣ Tamanho por tablespace:
+----------------------------------------
+SQL> SELECT TABLESPACE_NAME,
+            ROUND(SUM(BYTES)/1024/1024)     AS SIZE_MB,
+            ROUND(SUM(MAXBYTES)/1024/1024)  AS MAXSIZE_MB
+     FROM DBA_DATA_FILES
+     GROUP BY TABLESPACE_NAME;
+
+💡 Interprete:
+- SM/ADVISOR → dados de Advisors (WRI$_ADV_OBJECTS, índices)
+- SM/OPTSTAT → histórico de estatísticas
+- Total > 9 GB → risco de atingir o teto do XE
+
+================================================================================
+🧹 ETAPA 2 – AÇÕES CORRETIVAS
+================================================================================
+2.1️⃣ Ver retenção do Auto Stats Advisor
+----------------------------------------
+SQL> SELECT TASK_NAME, PARAMETER_NAME, PARAMETER_VALUE
+     FROM DBA_ADVISOR_PARAMETERS
+     WHERE TASK_NAME='AUTO_STATS_ADVISOR_TASK'
+       AND PARAMETER_NAME='EXECUTION_DAYS_TO_EXPIRE';
+
+2.2️⃣ Reduzir retenção (ex.: 1 dia)
+----------------------------------------
+SQL> BEGIN
+         DBMS_ADVISOR.SET_TASK_PARAMETER(
+           task_name => 'AUTO_STATS_ADVISOR_TASK',
+           parameter => 'EXECUTION_DAYS_TO_EXPIRE',
+           value     => 1);
+     END;
+/
+
+2.3️⃣ Purgar execuções expiradas
+----------------------------------------
+SQL> EXEC PRVT_ADVISOR.DELETE_EXPIRED_TASKS;
+
+💬 Dica:
+- Execute como SYS
+- Refaça o diagnóstico após a limpeza
+
+================================================================================
+🔧 ETAPA 3 – REORGANIZAÇÃO DE OBJETOS INTERNOS
+================================================================================
+3.1️⃣ Mover a tabela principal (WRI$_ADV_OBJECTS)
+----------------------------------------
+SQL> ALTER TABLE WRI$_ADV_OBJECTS MOVE PARALLEL 2;
+
+3.2️⃣ Rebuild dos índices
+----------------------------------------
+SQL> ALTER INDEX WRI$_ADV_OBJECTS_PK     REBUILD;
+SQL> ALTER INDEX WRI$_ADV_OBJECTS_IDX_01 REBUILD;
+SQL> ALTER INDEX WRI$_ADV_OBJECTS_IDX_02 REBUILD;
+
+📎 Todos os índices devem constar como VALID:
+SQL> SELECT INDEX_NAME, STATUS
+     FROM DBA_INDEXES
+     WHERE TABLE_NAME='WRI$_ADV_OBJECTS';
+
+================================================================================
+🧮 ETAPA 4 – AJUSTAR RETENÇÃO DE ESTATÍSTICAS (SM/OPTSTAT)
+================================================================================
+4.1️⃣ Ver retenção atual:
+SQL> SELECT DBMS_STATS.GET_STATS_HISTORY_RETENTION FROM DUAL;
+
+4.2️⃣ Ver data mais antiga disponível:
+SQL> SELECT DBMS_STATS.GET_STATS_HISTORY_AVAILABILITY FROM DUAL;
+
+4.3️⃣ Definir nova retenção (ex.: 10 dias)
+SQL> EXEC DBMS_STATS.ALTER_STATS_HISTORY_RETENTION(10);
+
+4.4️⃣ Purgar estatísticas antigas
+SQL> EXEC DBMS_STATS.PURGE_STATS(SYSDATE - 10);
+
+💡 Sugestão:
+- Use 7 dias em bases pequenas (economia máxima)
+- Reavalie ocupação após 24h
+
+================================================================================
+📉 ETAPA 5 – (OPCIONAL) REDUZIR TAMANHO DO DATAFILE SYSAUX
+================================================================================
+Verifique se há espaço livre contíguo:
+SQL> ALTER DATABASE DATAFILE '<path_do_sysaux.dbf>' RESIZE <novo_tamanho>M;
+
+⚠️ Se ocorrer ORA-03297 → há blocos ativos no fim do arquivo (não force).
+Mesmo “vazio”, o tamanho alocado conta nos 12 GB totais do XE.
+
+================================================================================
+✅ ETAPA 6 – VALIDAÇÃO FINAL
+================================================================================
+1️⃣ Espaço atual:
+----------------------------------------
+SQL> SELECT
+       (SELECT ROUND(SUM(BYTES)/1024/1024)
+          FROM DBA_SEGMENTS WHERE TABLESPACE_NAME='SYSAUX') AS USADO_MB,
+       (SELECT ROUND(SUM(BYTES)/1024/1024)
+          FROM DBA_FREE_SPACE WHERE TABLESPACE_NAME='SYSAUX') AS LIVRE_MB,
+       (SELECT ROUND(SUM(MAXBYTES)/1024/1024)
+          FROM DBA_DATA_FILES WHERE TABLESPACE_NAME='SYSAUX') AS TAMANHO_MAX_MB
+     FROM DUAL;
+
+2️⃣ Confirmar ocupantes:
+----------------------------------------
+SQL> SELECT OCCUPANT_NAME, SPACE_USAGE_KBYTES
+     FROM V$SYSAUX_OCCUPANTS
+     WHERE SPACE_USAGE_KBYTES > 0
+     ORDER BY SPACE_USAGE_KBYTES DESC;
+
+3️⃣ Validar Auto Stats Advisor:
+----------------------------------------
+SQL> SELECT TASK_NAME, STATUS, LAST_EXECUTION
+     FROM DBA_ADVISOR_TASKS
+     WHERE TASK_NAME='AUTO_STATS_ADVISOR_TASK';
+
+4️⃣ Teste de operação normal:
+----------------------------------------
+SQL> EXEC DBMS_STATS.GATHER_SCHEMA_STATS('SYS');
+
+5️⃣ Teste de alocação:
+----------------------------------------
+SQL> CREATE TABLE TESTE_SPACIO (ID NUMBER) TABLESPACE USERS;
+
+================================================================================
+🧠 DECISÃO FINAL — AUMENTAR OU NÃO A SYSAUX
+================================================================================
+🔸 Se, após purges/reorg, SYSAUX estiver estável → NÃO aumentar.
+🔸 Se precisar de pequena folga e o total < 12 GB → aumento controlado.
+🔸 Mantenha sempre folga de 2–3 GB no total do banco.
+🔸 Nunca deixe SYSAUX ocupar mais que 80% do limite do XE.
+
+================================================================================
+💡 BOAS PRÁTICAS
+================================================================================
+✔ Retenção curta: 1 dia (advisor) / 10 dias (stats)
+✔ Evite autoextend ilimitado
+✔ Monitore V$SYSAUX_OCCUPANTS mensalmente
+✔ Documente parâmetros e execuções
+✔ Planeje migração → Standard/Enterprise ao se aproximar do teto
+
+================================================================================
+📋 CHECKLIST DE EXECUÇÃO
+================================================================================
+[ ] Diagnóstico inicial realizado (ocupantes, segmentos, limites)
+[ ] Retenção do Advisor ajustada (EXECUTION_DAYS_TO_EXPIRE = 1)
+[ ] Purge dos Advisors executado
+[ ] Reorg da tabela WRI$_ADV_OBJECTS + rebuild dos índices
+[ ] Retenção de stats ajustada (10 dias) + purge realizado
+[ ] (Opcional) Datafile SYSAUX reduzido (se aplicável)
+[ ] Validação final executada (uso, tasks, testes)
+[ ] Decisão documentada (aumentar ou não SYSAUX)
+[ ] Banco validado — livre e funcional dentro do limite XE
+
+================================================================================
+🏁 RESULTADO ESPERADO
+================================================================================
+✔ SYSAUX otimizada (sem crescimento anormal)
+✔ Advisors e Stats sob controle
+✔ Espaço interno recuperado
+✔ Banco operacional e estável dentro do limite de 12 GB
+✔ Procedimento documentado e repetível por qualquer DBA Júnior
+
+================================================================================

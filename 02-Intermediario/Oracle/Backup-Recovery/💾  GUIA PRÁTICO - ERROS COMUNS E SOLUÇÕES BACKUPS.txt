@@ -1,0 +1,10 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+SHOW PARAMETER db_recovery;
+ALTER SYSTEM SET db_recovery_file_dest_size=8G;
+
+Banco em NOARCHIVELOG:
+SHUTDOWN IMMEDIATE;
+STARTUP MOUNT;
+ALTER DATABASE ARCHIVELOG;
+ALTER DATABASE OPEN;

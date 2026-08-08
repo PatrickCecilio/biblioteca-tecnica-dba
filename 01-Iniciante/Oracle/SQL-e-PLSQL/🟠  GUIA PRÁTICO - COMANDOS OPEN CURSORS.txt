@@ -1,0 +1,54 @@
+==================================================
+🎯 Ajustes de visualização
+==================================================
+SET LINESIZE 200
+COL username FORMAT A20
+COL program FORMAT A40
+COL open_cursor_count FORMAT 9999
+
+
+==================================================
+👀 Quem está mantendo muitos cursores abertos
+==================================================
+SELECT se.sid,
+       se.serial#,
+       se.username,
+       se.program,
+       COUNT(*) AS open_cursor_count
+FROM   v$open_cursor oc
+JOIN   v$session se ON se.sid = oc.sid
+GROUP  BY se.sid, se.serial#, se.username, se.program
+ORDER  BY COUNT(*) DESC;
+
+
+==================================================
+🔎 SQLs de uma sessão específica (exemplo: SID=396)
+==================================================
+SELECT oc.sid,
+       oc.sql_id,
+       oc.sql_text
+FROM   v$open_cursor oc
+WHERE  oc.sid = 396;
+
+
+==================================================
+📊 Cálculo rápido para dimensionar OPEN_CURSORS
+==================================================
+-- Pico atual por sessão
+SELECT MAX(s.value) AS max_opened_cursors_current
+FROM   v$sesstat s
+JOIN   v$statname n ON n.statistic# = s.statistic#
+WHERE  n.name = 'opened cursors current';
+
+
+==================================================
+⚙️ Administração do parâmetro OPEN_CURSORS
+==================================================
+-- Verificar valor atual
+SHOW PARAMETER open_cursors;
+
+-- Ajustar e salvar no SPFILE
+ALTER SYSTEM SET open_cursors = 300 SCOPE=BOTH;
+
+-- Caso use PFILE (sem SPFILE)
+ALTER SYSTEM SET open_cursors = 300 SCOPE=MEMORY;

@@ -1,0 +1,11 @@
+BACKUP MANUAL DO CONTROL FILE E SPFILE
+
+Pré-requisito: conectar ao RMAN e confirmar o banco correto.
+
+SHOW ALL;
+BACKUP CURRENT CONTROLFILE TAG 'CONTROLFILE_MANUAL';
+BACKUP SPFILE TAG 'SPFILE_MANUAL';
+LIST BACKUP OF CONTROLFILE;
+LIST BACKUP OF SPFILE;
+
+Validação: confirme status AVAILABLE e localização dos backup pieces.

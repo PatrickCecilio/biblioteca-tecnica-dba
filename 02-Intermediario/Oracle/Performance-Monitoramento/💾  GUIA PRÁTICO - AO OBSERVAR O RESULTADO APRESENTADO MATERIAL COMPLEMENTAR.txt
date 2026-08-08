@@ -1,0 +1,117 @@
+Ao observar o resultado apresentado, temos o seguinte cenário:
+
+| BLOCKING_SID | WAITING_SID | WAITING_USER | BLOCKING_USER | EVENT                 | SECONDS_IN_WAIT |
+| ------------ | ----------- | ------------ | ------------- | --------------------- | --------------- |
+| 4456         | 194         | SYBSA        | (null)        | log file sync         | 0               |
+| 24           | 1360        | SYBSA        | SYBSA         | PX Deq: Execute Reply | 0               |
+
+A primeira impressão pode ser a de que existe um bloqueio ativo no banco. No entanto, uma análise mais cuidadosa mostra que não estamos diante de um bloqueio clássico de lock entre sessões.
+
+Vamos entender isso com calma.
+
+Quem está bloqueando?
+
+A coluna BLOCKING_SID indica qual sessão estaria atuando como bloqueadora.
+
+Na primeira linha, a sessão 4456 aparece como bloqueadora, mas o campo BLOCKING_USER está nulo. Isso normalmente indica que o processo responsável não é uma sessão de usuário comum, e sim um processo de background do Oracle, como LGWR (Log Writer) ou DBWR (Database Writer).
+
+Na segunda linha, a sessão 24 aparece como bloqueadora, e o usuário é SYBSA. Aqui temos uma sessão de usuário envolvida, mas o tipo de evento precisa ser analisado antes de concluir que há bloqueio real.
+
+E é justamente aqui que está o ponto mais importante da análise.
+
+Esses eventos não representam bloqueio clássico
+
+Os eventos identificados foram:
+
+log file sync
+
+PX Deq: Execute Reply
+
+Nenhum deles corresponde a bloqueios tradicionais como:
+
+enq: TX – row lock contention
+
+enq: TM – contention
+
+library cache lock
+
+Ou seja, não estamos diante de disputa por linha ou tabela. Estamos vendo esperas internas normais do Oracle.
+
+Vamos detalhar cada uma.
+
+Evento 1: log file sync
+
+Esse evento ocorre quando uma sessão executa um COMMIT.
+
+O fluxo é simples:
+
+A sessão executa o COMMIT.
+
+O Oracle gera informações de redo.
+
+O processo LGWR grava esse redo no arquivo de log.
+
+A sessão aguarda a confirmação da gravação.
+
+Essa espera é registrada como log file sync.
+
+Portanto, não se trata de um bloqueio entre usuários. A sessão está apenas aguardando o término da gravação do redo em disco. Por isso o campo BLOCKING_USER aparece como nulo: o “bloqueador” é um processo interno do banco.
+
+Esse evento só se torna preocupante quando apresenta tempos elevados de espera, o que pode indicar:
+
+I/O lento no storage
+
+excesso de commits na aplicação
+
+gargalo no log buffer
+
+problemas na infraestrutura de disco
+
+No caso analisado, o campo SECONDS_IN_WAIT está com valor 0. Isso indica que a sessão não está realmente presa; apenas foi capturada no momento da verificação.
+
+Evento 2: PX Deq: Execute Reply
+
+O prefixo PX significa Parallel Execution.
+
+Esse evento ocorre quando há execução paralela e um processo (slave PX) está aguardando resposta de outro processo dentro da mesma operação paralela.
+
+Não é bloqueio de lock. É sincronização entre processos que trabalham juntos na mesma query.
+
+Mesmo que a aplicação não utilize paralelismo explicitamente, o Oracle pode ativá-lo automaticamente, dependendo do DOP configurado ou das estatísticas da tabela.
+
+Novamente, o tempo de espera está em 0 segundos, o que reforça que não há retenção significativa de recursos.
+
+Conclusão técnica
+
+Com base nos dados apresentados, não há evidência de bloqueio real entre sessões.
+
+O que se observa são esperas internas normais do Oracle:
+
+Espera por confirmação de gravação de redo (log file sync)
+
+Sincronização entre processos paralelos (PX Deq)
+
+Além disso, como o tempo de espera registrado é zero, as sessões estavam ativas no momento da coleta, e não bloqueadas de forma prolongada.
+
+Como confirmar se há bloqueio real
+
+Para validar a existência de bloqueios de lock, pode-se consultar eventos do tipo enq:
+
+SELECT *
+FROM v$session
+WHERE event LIKE 'enq:%';
+
+Ou verificar diretamente as visões específicas de bloqueio:
+
+SELECT * FROM dba_blockers;
+SELECT * FROM dba_waiters;
+
+Se essas consultas não retornarem registros relevantes, não há bloqueio ativo no banco naquele momento.
+
+Resumo final
+
+Os eventos identificados não caracterizam bloqueio clássico de banco de dados. Tratam-se de mecanismos internos de controle e sincronização do Oracle, que fazem parte do funcionamento normal do SGBD.
+
+Em outras palavras, o cenário analisado não indica contenção de recursos entre usuários, mas sim operações internas esperadas durante commits e execuções paralelas.
+
+Se desejar, é possível estruturar um script de troubleshooting que classifique automaticamente as sessões em: bloqueio real, espera por I/O, espera por commit ou sincronização paralela. Isso ajuda bastante em análises rápidas em produção.

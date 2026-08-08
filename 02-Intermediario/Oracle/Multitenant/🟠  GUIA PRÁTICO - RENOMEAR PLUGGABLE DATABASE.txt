@@ -1,0 +1,62 @@
+# GUIA PRÁTICO ORACLE
+
+## Renomear um Pluggable Database (PDB)
+
+### 1. Fechar a PDB
+
+```sql
+ALTER PLUGGABLE DATABASE <PDB_NAME> CLOSE;
+```
+
+---
+
+### 2. Abrir a PDB em modo RESTRICTED
+
+```sql
+ALTER PLUGGABLE DATABASE <PDB_NAME> OPEN RESTRICTED;
+```
+
+---
+
+### 3. Alterar a sessão para a PDB
+
+```sql
+ALTER SESSION SET CONTAINER=<PDB_NAME>;
+```
+
+---
+
+### 4. Renomear a PDB
+
+```sql
+ALTER PLUGGABLE DATABASE
+RENAME GLOBAL_NAME TO <NEW_PDB_NAME>;
+```
+
+---
+
+### 5. Fechar a PDB renomeada
+
+```sql
+ALTER PLUGGABLE DATABASE CLOSE IMMEDIATE;
+```
+
+---
+
+### 6. Abrir a PDB
+
+```sql
+ALTER PLUGGABLE DATABASE OPEN;
+```
+
+---
+
+### 7. Validar o novo nome
+
+```sql
+SHOW CON_NAME;
+```
+
+```sql
+SHOW PDBS;
+```
