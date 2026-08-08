@@ -1,9 +1,10 @@
-# Prompts reutilizáveis
+# PROMPTS
 
-Conteúdo complementar mantido fora da trilha técnica principal.
+## Conteúdo
 
-## Pastas
+- `Geral` — 1 arquivos
+- `Oracle` — 2 arquivos
+- `SQL-Server` — 1 arquivos
+- Arquivos na raiz — 5
 
-- Geral: 1 arquivos
-- Oracle: 2 arquivos
-- SQL-Server: 1 arquivos
+Revise cada comando antes de utilizá-lo em qualquer ambiente.

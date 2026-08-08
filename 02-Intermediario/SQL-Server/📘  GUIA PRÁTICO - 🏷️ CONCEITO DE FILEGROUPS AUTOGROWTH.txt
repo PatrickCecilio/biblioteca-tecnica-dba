@@ -1,0 +1,18 @@
+USE [<DATABASE_NAME>];
+GO
+
+SELECT fg.name AS filegroup_name,
+       df.name AS logical_file_name,
+       df.physical_name,
+       df.size * 8.0 / 1024 AS size_mb,
+       CASE WHEN df.is_percent_growth = 1 THEN CONCAT(df.growth, '%') ELSE CONCAT(df.growth * 8.0 / 1024, ' MB') END AS growth_setting,
+       df.max_size
+FROM sys.filegroups AS fg
+JOIN sys.database_files AS df
+  ON df.data_space_id = fg.data_space_id
+ORDER BY fg.name, df.file_id;
+GO
+
+ALTER DATABASE [<DATABASE_NAME>]
+MODIFY FILE (NAME = N'<LOGICAL_FILE_NAME>', FILEGROWTH = <GROWTH_MB>MB, MAXSIZE = <MAX_SIZE_MB>MB);
+GO

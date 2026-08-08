@@ -1,18 +1,16 @@
 # Biblioteca Técnica DBA — Conteúdo Público
 
 Biblioteca técnica organizada por nível de conhecimento.
-Nenhum script desta coleção deve ser executado sem revisão prévia e validação em ambiente controlado.
+Nenhum script deve ser executado sem revisão e validação em ambiente controlado.
 
 ## Estrutura
 
-- `01-Iniciante` — 141 arquivos
-- `02-Intermediario` — 232 arquivos
-- `03-Avancado` — 76 arquivos
+- `01-Iniciante` — 147 arquivos
+- `02-Intermediario` — 305 arquivos
+- `03-Avancado` — 114 arquivos
 - `APRENDIZADO` — 6 arquivos
 - `PROMPTS` — 8 arquivos
 
-Total: **464 arquivos de conteúdo**.
-
-## Perfil
+Total: **581 arquivos de conteúdo**.
 
 GitHub: https://github.com/PatrickCecilio

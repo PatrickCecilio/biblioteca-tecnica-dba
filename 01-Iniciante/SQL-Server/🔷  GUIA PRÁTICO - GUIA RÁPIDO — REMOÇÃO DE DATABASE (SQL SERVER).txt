@@ -1,0 +1,16 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+USE [master];
+GO
+
+SELECT name, state_desc, user_access_desc
+FROM sys.databases
+WHERE name = N'<DATABASE_NAME>';
+GO
+
+IF DB_ID(N'<DATABASE_NAME>') IS NOT NULL
+BEGIN
+    ALTER DATABASE [<DATABASE_NAME>] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+    DROP DATABASE [<DATABASE_NAME>];
+END;
+GO

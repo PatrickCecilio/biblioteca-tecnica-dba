@@ -1,0 +1,34 @@
+ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+
+📌 ETAPA 1 — GARANTIR QUE A SESSÃO NÃO ESTÁ CONECTADA NA BASE
+(O DROP deve ser executado fora da database)
+
+---
+
+USE master;
+GO
+
+Confirmar banco atual:
+
+SELECT DB_NAME() AS BancoAtual;
+
+📌 ETAPA 2 — DERRUBAR CONEXÕES ATIVAS
+(Força desconexão de usuários conectados)
+
+---
+
+ALTER DATABASE SANKHYA_TREINA
+SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+
+📌 ETAPA 3 — REMOVER A DATABASE
+⚠️ ATENÇÃO: operação irreversível
+
+---
+
+DROP DATABASE SANKHYA_TREINA;
+
+## 📌 ETAPA 4 — CONFIRMAR QUE A BASE FOI REMOVIDA
+
+SELECT name
+FROM sys.databases
+WHERE name = 'SANKHYA_TREINA';

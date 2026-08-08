@@ -1,31 +1,15 @@
-# Biblioteca Técnica por Nível — Patrick Cecilio
+# Biblioteca Técnica por Nível
 
-Acervo organizado para estudo e consulta de Oracle Database, SQL Server, Linux, Docker e PostgreSQL.
+Acervo profissional de Oracle, SQL Server, Linux, Docker e PostgreSQL.
 
-## Ordem recomendada
+## Estrutura
 
-1. 01-Iniciante — fundamentos e primeiros procedimentos.
-2. 02-Intermediario — administração e operação recorrente.
-3. 03-Avancado — diagnóstico, performance, alta disponibilidade e recuperação complexa.
-4. APRENDIZADO — documentos profissionais, apresentações, imagens e materiais auxiliares.
-5. PROMPTS — instruções reutilizáveis separadas dos procedimentos técnicos.
+- `01-Iniciante` — 177 arquivos
+- `02-Intermediario` — 487 arquivos
+- `03-Avancado` — 190 arquivos
+- `APRENDIZADO` — 162 arquivos
+- `PROMPTS` — 10 arquivos
 
-## Distribuição atual
+Total: **1027 arquivos**.
 
-- 01-Iniciante: 176 arquivos
-- 02-Intermediario: 504 arquivos
-- 03-Avancado: 385 arquivos
-- APRENDIZADO: 161 arquivos
-- PROMPTS: 9 arquivos
-
-## Política de uso
-
-- Não execute comandos diretamente em produção.
-- Valide versão, tecnologia, banco, instância, schema, caminhos e privilégios.
-- Substitua marcadores como `<ORACLE_SID>`, `<NOME_PDB>`, `<SENHA_FORTE>` e `<HOST>`.
-- Revise comandos destrutivos e prepare rollback ou restauração.
-- Senhas e endereços sensíveis devem permanecer fora dos documentos.
-
-## Perfil
-
-https://github.com/PatrickCecilio
+GitHub: https://github.com/PatrickCecilio
