@@ -6,6 +6,5 @@
 - `Linux` — 21 arquivos
 - `Oracle` — 330 arquivos
 - `PostgreSQL` — 10 arquivos
-- `SQL-Server` — 84 arquivos
 
 Revise cada comando antes de utilizá-lo em qualquer ambiente.
