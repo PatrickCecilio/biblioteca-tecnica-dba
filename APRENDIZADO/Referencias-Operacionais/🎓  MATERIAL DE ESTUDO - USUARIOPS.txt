@@ -1,4 +1,9 @@
-admin@local / admin123
-Sandrinha@cecilio2025 / admin123
-Sergio@cecilio2025 / admin123
-Patrick@cecilio2025 / admin123
+REFERÊNCIA OPERACIONAL — CREDENCIAIS REMOVIDAS
+
+Este arquivo continha pares de usuários e senhas em texto puro. Os valores
+foram retirados da versão atual do repositório. Não use este repositório para
+armazenar credenciais; mantenha-as em um gerenciador de segredos autorizado.
+
+Se os valores anteriores foram usados em algum serviço, considere-os expostos:
+o histórico público do Git pode preservar versões antigas. Revogue ou altere
+as credenciais nos sistemas correspondentes e verifique o histórico de acesso.
