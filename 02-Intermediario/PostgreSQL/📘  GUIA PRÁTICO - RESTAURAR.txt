@@ -1,4 +1,4 @@
-ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+RISCO D3 — o exemplo rm -rf apaga arquivos no diretório de dados PostgreSQL. Este fragmento não é um runbook de restauração completo. Não execute sem identificar o cluster, confirmar backup restaurável e planejar parada, restore e validação. Consulte COMANDOS-POR-RISCO.md na raiz.
 
 systemctl stop postgresql
 

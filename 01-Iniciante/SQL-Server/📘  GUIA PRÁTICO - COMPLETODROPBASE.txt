@@ -1,4 +1,4 @@
-ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+RISCO D3 — DROP DATABASE remove o banco; SINGLE_USER WITH ROLLBACK IMMEDIATE encerra sessões e transações. Material de laboratório: confirme alvo, backup restaurável, janela e plano de retorno. Consulte COMANDOS-POR-RISCO.md na raiz.
 
 USE [master];
 GO

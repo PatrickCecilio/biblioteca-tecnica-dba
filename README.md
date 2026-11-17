@@ -12,9 +12,13 @@ Biblioteca pública de estudos e procedimentos de Oracle Database, SQL Server, L
 
 O catálogo canônico, gerado automaticamente a partir da árvore real, está em [`CATALOGO.md`](CATALOGO.md).
 
+## Comandos por risco operacional
+
+O nível de conhecimento das pastas não representa o impacto de execução. Consulte [`COMANDOS-POR-RISCO.md`](COMANDOS-POR-RISCO.md) para classificar procedimentos de D0 (consulta) a D3 (destrutivo ou recuperação com perda potencial de dados). O índice aponta comandos críticos que hoje aparecem inclusive em `01-Iniciante`.
+
 ## Uso seguro
 
-Os arquivos são referências educacionais. Revise comandos, privilégios, caminhos, versões e parâmetros antes de qualquer uso. Nenhum script deve ser executado diretamente em produção.
+Os arquivos são referências educacionais. Antes de qualquer execução, identifique ambiente, instância, banco e container; confirme backup restaurável, cadeia de logs, RPO/RTO, janela e plano de retorno. Comandos D2 e D3 exigem revisão específica do procedimento. Nenhum script deve ser executado diretamente em produção.
 
 ## Autoria
 
