@@ -2,6 +2,8 @@
 
 Esta classificação descreve o **impacto de uma execução incorreta**, não a senioridade necessária nem a complexidade sintática. A biblioteca continua organizada por nível de estudo; este índice permite localizar operações pelo potencial de indisponibilidade ou perda de dados. Exemplos são materiais de laboratório e dependem de versão, topologia e política de recuperação.
 
+O [inventário completo dos arquivos](INVENTARIO-RISCO.md) registra a triagem automatizada de todo o acervo. O nível de cada arquivo é preliminar e deve ser conferido no contexto do comando.
+
 | Nível | Impacto possível | Exemplos | Controle mínimo |
 |---|---|---|---|
 | **D0 — Observação** | Sem alteração intencional de estado | `SELECT`, `SHOW PDBS`, `LIST BACKUP`, `REPORT OBSOLETE`, `df -h` | Confirmar alvo e privilégios de leitura. |
@@ -47,7 +49,7 @@ O mesmo arquivo pode conter comandos de níveis distintos. Abra o guia e classif
 | `DROP PLUGGABLE DATABASE ... INCLUDING DATAFILES` | Remove a PDB e seus datafiles. | [Oracle — clone de PDB](02-Intermediario/Oracle/Multitenant/) |
 | `DROP USER ... CASCADE` / `DROP TABLESPACE ... INCLUDING CONTENTS AND DATAFILES` | Remove objetos ou arquivos associados. | [Oracle — storage](02-Intermediario/Oracle/Storage/) |
 | `TRUNCATE TABLE` | Esvazia tabela com efeitos de DDL; não trate como `DELETE` transacional comum. | [Oracle — DDL/DML](02-Intermediario/Oracle/) |
-| `rm -rf /var/lib/pgsql/14/data/*` | Apaga o diretório de dados PostgreSQL; o exemplo não constitui um runbook de restauração completo. | [PostgreSQL — restaurar](02-Intermediario/PostgreSQL/) |
+| `rm -rf` no diretório de dados PostgreSQL | Apaga arquivos do cluster. O exemplo foi retirado e substituído por um modelo de runbook com pré verificações. | [PostgreSQL — restaurar](02-Intermediario/PostgreSQL/) |
 | `DELETE OBSOLETE` / `DELETE ARCHIVELOG` | Pode eliminar a janela de recuperação exigida se retenção e backups externos não forem conferidos. | [Oracle — backup e recovery](02-Intermediario/Oracle/Backup-Recovery/) |
 | `FLASHBACK DATABASE` e `OPEN RESETLOGS` | Altera a linha temporal de recuperação; depende de pré condições e validação de backups. | [Oracle — flashback](03-Avancado/Oracle/Backup-Recovery/) |
 | `kill -9` em processo do Oracle | Pode afetar instância e recuperação; não é substituto de diagnóstico de sessão. | [Oracle — performance e monitoramento](03-Avancado/Oracle/Performance-Monitoramento/) |
@@ -55,6 +57,6 @@ O mesmo arquivo pode conter comandos de níveis distintos. Abra o guia e classif
 ## Pontos de revisão do acervo
 
 - Há exemplos D3 em `01-Iniciante`; o caminho indica progressão didática, **não permissão para execução**.
-- O guia PostgreSQL que contém `rm -rf` deve ser tratado como fragmento de referência, não como procedimento pronto. Exige plano de restore, verificação de backup e de diretório antes de qualquer uso.
+- O antigo guia PostgreSQL continha remoção direta do diretório de dados. O [novo modelo de runbook](02-Intermediario/PostgreSQL/) exige plano de restore, verificação de backup e identificação do cluster antes da execução.
 - Alguns arquivos repetem material ou misturam consultas com remoção. Prefira os laboratórios com preflight, validação e ambiente isolado ao estudar uma sequência completa.
 - Se um comando usar nome de ambiente, schema ou caminho real, substitua pelos parâmetros do seu laboratório; jamais copie literalmente para produção.

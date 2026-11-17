@@ -1,11 +1,86 @@
-RISCO D3 — o exemplo rm -rf apaga arquivos no diretório de dados PostgreSQL. Este fragmento não é um runbook de restauração completo. Não execute sem identificar o cluster, confirmar backup restaurável e planejar parada, restore e validação. Consulte COMANDOS-POR-RISCO.md na raiz.
+RESTAURAÇÃO FÍSICA DO POSTGRESQL 14 — MODELO DE RUNBOOK (RISCO D3)
 
-systemctl stop postgresql
+Escopo: recuperação de um cluster inteiro a partir de backup físico válido. Este
+documento é um modelo de decisão e validação, não um script pronto. O conteúdo
+anterior misturava stop/start com remoção direta do diretório de dados, sem
+origem do backup nem configuração de WAL. A remoção foi retirada do exemplo.
 
-systemctl start postgresql
+1. DEFINIR O CENÁRIO
 
-sudo systemctl stop postgresql
+- Registrar incidente, ambiente, host, instância/cluster, responsável e janela.
+- Definir o estado desejado: último estado consistente ou ponto no tempo.
+- Registrar RPO e RTO exigidos. Não informar valores alcançados sem medição.
+- Identificar o tipo de backup: pg_basebackup, ferramenta física de terceiros
+  ou dump lógico. Um pg_dump não é base para replay de WAL.
+- Conferir versão principal do PostgreSQL, sistema de arquivos, tablespaces,
+  permissões, espaço disponível e método de arquivamento dos WAL.
+- Confirmar que o backup e os WAL necessários existem fora do diretório afetado.
 
-rm -rf /var/lib/pgsql/14/data/*
+2. PREFLIGHT — SOMENTE LEITURA
 
-sudo systemctl start postgresql
+Executar no host e na instância corretos; substitua os parâmetros do ambiente:
+
+    pg_config --version
+    systemctl status postgresql
+    psql -X -A -t -c "SHOW data_directory;"
+    psql -X -A -t -c "SHOW archive_mode;"
+    psql -X -A -t -c "SHOW archive_command;"
+    df -h
+
+Se o cluster não iniciar, obtenha o data_directory e as opções de serviço
+pela configuração da unidade/systemd e pelo inventário do ambiente. Não
+assuma que /var/lib/pgsql/14/data é o destino real.
+
+3. VERIFICAR O BACKUP
+
+- Verificar origem, data, integridade, proprietário e compatibilidade do backup.
+- Para pg_basebackup em formato plain com backup_manifest, usar a ferramenta
+  pg_verifybackup da mesma versão principal, em uma cópia do backup:
+
+    pg_verifybackup <DIRETORIO_DO_BACKUP_PLAIN>
+
+- A verificação não substitui um restore de teste. Em PostgreSQL 14, backup
+  tar deve ser extraído antes de usar pg_verifybackup.
+- Para PITR, comprovar sequência contínua de WAL desde o início do backup
+  até o alvo. Conferir a timeline escolhida e o instante de parada.
+
+4. PLANEJAR A RESTAURAÇÃO
+
+- Preferir instância de teste ou destino alternativo para validar o backup.
+- Definir previamente o procedimento da ferramenta que produziu o backup.
+- Na recuperação por arquivo contínuo, preparar restore_command e
+  recovery.signal no cluster restaurado; definir recovery_target_time apenas
+  quando houver ponto no tempo aprovado. Verificar sintaxe na documentação
+  da versão 14 e testar o acesso ao arquivo de WAL.
+- Preservar configuração, certificados, arquivos de autenticação e tablespaces.
+  A recuperação física por WAL abrange o cluster, não uma única tabela.
+- Se a substituição do diretório original for inevitável, registrar a cópia
+  preservada, a identificação exata do diretório, a parada do serviço e o
+  procedimento de reversão. Não usar limpeza genérica ou comando com wildcard.
+
+5. EXECUÇÃO CONTROLADA (D2/D3)
+
+- Parar o serviço somente dentro da janela aprovada e confirmar que todos os
+  processos do cluster alvo encerraram.
+- Restaurar o backup físico no destino definido pelo runbook específico da
+  ferramenta; ajustar dono, permissões, tablespaces e configuração de recovery.
+- Iniciar o cluster e acompanhar os logs até o término do replay de WAL.
+- Em recuperação point-in-time, confirmar alvo e timeline antes de promover
+  ou liberar conexões de aplicação.
+
+6. VALIDAÇÃO E ENCERRAMENTO
+
+- Confirmar versão, estado da instância, bancos, extensões, tablespaces,
+  conexões, jobs e integridade dos dados esperados.
+- Comparar o ponto recuperado com o objetivo definido e medir RPO/RTO reais.
+- Executar consultas de aplicação e uma nova rotina de backup após a
+  recuperação, conforme a política do ambiente.
+- Registrar horários, comandos efetivamente usados, logs, resultado e
+  pendências. Reabrir tráfego de aplicação apenas após validação.
+
+REFERÊNCIAS OFICIAIS (POSTGRESQL 14)
+
+https://www.postgresql.org/docs/14/continuous-archiving.html
+https://www.postgresql.org/docs/14/app-pgverifybackup.html
+
+Classificação D0–D3: COMANDOS-POR-RISCO.md na raiz deste repositório.
