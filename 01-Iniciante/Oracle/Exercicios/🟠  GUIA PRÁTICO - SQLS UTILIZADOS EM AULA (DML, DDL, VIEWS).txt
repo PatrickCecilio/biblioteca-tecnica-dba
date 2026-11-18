@@ -1,8 +1,8 @@
--- Criação de usuário e privilégios\CREATE USER aluno IDENTIFIED BY aluno123;
+-- Criação de usuário e privilégios\CREATE USER aluno IDENTIFIED BY "<SENHA_SUBSTITUIR>";
 GRANT CONNECT, RESOURCE TO aluno;
 
 -- Criação de CDB user (C##)
-CREATE USER C##sombra IDENTIFIED BY sombra123 CONTAINER=ALL;
+CREATE USER C##sombra IDENTIFIED BY "<SENHA_SUBSTITUIR>" CONTAINER=ALL;
 GRANT CONNECT, RESOURCE TO C##sombra CONTAINER=ALL;
 
 -- Criação de tabela e inserção
