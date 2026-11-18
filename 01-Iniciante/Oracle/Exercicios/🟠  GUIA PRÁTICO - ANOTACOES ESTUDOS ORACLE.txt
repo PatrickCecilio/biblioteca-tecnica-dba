@@ -8,7 +8,7 @@
 🧱 Criar PDB (a partir do PDB$SEED)
 ----------------------------------
 CREATE PLUGGABLE DATABASE pdb1
-  ADMIN USER admin IDENTIFIED BY "<SENHA_ORACLE>"
+  ADMIN USER admin IDENTIFIED BY "<SENHA_SUBSTITUIR>"
   FILE_NAME_CONVERT = ('/pdbseed/', '/pdb1/');
 
 🔓 Abrir PDB
@@ -58,14 +58,14 @@ da instância. Qual comando ele deve usar?
 - Existe em todos os PDBs
 
 Exemplo:
-  CREATE USER C##MONITOR IDENTIFIED BY Oracle_123 CONTAINER=ALL;
+  CREATE USER C##MONITOR IDENTIFIED BY "<SENHA_SUBSTITUIR>" CONTAINER=ALL;
 
 👤 Local User (Usuário Local)
 - Criado dentro do PDB
 - Existe só naquele PDB
 
 Exemplo:
-  CREATE USER app_user IDENTIFIED BY Oracle_123;
+  CREATE USER app_user IDENTIFIED BY "<SENHA_SUBSTITUIR>";
 
 
 📌 Pergunta típica:
@@ -183,7 +183,7 @@ D) `ALTER SYSTEM SET pdb_open = true;`
 ❓ Qual comando **falha** quando executado no `CDB$ROOT`?
 
 A) `CREATE PLUGGABLE DATABASE pdb_teste ...;`
-B) `CREATE USER C##AUDITOR IDENTIFIED BY x CONTAINER=ALL;`
+B) `CREATE USER C##AUDITOR IDENTIFIED BY "<SENHA_SUBSTITUIR>" CONTAINER=ALL;`
 C) `CREATE TABLE clientes (id NUMBER);`
 D) `ALTER PLUGGABLE DATABASE ALL OPEN;`
 

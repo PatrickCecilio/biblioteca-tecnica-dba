@@ -4,7 +4,7 @@
 ALTER SESSION SET CONTAINER = pdb1;
 
 -- Criação de usuário de teste (se ainda não existir)
-CREATE USER teste IDENTIFIED BY teste;
+CREATE USER teste IDENTIFIED BY "<SENHA_SUBSTITUIR>";
 GRANT CONNECT, RESOURCE TO teste;
 
 -- =========================================================

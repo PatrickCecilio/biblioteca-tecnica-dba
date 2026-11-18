@@ -17,6 +17,9 @@ FORBIDDEN = re.compile(
     r"First Responder|DBA[ -]Toolbox|Ola Hallengren|Paul Randal|"
     r"sp_Blitz|sp_Quickie|sp_WhoIsActive)"
 )
+CREDENTIAL_LITERAL = re.compile(
+    r"(?i)\bIDENTIFIED\s+BY\s+(?:VALUES\s+)?(?:\"[^\"]+\"|'[^']+'|[^\s;]+)"
+)
 
 
 def files() -> list[Path]:
@@ -49,6 +52,10 @@ def main() -> int:
             else:
                 if FORBIDDEN.search(text):
                     errors.append(f"marcador proibido: {relative}")
+                for match in CREDENTIAL_LITERAL.finditer(text):
+                    if "<SENHA_SUBSTITUIR>" not in match.group() and "<HASH_SUBSTITUIR>" not in match.group():
+                        errors.append(f"possível credencial literal: {relative}")
+                        break
         if path.suffix.lower() in {".zip", ".docx", ".pptx", ".xlsx"}:
             try:
                 with zipfile.ZipFile(path) as archive:

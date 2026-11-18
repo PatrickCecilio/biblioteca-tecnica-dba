@@ -123,7 +123,7 @@ WHERE
 --------------------------------------------------------------------------------
 -- Desbloquear e alterar senha do usuário UDBD03
 ALTER USER udbd03
-  IDENTIFIED BY "4232OD"
+  IDENTIFIED BY "<SENHA_SUBSTITUIR>"
   ACCOUNT UNLOCK;
 
 -- Criar backup da tabela MP_CUSTOM_METRICS_EXP
