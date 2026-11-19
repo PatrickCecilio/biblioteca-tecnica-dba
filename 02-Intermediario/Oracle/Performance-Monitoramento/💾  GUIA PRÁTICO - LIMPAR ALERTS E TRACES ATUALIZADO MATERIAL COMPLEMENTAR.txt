@@ -1,9 +1,15 @@
-#!/bin/bash
-#AUDIT
-find /u01/app/oracle/admin/CDB1/adump -name \*.aud -mtime +1 -exec rm -f {} \;
+#!/usr/bin/env bash
+# Limpeza de diagnósticos Oracle — D3 (pré-visualização)
+# Runbook: ../../../03-Avancado/Oracle/Performance-Monitoramento/RUNBOOK-LIMPEZA-DIAGNOSTICOS.md
+# Este exemplo LISTA candidatos; não remove arquivos. Não copie caminhos de outros ambientes.
 
-#ALERTS,TRACES
-find /u01/app/oracle/diag/rdbms/cdb1/CDB1/alert    -name \*.xml    -mtime +1 -exec rm -f {} \;
-find /u01/app/oracle/diag/rdbms/cdb1/CDB1/incident -name \*.tr[cm] -mtime +1 -exec rm -f {} \;
-find /u01/app/oracle/diag/rdbms/cdb1/CDB1/trace    -name \*.tr[cm] -mtime +1 -exec rm -f {} \;
-find /u01/app/oracle/diag/tnslsnr/localhost/listener/alert -name 'log_*'  -mtime +1 -exec rm -f {} \;
+set -euo pipefail
+: "${TARGET:?Defina o diretório validado de audit ou trace}"
+: "${RETENTION_DAYS:?Defina a retenção aprovada em dias}"
+case "$RETENTION_DAYS" in ''|*[!0-9]*) echo 'Retenção inválida' >&2; exit 1;; esac
+[ "$RETENTION_DAYS" -ge 2 ] || { echo 'Retenção menor que 2 dias exige revisão específica' >&2; exit 1; }
+[ -d "$TARGET" ] && [ ! -L "$TARGET" ] || { echo 'Alvo inválido' >&2; exit 1; }
+RESOLVED=$(realpath -- "$TARGET")
+printf 'Alvo: %s\nRetenção: %s dias\n' "$RESOLVED" "$RETENTION_DAYS"
+find "$RESOLVED" -xdev -type f -name '*.aud' -mtime +"$RETENTION_DAYS" -print
+# A execução de remoção é uma etapa separada, após aprovação e inspeção da listagem.

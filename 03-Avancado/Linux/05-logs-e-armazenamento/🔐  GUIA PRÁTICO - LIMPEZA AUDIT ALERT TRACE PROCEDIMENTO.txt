@@ -1,45 +1,12 @@
-# GUIA PRÁTICO ORACLE
+LIMPEZA DE DIAGNÓSTICOS ORACLE — D3
 
-## Limpeza de Audit, Alert e Trace
+Runbook canônico: ../../Oracle/Performance-Monitoramento/RUNBOOK-LIMPEZA-DIAGNOSTICOS.md
 
-### 1. Limpar arquivos de Audit
+1. Confirmar host, instância, ADR home, finalidade da limpeza, retenção aprovada e incidentes abertos.
+2. Preferir ADRCI para alert, incident e trace: SHOW HOMES; SET HOMEPATH <ADR_HOME_VALIDADO>; SHOW CONTROL.
+3. Para audit fora do ADR, listar candidatos com find -xdev -type f -name '*.aud' -mtime +<DIAS_APROVADOS> -print.
+4. Conferir caminho resolvido, datas, quantidade e evidências antes de qualquer exclusão.
+5. Executar a limpeza somente com aprovação operacional, uma categoria por vez, seguindo o runbook.
+6. Repetir a listagem e validar alertas, incidentes e espaço após a mudança.
 
-```bash
-find <ORACLE_BASE>/admin/<DB_NAME>/adump \
--name "*.aud" \
--mtime +1 \
--exec rm -f {} \;
-```
-
----
-
-### 2. Limpar arquivos XML do Alert
-
-```bash
-find <ORACLE_BASE>/diag/rdbms/<DB_NAME>/<ORACLE_SID>/alert \
--name "*.xml" \
--mtime +1 \
--exec rm -f {} \;
-```
-
----
-
-### 3. Limpar arquivos de Incident
-
-```bash
-find <ORACLE_BASE>/diag/rdbms/<DB_NAME>/<ORACLE_SID>/incident \
--name "*.tr[cm]" \
--mtime +1 \
--exec rm -f {} \;
-```
-
----
-
-### 4. Limpar arquivos de Trace
-
-```bash
-find <ORACLE_BASE>/diag/rdbms/<DB_NAME>/<ORACLE_SID>/trace \
--name "*.tr[cm]" \
--mtime +1 \
--exec rm -f {} \;
-```
+Não usar rm -rf, truncamento direto de listener.log nem retenção de um dia como procedimento padrão.

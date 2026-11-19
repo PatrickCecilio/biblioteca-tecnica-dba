@@ -1,18 +1,12 @@
-ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+LIMPEZA DE DIAGNÓSTICOS ORACLE — D3
 
-# Remoção de traces
-rm -rf log_*
-> listener.log
+Runbook canônico: ../../../03-Avancado/Oracle/Performance-Monitoramento/RUNBOOK-LIMPEZA-DIAGNOSTICOS.md
 
-# Buscar e remover traces antigos
-find /opt/oracle/diag/rdbms/free/FREE/trace/ -type f -mtime +5 -exec rm -f {} \;
+1. Confirmar host, instância, ADR home, finalidade da limpeza, retenção aprovada e incidentes abertos.
+2. Preferir ADRCI para alert, incident e trace: SHOW HOMES; SET HOMEPATH <ADR_HOME_VALIDADO>; SHOW CONTROL.
+3. Para audit fora do ADR, listar candidatos com find -xdev -type f -name '*.aud' -mtime +<DIAS_APROVADOS> -print.
+4. Conferir caminho resolvido, datas, quantidade e evidências antes de qualquer exclusão.
+5. Executar a limpeza somente com aprovação operacional, uma categoria por vez, seguindo o runbook.
+6. Repetir a listagem e validar alertas, incidentes e espaço após a mudança.
 
-# Limpeza por servidor:
-cd /u01/app/oracle/diag/rdbms/cdbweb/CDBWEB/trace
-rm -rf CDBWEB_* cdmp_* Incdir_*
-
-cd /u01/app/oracle/diag/tnslsnr/srv-modal-db1/listener/alert
-rm -rf log_*
-
-cd /u01/app/oracle/diag/tnslsnr/srv-modal-db1/listener/trace
-> listener.log
+Não usar rm -rf, truncamento direto de listener.log nem retenção de um dia como procedimento padrão.

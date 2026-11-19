@@ -2,11 +2,11 @@
 
 Triagem de todo o conteúdo público por gatilhos textuais, com revisão manual das referências sem comandos. O nível D0-D3 é o **maior gatilho textual encontrado no arquivo**, não uma autorização de execução nem uma revisão semântica completa. Comandos citados em explicações também podem elevar o nível. `N` identifica arquivos revisados sem comando executável. `R` indica arquivo novo ou sem gatilho, ainda pendente de revisão; **não significa risco zero**. Consulte [Comandos por risco operacional](COMANDOS-POR-RISCO.md) para critérios e controles.
 
-Arquivos analisados: **464**. D3: **78**; D2: **113**; D1: **122**; D0: **115**; sem comando (`N`): **36**; revisão pendente (`R`): **0**.
+Arquivos analisados: **465**. D3: **77**; D2: **113**; D1: **121**; D0: **118**; sem comando (`N`): **36**; revisão pendente (`R`): **0**.
 
 Antes de usar qualquer procedimento, confira ambiente, versão, escopo, backup e linha exata do comando. Em caso de múltiplos níveis no mesmo arquivo, prevalece o maior risco.
 
-## D3 — destruição ou perda potencial (78)
+## D3 — destruição ou perda potencial (77)
 
 | Arquivo | Gatilhos textuais |
 |---|---|
@@ -38,7 +38,7 @@ Antes de usar qualquer procedimento, confira ambiente, versão, escopo, backup e
 | [02-Intermediario/Docker/Containers/🐳  GUIA PRÁTICO - DOCKER AULA 19 TESTES INTEGRACAO NODE MATERIAL COMPLEMENTAR.txt](<02-Intermediario/Docker/Containers/%F0%9F%90%B3%20%20GUIA%20PR%C3%81TICO%20-%20DOCKER%20AULA%2019%20TESTES%20INTEGRACAO%20NODE%20MATERIAL%20COMPLEMENTAR.txt>) | remoção Docker |
 | [02-Intermediario/Docker/Containers/🐳  GUIA PRÁTICO - DOCKER AULA 19 TESTES INTEGRACAO NODE.txt](<02-Intermediario/Docker/Containers/%F0%9F%90%B3%20%20GUIA%20PR%C3%81TICO%20-%20DOCKER%20AULA%2019%20TESTES%20INTEGRACAO%20NODE.txt>) | remoção Docker |
 | [02-Intermediario/Docker/Containers/🐳  GUIA PRÁTICO - DOCKER AULA 20 LIMPEZA AMBIENTE MATERIAL COMPLEMENTAR.txt](<02-Intermediario/Docker/Containers/%F0%9F%90%B3%20%20GUIA%20PR%C3%81TICO%20-%20DOCKER%20AULA%2020%20LIMPEZA%20AMBIENTE%20MATERIAL%20COMPLEMENTAR.txt>) | limpeza irreversível, remoção Docker |
-| [02-Intermediario/Docker/Containers/🐳  GUIA PRÁTICO - DOCKER AULA 20 LIMPEZA AMBIENTE.txt](<02-Intermediario/Docker/Containers/%F0%9F%90%B3%20%20GUIA%20PR%C3%81TICO%20-%20DOCKER%20AULA%2020%20LIMPEZA%20AMBIENTE.txt>) | limpeza irreversível, remoção Docker |
+| [02-Intermediario/Docker/Containers/🐳  GUIA PRÁTICO - DOCKER AULA 20 LIMPEZA AMBIENTE.txt](<02-Intermediario/Docker/Containers/%F0%9F%90%B3%20%20GUIA%20PR%C3%81TICO%20-%20DOCKER%20AULA%2020%20LIMPEZA%20AMBIENTE.txt>) | remoção Docker |
 | [02-Intermediario/Docker/Containers/🐳  GUIA PRÁTICO - DOCKER AULA 28 APLICACAO MONOLITICA.txt](<02-Intermediario/Docker/Containers/%F0%9F%90%B3%20%20GUIA%20PR%C3%81TICO%20-%20DOCKER%20AULA%2028%20APLICACAO%20MONOLITICA.txt>) | remoção Docker |
 | [02-Intermediario/Docker/Containers/👤  GUIA PRÁTICO - CONTROLE DE PASTA.txt](<02-Intermediario/Docker/Containers/%F0%9F%91%A4%20%20GUIA%20PR%C3%81TICO%20-%20CONTROLE%20DE%20PASTA.txt>) | remoção de arquivos, formatação de volume |
 | [02-Intermediario/Docker/🌐  GUIA PRÁTICO - REMOVER CONTAINER E REDE DOCKER.txt](<02-Intermediario/Docker/%F0%9F%8C%90%20%20GUIA%20PR%C3%81TICO%20-%20REMOVER%20CONTAINER%20E%20REDE%20DOCKER.txt>) | remoção Docker |
@@ -48,11 +48,12 @@ Antes de usar qualquer procedimento, confira ambiente, versão, escopo, backup e
 | [02-Intermediario/Linux/Conectividade/🌐  GUIA PRÁTICO - NOVO(A) DOCUMENTO DE TEXTO.txt](<02-Intermediario/Linux/Conectividade/%F0%9F%8C%90%20%20GUIA%20PR%C3%81TICO%20-%20NOVO%28A%29%20DOCUMENTO%20DE%20TEXTO.txt>) | exclusão por shell ou script |
 | [02-Intermediario/Linux/Containers/🔐  GUIA PRÁTICO - CRIPTOGRAFIA LINUX.txt](<02-Intermediario/Linux/Containers/%F0%9F%94%90%20%20GUIA%20PR%C3%81TICO%20-%20CRIPTOGRAFIA%20LINUX.txt>) | remoção de arquivos, formatação de volume |
 | [02-Intermediario/Oracle/Administracao-do-Sistema/🟠  GUIA PRÁTICO - UTILITARIOS.txt](<02-Intermediario/Oracle/Administracao-do-Sistema/%F0%9F%9F%A0%20%20GUIA%20PR%C3%81TICO%20-%20UTILITARIOS.txt>) | remoção de arquivos, exclusão por shell ou script |
+| [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - DELETE ARCHIVE ATUALIZADO.txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20DELETE%20ARCHIVE%20ATUALIZADO.txt>) | remoção de backups ou logs |
 | [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - FLASHBACK GUIA JUNIOR.txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20FLASHBACK%20GUIA%20JUNIOR.txt>) | mudança de linha temporal |
 | [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - MANUTENCAO E EXPIRACAO BACKUPS RMAN.txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20MANUTENCAO%20E%20EXPIRACAO%20BACKUPS%20RMAN.txt>) | remoção de backups ou logs |
 | [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - NOVO(A) DOCUMENTO DE TEXTO.txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20NOVO%28A%29%20DOCUMENTO%20DE%20TEXTO.txt>) | exclusão por shell ou script |
 | [02-Intermediario/Oracle/Conectividade/🌐  GUIA PRÁTICO - ALERT TRACE AMBIENTE ESPECIFICO.txt](<02-Intermediario/Oracle/Conectividade/%F0%9F%8C%90%20%20GUIA%20PR%C3%81TICO%20-%20ALERT%20TRACE%20AMBIENTE%20ESPECIFICO.txt>) | exclusão por shell ou script |
-| [02-Intermediario/Oracle/Conectividade/🌐  GUIA PRÁTICO - LIMPEZA E MANUTENÇÃO DE LOGS E TRACES.txt](<02-Intermediario/Oracle/Conectividade/%F0%9F%8C%90%20%20GUIA%20PR%C3%81TICO%20-%20LIMPEZA%20E%20MANUTEN%C3%87%C3%83O%20DE%20LOGS%20E%20TRACES.txt>) | remoção de arquivos, exclusão por shell ou script |
+| [02-Intermediario/Oracle/Conectividade/🌐  GUIA PRÁTICO - LIMPEZA E MANUTENÇÃO DE LOGS E TRACES.txt](<02-Intermediario/Oracle/Conectividade/%F0%9F%8C%90%20%20GUIA%20PR%C3%81TICO%20-%20LIMPEZA%20E%20MANUTEN%C3%87%C3%83O%20DE%20LOGS%20E%20TRACES.txt>) | remoção de arquivos |
 | [02-Intermediario/Oracle/Data-Pump-Migracao/💾  GUIA PRÁTICO - EXPDP MATERIAL COMPLEMENTAR.txt](<02-Intermediario/Oracle/Data-Pump-Migracao/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20EXPDP%20MATERIAL%20COMPLEMENTAR.txt>) | exclusão por shell ou script |
 | [02-Intermediario/Oracle/Data-Pump-Migracao/🟠  GUIA PRÁTICO - MIGRAÇÃO.txt](<02-Intermediario/Oracle/Data-Pump-Migracao/%F0%9F%9F%A0%20%20GUIA%20PR%C3%81TICO%20-%20MIGRA%C3%87%C3%83O.txt>) | remoção de banco ou objeto |
 | [02-Intermediario/Oracle/Instalacao-Administracao/🛠️  GUIA PRÁTICO - INSTALACAO SAMBA CONFIGURACAO.txt](<02-Intermediario/Oracle/Instalacao-Administracao/%F0%9F%9B%A0%EF%B8%8F%20%20GUIA%20PR%C3%81TICO%20-%20INSTALACAO%20SAMBA%20CONFIGURACAO.txt>) | remoção de arquivos |
@@ -60,7 +61,6 @@ Antes de usar qualquer procedimento, confira ambiente, versão, escopo, backup e
 | [02-Intermediario/Oracle/Multitenant/🟠  GUIA PRÁTICO - ADMINISTRACAO PDB CRIAR CLONAR ABRIR REMOVER.txt](<02-Intermediario/Oracle/Multitenant/%F0%9F%9F%A0%20%20GUIA%20PR%C3%81TICO%20-%20ADMINISTRACAO%20PDB%20CRIAR%20CLONAR%20ABRIR%20REMOVER.txt>) | remoção de banco ou objeto |
 | [02-Intermediario/Oracle/Multitenant/🟠  GUIA PRÁTICO - CLONE MATERIAL COMPLEMENTAR.txt](<02-Intermediario/Oracle/Multitenant/%F0%9F%9F%A0%20%20GUIA%20PR%C3%81TICO%20-%20CLONE%20MATERIAL%20COMPLEMENTAR.txt>) | remoção de banco ou objeto |
 | [02-Intermediario/Oracle/Multitenant/🟠  GUIA PRÁTICO - CLONE.txt](<02-Intermediario/Oracle/Multitenant/%F0%9F%9F%A0%20%20GUIA%20PR%C3%81TICO%20-%20CLONE.txt>) | remoção de banco ou objeto |
-| [02-Intermediario/Oracle/Performance-Monitoramento/💾  GUIA PRÁTICO - LIMPAR ALERTS E TRACES ATUALIZADO MATERIAL COMPLEMENTAR.txt](<02-Intermediario/Oracle/Performance-Monitoramento/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20LIMPAR%20ALERTS%20E%20TRACES%20ATUALIZADO%20MATERIAL%20COMPLEMENTAR.txt>) | exclusão por shell ou script |
 | [02-Intermediario/Oracle/Performance-Monitoramento/💾  GUIA PRÁTICO - LIMPAR ALERTS E TRACES ATUALIZADO.txt](<02-Intermediario/Oracle/Performance-Monitoramento/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20LIMPAR%20ALERTS%20E%20TRACES%20ATUALIZADO.txt>) | limpeza irreversível |
 | [02-Intermediario/Oracle/Performance-Monitoramento/💾  GUIA PRÁTICO - SIMULACAO DIAGNOSTICO SESSOES BLOQUEADAS.txt](<02-Intermediario/Oracle/Performance-Monitoramento/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20SIMULACAO%20DIAGNOSTICO%20SESSOES%20BLOQUEADAS.txt>) | remoção de banco ou objeto |
 | [02-Intermediario/Oracle/Projetos-Praticos/MAPEAMENTO_DOS_ARQUIVOS.txt/🟠  GUIA PRÁTICO - MAPEAMENTO DOS ARQUIVOS.txt](<02-Intermediario/Oracle/Projetos-Praticos/MAPEAMENTO_DOS_ARQUIVOS.txt/%F0%9F%9F%A0%20%20GUIA%20PR%C3%81TICO%20-%20MAPEAMENTO%20DOS%20ARQUIVOS.txt>) | mudança de linha temporal |
@@ -74,8 +74,7 @@ Antes de usar qualquer procedimento, confira ambiente, versão, escopo, backup e
 | [03-Avancado/Docker/Containers/🔐  GUIA PRÁTICO - CRIPTOGRAFIA LINUX.txt](<03-Avancado/Docker/Containers/%F0%9F%94%90%20%20GUIA%20PR%C3%81TICO%20-%20CRIPTOGRAFIA%20LINUX.txt>) | remoção de arquivos, formatação de volume |
 | [03-Avancado/Linux/05-logs-e-armazenamento/🌐  GUIA PRÁTICO - LIMPEZA LOGS GRID LISTENER.txt](<03-Avancado/Linux/05-logs-e-armazenamento/%F0%9F%8C%90%20%20GUIA%20PR%C3%81TICO%20-%20LIMPEZA%20LOGS%20GRID%20LISTENER.txt>) | exclusão por shell ou script |
 | [03-Avancado/Linux/05-logs-e-armazenamento/💾  GUIA PRÁTICO - LIMPEZA BACKUPS RMAN FILESYSTEM.txt](<03-Avancado/Linux/05-logs-e-armazenamento/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20LIMPEZA%20BACKUPS%20RMAN%20FILESYSTEM.txt>) | exclusão por shell ou script |
-| [03-Avancado/Linux/05-logs-e-armazenamento/🔐  GUIA PRÁTICO - LIMPEZA AUDIT ALERT TRACE PROCEDIMENTO.txt](<03-Avancado/Linux/05-logs-e-armazenamento/%F0%9F%94%90%20%20GUIA%20PR%C3%81TICO%20-%20LIMPEZA%20AUDIT%20ALERT%20TRACE%20PROCEDIMENTO.txt>) | exclusão por shell ou script |
-| [03-Avancado/Linux/05-logs-e-armazenamento/🔐  GUIA PRÁTICO - LIMPEZA AUDIT ALERT TRACE SCRIPT.txt](<03-Avancado/Linux/05-logs-e-armazenamento/%F0%9F%94%90%20%20GUIA%20PR%C3%81TICO%20-%20LIMPEZA%20AUDIT%20ALERT%20TRACE%20SCRIPT.txt>) | exclusão por shell ou script |
+| [03-Avancado/Linux/05-logs-e-armazenamento/🔐  GUIA PRÁTICO - LIMPEZA AUDIT ALERT TRACE PROCEDIMENTO.txt](<03-Avancado/Linux/05-logs-e-armazenamento/%F0%9F%94%90%20%20GUIA%20PR%C3%81TICO%20-%20LIMPEZA%20AUDIT%20ALERT%20TRACE%20PROCEDIMENTO.txt>) | remoção de arquivos |
 | [03-Avancado/Linux/🐧  SCRIPT SHELL - CRIPTOGRAFAR DIRETORIO LUKS.sh](<03-Avancado/Linux/%F0%9F%90%A7%20%20SCRIPT%20SHELL%20-%20CRIPTOGRAFAR%20DIRETORIO%20LUKS.sh>) | remoção de arquivos, formatação de volume |
 | [03-Avancado/Oracle/Alta-Disponibilidade/🟠  GUIA PRÁTICO - DATA GUARD PRIMARY PHYSICAL STANDBY.txt](<03-Avancado/Oracle/Alta-Disponibilidade/%F0%9F%9F%A0%20%20GUIA%20PR%C3%81TICO%20-%20DATA%20GUARD%20PRIMARY%20PHYSICAL%20STANDBY.txt>) | mudança de linha temporal |
 | [03-Avancado/Oracle/Atualizacoes-e-Patches/Arquivos-Extraidos/🗄️  SCRIPT SQL - SCRIPT1.sql](<03-Avancado/Oracle/Atualizacoes-e-Patches/Arquivos-Extraidos/%F0%9F%97%84%EF%B8%8F%20%20SCRIPT%20SQL%20-%20SCRIPT1.sql>) | remoção de banco ou objeto |
@@ -84,9 +83,9 @@ Antes de usar qualquer procedimento, confira ambiente, versão, escopo, backup e
 | [03-Avancado/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - FLASHBACK.txt](<03-Avancado/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20FLASHBACK.txt>) | mudança de linha temporal |
 | [03-Avancado/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - LIMPEZA BACKUPS RMAN FILESYSTEM.txt](<03-Avancado/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20LIMPEZA%20BACKUPS%20RMAN%20FILESYSTEM.txt>) | limpeza irreversível |
 | [03-Avancado/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - RMAN ARCHIVELOG FRA FLASHBACK.txt](<03-Avancado/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20RMAN%20ARCHIVELOG%20FRA%20FLASHBACK.txt>) | mudança de linha temporal |
-| [03-Avancado/Oracle/Fundamentos-Referencias/🔐  GUIA PRÁTICO - LIMPEZA AUDIT ALERT TRACE PROCEDIMENTO.txt](<03-Avancado/Oracle/Fundamentos-Referencias/%F0%9F%94%90%20%20GUIA%20PR%C3%81TICO%20-%20LIMPEZA%20AUDIT%20ALERT%20TRACE%20PROCEDIMENTO.txt>) | limpeza irreversível |
-| [03-Avancado/Oracle/Fundamentos-Referencias/🔐  GUIA PRÁTICO - LIMPEZA AUDIT ALERT TRACE SCRIPT.txt](<03-Avancado/Oracle/Fundamentos-Referencias/%F0%9F%94%90%20%20GUIA%20PR%C3%81TICO%20-%20LIMPEZA%20AUDIT%20ALERT%20TRACE%20SCRIPT.txt>) | exclusão por shell ou script |
+| [03-Avancado/Oracle/Fundamentos-Referencias/🔐  GUIA PRÁTICO - LIMPEZA AUDIT ALERT TRACE PROCEDIMENTO.txt](<03-Avancado/Oracle/Fundamentos-Referencias/%F0%9F%94%90%20%20GUIA%20PR%C3%81TICO%20-%20LIMPEZA%20AUDIT%20ALERT%20TRACE%20PROCEDIMENTO.txt>) | remoção de arquivos |
 | [03-Avancado/Oracle/Material-Tecnico/🛠️  GUIA PRÁTICO - CONFIGURAR SWAP MANUAL LINUX.txt](<03-Avancado/Oracle/Material-Tecnico/%F0%9F%9B%A0%EF%B8%8F%20%20GUIA%20PR%C3%81TICO%20-%20CONFIGURAR%20SWAP%20MANUAL%20LINUX.txt>) | formatação de volume |
+| [03-Avancado/Oracle/Performance-Monitoramento/RUNBOOK-LIMPEZA-DIAGNOSTICOS.md](<03-Avancado/Oracle/Performance-Monitoramento/RUNBOOK-LIMPEZA-DIAGNOSTICOS.md>) | remoção de arquivos |
 | [03-Avancado/Oracle/Performance-Monitoramento/💾  GUIA PRÁTICO - SESSÃO PDB.txt](<03-Avancado/Oracle/Performance-Monitoramento/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20SESS%C3%83O%20PDB.txt>) | interrupção forçada |
 
 ## D2 — indisponibilidade ou recuperação (113)
@@ -207,7 +206,7 @@ Antes de usar qualquer procedimento, confira ambiente, versão, escopo, backup e
 | [03-Avancado/Oracle/🟠  GUIA PRÁTICO - DATA GUARD & STAND BY.txt](<03-Avancado/Oracle/%F0%9F%9F%A0%20%20GUIA%20PR%C3%81TICO%20-%20DATA%20GUARD%20%26%20STAND%20BY.txt>) | mudança em banco ou PDB, parada ou restart |
 | [PROMPTS/Oracle/💬  PROMPT - AUTOMACAO INSTALACAO ORACLE 19C.txt](<PROMPTS/Oracle/%F0%9F%92%AC%20%20PROMPT%20-%20AUTOMACAO%20INSTALACAO%20ORACLE%2019C.txt>) | patch Oracle |
 
-## D1 — alteração localizada (122)
+## D1 — alteração localizada (121)
 
 | Arquivo | Gatilhos textuais |
 |---|---|
@@ -281,7 +280,6 @@ Antes de usar qualquer procedimento, confira ambiente, versão, escopo, backup e
 | [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - BACKUP POR TABLESPACE, PDB OU ROOT.txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20BACKUP%20POR%20TABLESPACE%2C%20PDB%20OU%20ROOT.txt>) | backup ou configuração |
 | [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - BACKUP RMAN.txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20BACKUP%20RMAN.txt>) | backup ou configuração |
 | [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - CONEXÃO E DIAGNÓSTICO INICIAL COM RMAN.txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20CONEX%C3%83O%20E%20DIAGN%C3%93STICO%20INICIAL%20COM%20RMAN.txt>) | configuração e automação |
-| [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - DELETE ARCHIVE ATUALIZADO.txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20DELETE%20ARCHIVE%20ATUALIZADO.txt>) | configuração e automação |
 | [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - ESTRATÉGIA DE BACKUPS INCREMENTAIS MATERIAL COMPLEMENTAR.txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20ESTRAT%C3%89GIA%20DE%20BACKUPS%20INCREMENTAIS%20MATERIAL%20COMPLEMENTAR.txt>) | configuração e automação |
 | [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - ESTRATÉGIA DE BACKUPS INCREMENTAIS.txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20ESTRAT%C3%89GIA%20DE%20BACKUPS%20INCREMENTAIS.txt>) | backup ou configuração, configuração e automação |
 | [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - LISTAR BACKUPS RECENTES NO RMAN (02).txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20LISTAR%20BACKUPS%20RECENTES%20NO%20RMAN%20%2802%29.txt>) | backup ou configuração |
@@ -334,7 +332,7 @@ Antes de usar qualquer procedimento, confira ambiente, versão, escopo, backup e
 | [03-Avancado/Oracle/Performance-Monitoramento/💾  GUIA PRÁTICO - TRACE MODULO SERVICE.txt](<03-Avancado/Oracle/Performance-Monitoramento/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20TRACE%20MODULO%20SERVICE.txt>) | configuração e automação |
 | [APRENDIZADO/Portfolio/🐧  SCRIPT SHELL - INSTALL SOFTWARE EXAMPLE.sh](<APRENDIZADO/Portfolio/%F0%9F%90%A7%20%20SCRIPT%20SHELL%20-%20INSTALL%20SOFTWARE%20EXAMPLE.sh>) | configuração e automação |
 
-## D0 — observação identificada (115)
+## D0 — observação identificada (118)
 
 | Arquivo | Gatilhos textuais |
 |---|---|
@@ -420,6 +418,7 @@ Antes de usar qualquer procedimento, confira ambiente, versão, escopo, backup e
 | [02-Intermediario/Oracle/Performance-Monitoramento/💾  GUIA PRÁTICO - DIAGNÓSTICO DE SESSÕES COM ALTO CONSUMO DE CPU (ORACLE) (02).txt](<02-Intermediario/Oracle/Performance-Monitoramento/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20DIAGN%C3%93STICO%20DE%20SESS%C3%95ES%20COM%20ALTO%20CONSUMO%20DE%20CPU%20%28ORACLE%29%20%2802%29.txt>) | consulta SQL |
 | [02-Intermediario/Oracle/Performance-Monitoramento/💾  GUIA PRÁTICO - ERRO ORA 12547.txt](<02-Intermediario/Oracle/Performance-Monitoramento/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20ERRO%20ORA%2012547.txt>) | consulta de arquivos e logs, consulta complementar |
 | [02-Intermediario/Oracle/Performance-Monitoramento/💾  GUIA PRÁTICO - HEALTH CHECK OPERACIONAL ORACLE.txt](<02-Intermediario/Oracle/Performance-Monitoramento/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20HEALTH%20CHECK%20OPERACIONAL%20ORACLE.txt>) | consulta SQL, consulta de arquivos e logs, consulta complementar |
+| [02-Intermediario/Oracle/Performance-Monitoramento/💾  GUIA PRÁTICO - LIMPAR ALERTS E TRACES ATUALIZADO MATERIAL COMPLEMENTAR.txt](<02-Intermediario/Oracle/Performance-Monitoramento/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20LIMPAR%20ALERTS%20E%20TRACES%20ATUALIZADO%20MATERIAL%20COMPLEMENTAR.txt>) | consulta de arquivos e logs |
 | [02-Intermediario/Oracle/Performance-Monitoramento/💾  GUIA PRÁTICO - LISTAR PROCESSOS ORACLE.txt](<02-Intermediario/Oracle/Performance-Monitoramento/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20LISTAR%20PROCESSOS%20ORACLE.txt>) | consulta de arquivos e logs |
 | [02-Intermediario/Oracle/Performance-Monitoramento/💾  GUIA PRÁTICO - OPERADORES DE REDIRECIONAMENTO.txt](<02-Intermediario/Oracle/Performance-Monitoramento/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20OPERADORES%20DE%20REDIRECIONAMENTO.txt>) | consulta de arquivos e logs |
 | [02-Intermediario/Oracle/Performance-Monitoramento/💾  GUIA PRÁTICO - SESSOES BLOQUEADAS BLOQUEADORAS.txt](<02-Intermediario/Oracle/Performance-Monitoramento/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20SESSOES%20BLOQUEADAS%20BLOQUEADORAS.txt>) | consulta SQL |
@@ -439,10 +438,12 @@ Antes de usar qualquer procedimento, confira ambiente, versão, escopo, backup e
 | [02-Intermediario/Oracle/Storage/🟠  GUIA PRÁTICO - SYSAUX PARTE 3 (02).txt](<02-Intermediario/Oracle/Storage/%F0%9F%9F%A0%20%20GUIA%20PR%C3%81TICO%20-%20SYSAUX%20PARTE%203%20%2802%29.txt>) | consulta SQL |
 | [02-Intermediario/Oracle/Storage/🟠  GUIA PRÁTICO - UNDOTBS ORACLE.txt](<02-Intermediario/Oracle/Storage/%F0%9F%9F%A0%20%20GUIA%20PR%C3%81TICO%20-%20UNDOTBS%20ORACLE.txt>) | consulta SQL |
 | [02-Intermediario/Oracle/🟠  GUIA PRÁTICO - ALERT TRACE.txt](<02-Intermediario/Oracle/%F0%9F%9F%A0%20%20GUIA%20PR%C3%81TICO%20-%20ALERT%20TRACE.txt>) | consulta de sistema, consulta de arquivos e logs |
+| [03-Avancado/Linux/05-logs-e-armazenamento/🔐  GUIA PRÁTICO - LIMPEZA AUDIT ALERT TRACE SCRIPT.txt](<03-Avancado/Linux/05-logs-e-armazenamento/%F0%9F%94%90%20%20GUIA%20PR%C3%81TICO%20-%20LIMPEZA%20AUDIT%20ALERT%20TRACE%20SCRIPT.txt>) | consulta de arquivos e logs |
 | [03-Avancado/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - ADDM (AUTOMATIC DATABASE DIAGNOSTIC MONITOR).txt](<03-Avancado/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20ADDM%20%28AUTOMATIC%20DATABASE%20DIAGNOSTIC%20MONITOR%29.txt>) | consulta SQL |
 | [03-Avancado/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - DIMENSIONAMENTO SGA PGA ORACLE.txt](<03-Avancado/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20DIMENSIONAMENTO%20SGA%20PGA%20ORACLE.txt>) | consulta SQL, consulta de sistema, consulta de arquivos e logs, consulta complementar |
 | [03-Avancado/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - LOG BUFFER CONCEITO.txt](<03-Avancado/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20LOG%20BUFFER%20CONCEITO.txt>) | consulta SQL |
 | [03-Avancado/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - LOG SGA ALOCACAO MEMORIA ORACLE.txt](<03-Avancado/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20LOG%20SGA%20ALOCACAO%20MEMORIA%20ORACLE.txt>) | consulta SQL |
+| [03-Avancado/Oracle/Fundamentos-Referencias/🔐  GUIA PRÁTICO - LIMPEZA AUDIT ALERT TRACE SCRIPT.txt](<03-Avancado/Oracle/Fundamentos-Referencias/%F0%9F%94%90%20%20GUIA%20PR%C3%81TICO%20-%20LIMPEZA%20AUDIT%20ALERT%20TRACE%20SCRIPT.txt>) | consulta de arquivos e logs |
 | [03-Avancado/Oracle/Instalacao-Administracao/🛠️  GUIA PRÁTICO - GUIA SWAP LINUX.txt](<03-Avancado/Oracle/Instalacao-Administracao/%F0%9F%9B%A0%EF%B8%8F%20%20GUIA%20PR%C3%81TICO%20-%20GUIA%20SWAP%20LINUX.txt>) | consulta de sistema |
 | [03-Avancado/Oracle/Performance-Monitoramento/🌐  GUIA PRÁTICO - LOCALIZAR ALERT LOG E CONFIGURACAO REDE.txt](<03-Avancado/Oracle/Performance-Monitoramento/%F0%9F%8C%90%20%20GUIA%20PR%C3%81TICO%20-%20LOCALIZAR%20ALERT%20LOG%20E%20CONFIGURACAO%20REDE.txt>) | consulta de arquivos e logs |
 | [03-Avancado/Oracle/Performance-Monitoramento/👤  GUIA PRÁTICO - DIAGNOSTICO SYSTEMD SELINUX STARTUP ORACLE.txt](<03-Avancado/Oracle/Performance-Monitoramento/%F0%9F%91%A4%20%20GUIA%20PR%C3%81TICO%20-%20DIAGNOSTICO%20SYSTEMD%20SELINUX%20STARTUP%20ORACLE.txt>) | consulta SQL, consulta complementar |
