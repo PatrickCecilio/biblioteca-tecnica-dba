@@ -18,11 +18,13 @@ ____________________________________________________________________________
 
 -listener wint>
 ****PARA VERIFICAR OS ARQUIVOS .LOG NO ALERT  (Alert)
-find /u01/app/oracle/diag/tnslsnr/oraclestdb/listener/alert -name "log_*" -mtime +285 -exec rm -f {} \;
+# RISCO D3: exemplo histórico; confirme o ADR home real e use o runbook.
+# Pré-visualização após validar o caminho e a retenção:
+find '<LISTENER_ALERT_VALIDADO>' -xdev -type f -name 'log_*' -mtime +<DIAS_APROVADOS> -print
 
 
 ****PARA VERIFICAR OS ARQUIVOS LISTENER.LOG  (Trace)
-find /u01/app/oracle/diag/tnslsnr/oraclestdb/listener/trace -name "listener*" -mtime +285 -exec rm -f {} \;
+find '<LISTENER_TRACE_VALIDADO>' -xdev -type f -name 'listener*' -mtime +<DIAS_APROVADOS> -print
 
 ################################################################################################################################################
 ################################################################################################################################################

@@ -2,13 +2,17 @@
 setlocal
 
 :: Altere aqui para a pasta raiz dos seus .txt
-set "ROOT=G:\Iniciar backup\aprendizado\Acessos"
+:: RISCO D3: valide o diretório; não use arquivos sensíveis neste exemplo.
+set "ROOT=<DIRETORIO_VALIDADO>"
 
 :: Arquivo de saída
 set "TARGET=%ROOT%\unificado.txt"
 
-:: Se já existir, apaga sem perguntar
-if exist "%TARGET%" del /q "%TARGET%"
+:: Evite sobrescrever uma saída anterior.
+if exist "%TARGET%" (
+  echo O arquivo de saida ja existe. Escolha outro nome.
+  exit /b 1
+)
 
 :: Loop recursivo (usa %%F porque está dentro de um .bat)
 for /R "%ROOT%" %%F in (*.txt) do (

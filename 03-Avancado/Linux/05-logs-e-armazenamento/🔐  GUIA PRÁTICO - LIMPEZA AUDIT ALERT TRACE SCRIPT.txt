@@ -2,6 +2,14 @@
 # Limpeza de diagnósticos Oracle — D3 (pré-visualização)
 # Runbook: ../../Oracle/Performance-Monitoramento/RUNBOOK-LIMPEZA-DIAGNOSTICOS.md
 # Este exemplo LISTA candidatos; não remove arquivos. Não copie caminhos de outros ambientes.
+# Laboratório fictício: TARGET=/u01/app/oracle/admin/ORCL/adump RETENTION_DAYS=30
+# Saída SIMULADA (não comprova execução):
+# Alvo: /u01/app/oracle/admin/ORCL/adump
+# Retenção: 30 dias
+# /u01/app/oracle/admin/ORCL/adump/audit001.aud
+# /u01/app/oracle/admin/ORCL/adump/audit002.aud
+# /u01/app/oracle/admin/ORCL/adump/audit003.aud
+# Defina TARGET e RETENTION_DAYS com os valores validados antes de executar.
 
 set -euo pipefail
 : "${TARGET:?Defina o diretório validado de audit ou trace}"

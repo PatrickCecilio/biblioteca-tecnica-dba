@@ -1,11 +1,15 @@
 // Aula 20 - Fazendo a limpeza em seu ambiente
 
-# docker image prune -f
+# RISCO D3 — confirme contexto, objetos, dependências e dados persistentes.
+# docker context show
+# docker system df -v
 
 # docker container rm <container-id>
 
-# docker container prune --force
+# docker container ls -a
 
-$ docker volume prune
+$ docker volume ls
 
-$ docker volume rm <volume-name>
+# Após backup e inspeção do volume individual:
+# docker volume inspect <VOLUME_VALIDADO>
+# docker volume rm <VOLUME_VALIDADO>

@@ -1,3 +1,6 @@
+# RISCO D3: confirme contexto Docker, ID/nome do contêiner e volume do laboratório antes de qualquer remoção; não use nomes de serviços reais.
+# --privileged --pid=host concede acesso amplo ao host. Prefira docker volume inspect
+# e um contêiner de laboratório sem privilégios; não copie esse trecho em produção.
 // Aula 11 - Criação e montagem de volumes de dados
 
 # docker container run --name demo \
@@ -46,4 +49,8 @@ centos:7 /bin/bash
 
 # docker volume rm sample
 
-$ docker container rm -f $(docker container ls -aq)
+# AVISO D3: o comando de remover todos os contêineres foi retirado.
+docker container ls -a
+# Inspecione o ID do contêiner de laboratório e remova somente esse ID após validar o escopo:
+# docker container inspect <ID_VALIDADO>
+# docker container rm <ID_VALIDADO>

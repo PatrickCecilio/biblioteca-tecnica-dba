@@ -23,8 +23,10 @@ zabbix_get -s <IP_DO_HOST> -k system.uptime
 
 ---------------
 tail -f alert.log
-find /opt/oracle/diag/... -mtime +5 -exec rm -f {} \;
-find -mtime +90 -exec rm -rf {} \;
+# RISCO D3: não execute find com rm sobre caminho incompleto ou diretório atual.
+# Confirme ADR home e retenção; consulte RUNBOOK-LIMPEZA-DIAGNOSTICOS.md.
+# Exemplo de pré-visualização após validar um diretório de audit fora do ADR:
+find '<ADUMP_VALIDADO>' -xdev -type f -name '*.aud' -mtime +<DIAS_APROVADOS> -print
 find /var/log -type f -name "*.log"
 
 ================================================================================
@@ -136,7 +138,8 @@ Descrição: Remove um arquivo específico.
 
 ---
 
-📌 rm -rf pasta
+📌 Remoção recursiva é D3: liste o conteúdo e confirme o caminho absoluto;
+   trate a exclusão como etapa separada, sem copiar um rm -rf genérico.
 Descrição: Remove uma pasta e todos seus subdiretórios.
 Atenção: Comando destrutivo. Usar com extremo cuidado.
 

@@ -1,8 +1,10 @@
-ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+RISCO D3 — TRUNCATE é irreversível por rollback e executa commit implícito.
+Valide schema, tabela, quantidade de linhas, dependências, backup e aceite.
 
 ALTER USER udbd03 IDENTIFIED BY "<SENHA_SUBSTITUIR>" ACCOUNT UNLOCK;
 
 CREATE TABLE UDBD03.MP_CUSTOM_METRICS_EXP_BKP AS
 SELECT * FROM UDBD03.MP_CUSTOM_METRICS_EXP;
 
-TRUNCATE TABLE UDBD03.MP_CUSTOM_METRICS_EXP;
+-- Verifique a cópia e sua recuperação antes da etapa separada:
+-- TRUNCATE TABLE <SCHEMA_VALIDADO>.<TABELA_VALIDADA>;

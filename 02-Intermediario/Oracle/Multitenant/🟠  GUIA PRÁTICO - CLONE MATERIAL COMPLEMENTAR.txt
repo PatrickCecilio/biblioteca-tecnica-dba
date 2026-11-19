@@ -1,3 +1,6 @@
+RISCO D3 — confirme CDB, PDB de origem, backup, serviços e validação do clone.
+Não remova a PDB de origem como parte automática do fluxo de clonagem.
+
 CREATE PLUGGABLE DATABASE PDB1_MOVED
   USING '/u01/pdb_migration/PDB1/pdb1.xml'
   FILE_NAME_CONVERT = (
@@ -11,4 +14,6 @@ ALTER SESSION SET CONTAINER = PDB1_MOVED;
 @?/rdbms/admin/noncdb_to_pdb.sql
 ALTER PLUGGABLE DATABASE PDB1_MOVED CLOSE IMMEDIATE;
 ALTER PLUGGABLE DATABASE PDB1_MOVED OPEN;
-DROP PLUGGABLE DATABASE PDB1 INCLUDING DATAFILES;
+-- Etapa separada após validação funcional e aprovação:
+-- ALTER PLUGGABLE DATABASE <PDB_ORIGEM_VALIDADA> CLOSE IMMEDIATE;
+-- DROP PLUGGABLE DATABASE <PDB_ORIGEM_VALIDADA> INCLUDING DATAFILES;

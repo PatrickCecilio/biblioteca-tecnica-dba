@@ -1,3 +1,4 @@
+# RISCO D3: confirme contexto Docker, ID/nome do contêiner e volume do laboratório antes de qualquer remoção; não use nomes de serviços reais.
 docker container exec -i -t trivia /bin/sh
 
 docker container exec trivia ps

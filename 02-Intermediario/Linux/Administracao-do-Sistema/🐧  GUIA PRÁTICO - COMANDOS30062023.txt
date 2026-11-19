@@ -131,7 +131,8 @@ CREATE TABLE UDBD03.MP_CUSTOM_METRICS_EXP_BKP AS
 SELECT * FROM UDBD03.MP_CUSTOM_METRICS_EXP;
 
 -- Limpar (truncate) a tabela original
-TRUNCATE TABLE UDBD03.MP_CUSTOM_METRICS_EXP;
+-- RISCO D3: TRUNCATE não tem rollback. Confirmar schema, backup e aceite.
+-- TRUNCATE TABLE <SCHEMA_VALIDADO>.<TABELA_VALIDADA>;
 
 --------------------------------------------------------------------------------
 -- 9. Recompilação de Objetos Inválidos (script oficial)

@@ -18,6 +18,11 @@ O nível de conhecimento das pastas não representa o impacto de execução. Con
 
 O [inventário atualizado](INVENTARIO-RISCO.md) aplica uma triagem textual reproduzível a todo o acervo. Ele registra o maior risco detectado por arquivo e separa os casos sem gatilho conhecido para revisão manual; a classificação contextual de cada comando continua necessária.
 
+A [revisão D3 por impacto](REVISAO-D3-2026-11-19.md) registra a triagem dos 80
+arquivos sinalizados no início do ciclo e os controles aplicados. Os
+[laboratórios para comprovação](LABORATORIOS-PARA-COMPROVACAO.md) indicam as
+execuções necessárias antes de apresentar resultados funcionais.
+
 ## Uso seguro
 
 Os arquivos são referências educacionais. Antes de qualquer execução, identifique ambiente, instância, banco e container; confirme backup restaurável, cadeia de logs, RPO/RTO, janela e plano de retorno. Comandos D2 e D3 exigem revisão específica do procedimento. Nenhum script deve ser executado diretamente em produção.

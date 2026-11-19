@@ -18,15 +18,49 @@ SHOW CONTROL
 
 ## 2. Inspeção sem alteração
 
-Para arquivos de auditoria fora do ADR, substitua os parâmetros e execute primeiro apenas a listagem. O exemplo de 30 dias é ilustrativo; use a retenção aprovada.
+Para arquivos de auditoria fora do ADR, execute primeiro apenas a listagem.
+O cenário abaixo usa uma instância fictícia `ORCL` em laboratório, com
+retenção ilustrativa de 30 dias. Antes de executar em outro ambiente, confirme
+o `ORACLE_BASE`, o `ORACLE_SID` e a política real.
 
 ```bash
-TARGET='<ADUMP_VALIDADO>'
+TARGET='/u01/app/oracle/admin/ORCL/adump'
 RETENTION_DAYS=30
 test -d "$TARGET" && test ! -L "$TARGET" || { echo 'Alvo ausente ou link simbólico'; exit 1; }
 realpath -- "$TARGET"
 find "$TARGET" -xdev -type f -name '*.aud' -mtime +"$RETENTION_DAYS" -print
 ```
+
+Saída **simulada** para mostrar o formato esperado; não é evidência de
+execução neste repositório:
+
+```text
+/u01/app/oracle/admin/ORCL/adump
+/u01/app/oracle/admin/ORCL/adump/audit001.aud
+/u01/app/oracle/admin/ORCL/adump/audit002.aud
+/u01/app/oracle/admin/ORCL/adump/audit003.aud
+```
+
+Na execução real, registre host, data, retenção, comando, listagem e contagem.
+Uma lista vazia também é um resultado válido e não justifica reduzir a retenção.
+
+### Exercício reproduzível sem tocar no Oracle
+
+Crie arquivos fictícios em `/tmp` numa VM Linux de laboratório. O comando
+somente lista os três arquivos; registre a saída real do seu ambiente.
+
+```bash
+LAB_ROOT=$(mktemp -d /tmp/oracle-audit-lab.XXXXXX)
+mkdir -p "$LAB_ROOT/ORCL/adump"
+touch "$LAB_ROOT/ORCL/adump/audit001.aud" "$LAB_ROOT/ORCL/adump/audit002.aud" "$LAB_ROOT/ORCL/adump/audit003.aud"
+touch -d '31 days ago' "$LAB_ROOT/ORCL/adump/"*.aud
+TARGET="$LAB_ROOT/ORCL/adump"
+RETENTION_DAYS=30
+find "$TARGET" -xdev -type f -name '*.aud' -mtime +"$RETENTION_DAYS" -print
+```
+
+Esse exercício demonstra o filtro de retenção. Ele não valida a política de
+auditoria Oracle nem autoriza a exclusão de arquivos reais.
 
 Confira a lista, o volume de arquivos, as datas e o caminho resolvido. Guarde evidência da listagem. **Pare** se o alvo, a retenção ou os arquivos encontrados divergirem do plano.
 

@@ -1,4 +1,8 @@
-ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+RISCO D3 — notas de laboratório que misturam comandos de SQL*Plus, RMAN e
+shell. Não execute o arquivo inteiro. Separe cada contexto e confirme banco,
+FRA, política de retenção, archivelogs, espaço, restore point e backup
+recuperável antes de alterar ARCHIVELOG/FLASHBACK. Guarde evidência de
+RESTORE VALIDATE e da validação após a mudança.
 
 banco tem que está em modo archivelg
 ARCHIVE LOG LIST;

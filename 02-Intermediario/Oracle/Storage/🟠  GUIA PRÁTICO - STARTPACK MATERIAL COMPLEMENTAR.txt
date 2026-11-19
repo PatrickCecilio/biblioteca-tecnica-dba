@@ -6,6 +6,11 @@ ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros
 
 Objetivo:
 Configurar, administrar, manter e remover o Statspack
+
+RISCO D3 — purge, spdrop e DROP TABLESPACE eliminam histórico e objetos.
+Antes da etapa de remoção, confirme schema PERFSTAT, jobs, snapshots,
+tablespace, datafiles, backup recuperável, retenção e aprovação. Execute
+purge e remoção somente como mudanças separadas, nunca em sequência copiada.
 de forma organizada e segura.
 
 ====================================================================

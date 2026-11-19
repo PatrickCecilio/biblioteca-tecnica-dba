@@ -17,6 +17,10 @@ docker container ls -a
 
 docker container ls -q
 
-docker container rm -f $(docker container ls -a -q)
+# AVISO D3: o comando de remover todos os contêineres foi retirado.
+docker container ls -a
+# Inspecione o ID do contêiner de laboratório e remova somente esse ID após validar o escopo:
+# docker container inspect <ID_VALIDADO>
+# docker container rm <ID_VALIDADO>
 
 docker container ls -h

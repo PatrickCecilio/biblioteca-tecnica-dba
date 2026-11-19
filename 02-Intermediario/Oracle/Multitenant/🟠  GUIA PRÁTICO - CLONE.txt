@@ -1,3 +1,7 @@
+RISCO D3 — antes de remover a PDB de origem, confirme CDB, nome da PDB,
+backup recuperável, arquivos, serviços e validação funcional do destino.
+Este exemplo é de laboratório; não copie caminhos nem execute DROP por sequência.
+
 CREATE PLUGGABLE DATABASE PDB1_MOVED
   USING '/u01/pdb_migration/PDB1/pdb1.xml'
   FILE_NAME_CONVERT = (
@@ -8,4 +12,6 @@ ALTER PLUGGABLE DATABASE <PDB_NAME> OPEN UPGRADE;
 ALTER SESSION SET CONTAINER = PDB1_MOVED;
 ALTER PLUGGABLE DATABASE <PDB_NAME> CLOSE IMMEDIATE;
 ALTER PLUGGABLE DATABASE <PDB_NAME> OPEN;
-DROP PLUGGABLE DATABASE PDB1 INCLUDING DATAFILES;
+-- Etapa separada, somente após aceite do clone e janela aprovada:
+-- ALTER PLUGGABLE DATABASE <PDB_ORIGEM_VALIDADA> CLOSE IMMEDIATE;
+-- DROP PLUGGABLE DATABASE <PDB_ORIGEM_VALIDADA> INCLUDING DATAFILES;

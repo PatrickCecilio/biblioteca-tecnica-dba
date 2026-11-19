@@ -1,14 +1,20 @@
 # GUIA PRÁTICO ORACLE
 
-## Limpeza de Alert, Incident e Trace — Grid/Listener
+## Limpeza de Alert, Incident e Trace — Grid/Listener (D3)
+
+RISCO D3: PURGE remove diagnósticos e pode eliminar evidências.
+
+Use o ADRCI e selecione apenas o ADR home do listener validado. Confirme
+incidentes em aberto, retenção aprovada e coleta de suporte. Consulte o
+RUNBOOK-LIMPEZA-DIAGNOSTICOS.md antes da execução. -AGE usa minutos.
 
 ### 1. Limpar arquivos XML do Alert
 
 ```bash
-find <GRID_BASE>/diag/tnslsnr/<HOSTNAME>/<LISTENER_NAME>/alert \
--name "*.xml" \
--mtime +1 \
--exec rm -f {} \;
+adrci
+SHOW HOMES
+SET HOMEPATH <LISTENER_ADR_HOME_VALIDADO>
+SHOW CONTROL
 ```
 
 ---
@@ -16,10 +22,7 @@ find <GRID_BASE>/diag/tnslsnr/<HOSTNAME>/<LISTENER_NAME>/alert \
 ### 2. Limpar arquivos de Incident
 
 ```bash
-find <GRID_BASE>/diag/tnslsnr/<HOSTNAME>/<LISTENER_NAME>/incident \
--name "*.tr[cm]" \
--mtime +1 \
--exec rm -f {} \;
+Não apague incidentes ativos. Preserve evidências antes de PURGE.
 ```
 
 ---
@@ -27,8 +30,6 @@ find <GRID_BASE>/diag/tnslsnr/<HOSTNAME>/<LISTENER_NAME>/incident \
 ### 3. Limpar arquivos de Trace
 
 ```bash
-find <GRID_BASE>/diag/tnslsnr/<HOSTNAME>/<LISTENER_NAME>/trace \
--name "*.tr[cm]" \
--mtime +1 \
--exec rm -f {} \;
+Após aprovação, use ADRCI PURGE -AGE <MINUTOS_APROVADOS> -TYPE TRACE
+para um único ADR home. Valide o espaço e os diagnósticos depois.
 ```

@@ -183,6 +183,11 @@ docker container run --rm -it \
 
 $ bash test.sh
 
-docker container rm -f postgres api
-docker network rm test-net
-docker volume rm pg-data
+# RISCO D3: valide que postgres, api, test-net e pg-data pertencem a este
+# laboratório; pg-data pode conter dados persistentes. Faça backup antes.
+docker container inspect postgres api
+docker container stop postgres api
+docker container rm postgres api
+# Remova rede e volume apenas após confirmar dependências e dados:
+# docker network rm test-net
+# docker volume rm pg-data

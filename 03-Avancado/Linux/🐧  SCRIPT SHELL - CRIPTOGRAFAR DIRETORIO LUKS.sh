@@ -1,6 +1,5 @@
-# ATENÇÃO: material de referência. Revise o ambiente e os parâmetros antes de executar comandos destrutivos.
-
 #!/bin/bash
+# RISCO D3: executar apenas em laboratório isolado com --execute e backup validado.
 
 ##############################################################################
 #
@@ -38,7 +37,11 @@
 #  Data: 2025-08-15
 ##############################################################################
 
-set -e
+set -euo pipefail
+if [[ "${1:-}" != "--execute" ]]; then
+    echo "Modo seguro: revise o script e use --execute somente em laboratório." >&2
+    exit 2
+fi
 
 # Verifica se o script está executando como root
 if [[ $EUID -ne 0 ]]; then
@@ -66,9 +69,17 @@ read_nonempty() {
 # 1. Solicita pasta a criptografar
 while true; do
     DIR=$(read_nonempty "Informe o caminho absoluto da pasta que deseja criptografar: ")
-    if [[ -d "$DIR" ]]; then
+    if [[ -d "$DIR" && ! -L "$DIR" ]]; then
         # Remove barra final, se houver
         DIR="$(readlink -f "$DIR")"
+        if [[ "$DIR" == "/" || "$DIR" == "/etc" || "$DIR" == "/var" || "$DIR" == "/usr" || "$DIR" == "/home" || "$DIR" == "/root" ]]; then
+            echo "Diretório raiz ou de sistema não pode ser alvo." >&2
+            continue
+        fi
+        if mountpoint -q "$DIR"; then
+            echo "O alvo já é ponto de montagem." >&2
+            continue
+        fi
         break
     else
         echo "Caminho inválido ou não é um diretório." >&2
@@ -87,9 +98,17 @@ while true; do
         continue
     fi
     # Evita salvar contêiner dentro da pasta a ser criptografada
-    if [[ "$CONTAINER" == "$DIR"* ]]; then
+    if [[ "$CONTAINER" == "$DIR/"* ]]; then
         echo "Não salve o contêiner dentro da pasta a ser criptografada. Escolha outro local." >&2
         continue
+    fi
+    if [[ -e "$CONTAINER" || -L "$CONTAINER" ]]; then
+        echo "O arquivo contêiner já existe; escolha um destino novo." >&2
+        continue
+    fi
+    if [[ -e "${DIR}_backup_original" ]]; then
+        echo "O diretório de backup original já existe; interrompendo antes de criar o contêiner." >&2
+        exit 1
     fi
     break
 done
@@ -120,7 +139,7 @@ echo "Tamanho do contêiner definido: ${SIZE_GB} GB"
 
 # 5. Cria contêiner com dd (imagem vazia)
 echo "Criando arquivo de contêiner em $CONTAINER..."
-dd if=/dev/zero of="$CONTAINER" bs=1M count=$((SIZE_GB * 1024)) status=progress
+dd if=/dev/zero of="$CONTAINER" bs=1M count=$((SIZE_GB * 1024)) status=progress oflag=excl
 echo "Arquivo de contêiner criado."
 
 # 6. Configura criptografia LUKS

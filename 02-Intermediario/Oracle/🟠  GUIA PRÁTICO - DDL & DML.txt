@@ -1,4 +1,6 @@
-ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+RISCO D3 — exemplos de DROP/TRUNCATE e grants devem ser executados somente
+por etapa e em esquema de laboratório. Confirme CDB/PDB, objeto, backup e
+privilégios antes de qualquer DDL; não execute o documento inteiro.
 
 ================================================================================
 📘 GUIA PRÁTICO DBA

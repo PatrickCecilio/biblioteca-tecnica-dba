@@ -1,3 +1,4 @@
+# RISCO D3: confirme contexto Docker, ID/nome do contêiner e volume do laboratório antes de qualquer remoção; não use nomes de serviços reais.
 docker container run -d --name trivia fundamentalsofdocker/trivia:ed2
 
 export CONTAINER_ID=$(docker container ls -a | grep trivia | awk '{print $1}')

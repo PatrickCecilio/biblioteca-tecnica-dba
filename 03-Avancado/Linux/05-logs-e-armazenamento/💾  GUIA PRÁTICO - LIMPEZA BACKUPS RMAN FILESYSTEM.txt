@@ -1,6 +1,11 @@
 # GUIA PRÁTICO ORACLE
 
-## Limpeza de Backups RMAN Antigos no Filesystem
+## Limpeza de backups RMAN — D3
+
+Não remova peças de backup com `find -exec rm`. A idade do arquivo no
+filesystem não determina se ele ainda é necessário para recuperação.
+Use o procedimento RMAN em
+`03-Avancado/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - LIMPEZA BACKUPS RMAN FILESYSTEM.txt`.
 
 ### 1. Validar backups de Archive antigos
 
@@ -12,13 +17,13 @@ find <RMAN_ARCHIVE_PATH> \
 
 ---
 
-### 2. Remover backups de Archive antigos
+### 2. Inspecionar no RMAN antes de qualquer exclusão
 
 ```bash
-find <RMAN_ARCHIVE_PATH> \
--name "*.bkp" \
--mtime +<RETENTION_DAYS> \
--exec rm -f {} \;
+rman target /
+SHOW RETENTION POLICY;
+LIST BACKUP SUMMARY;
+REPORT OBSOLETE;
 ```
 
 ---
@@ -33,13 +38,11 @@ find <RMAN_DATABASE_PATH> \
 
 ---
 
-### 4. Remover backups de Database antigos
+### 4. Execução controlada
 
 ```bash
-find <RMAN_DATABASE_PATH> \
--name "*.bkp" \
--mtime +<RETENTION_DAYS> \
--exec rm -f {} \;
+Após revisar a política, a lista e os backups necessários, executar
+DELETE OBSOLETE com prompt e aprovação operacional no RMAN.
 ```
 
 ---

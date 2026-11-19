@@ -1,4 +1,5 @@
--- ATENÇÃO: material de referência. Revise o banco, o escopo e os filtros antes de executar comandos destrutivos.
+-- RISCO D3: este arquivo gera SQL de privilégios e sinônimos. Revise os
+-- arquivos gerados antes de executá-los; TRUNCATE é uma etapa separada.
 
 SET HEADING OFF
 SET PAGESIZE 0
@@ -25,8 +26,10 @@ AND OBJECT_TYPE IN ('VIEW', 'PROCEDURE', 'TRIGGER','PACKAGE','PACKAGE BODY','FUN
 AND OBJECT_NAME NOT LIKE 'BIN$%';
 SPOOL OFF
 
-@/home/oracle/SINONIMOS.SQL
-@/home/oracle/GRANT.SQL
-@/home/oracle/OBJETOS.SQL
+-- Após revisão individual dos arquivos gerados, execute-os separadamente.
+-- @/home/oracle/SINONIMOS.SQL
+-- @/home/oracle/GRANT.SQL
+-- @/home/oracle/OBJETOS.SQL
 
-TRUNCATE TABLE INFOSAUDE.LOG_VERSAO DROP STORAGE;
+-- Após confirmar alvo, backup e autorização:
+-- TRUNCATE TABLE INFOSAUDE.LOG_VERSAO DROP STORAGE;

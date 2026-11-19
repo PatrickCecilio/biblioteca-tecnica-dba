@@ -1,4 +1,6 @@
-ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+RISCO D3 — export histórico extenso de roles e grants. NÃO executar em lote.
+Privilégios ANY, DROP, DELETE e ADMIN OPTION exigem revisão individual,
+separação de funções, menor privilégio e aprovação do responsável pelo banco.
 
 CREATE ROLE "ROLE_CRIARUSUARIOS";
 

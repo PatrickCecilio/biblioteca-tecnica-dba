@@ -243,6 +243,10 @@ UNDEFINE SID;
 
 ### 12. Encerrar sessão
 
+RISCO D3: valide PDB, SID, SERIAL#, usuário, SQL e transação antes de
+encerrar; esta etapa interrompe trabalho em andamento. Use apenas no
+usuário de laboratório e registre a autorização.
+
 ```sql
 ALTER SYSTEM KILL SESSION '<SID>,<SERIAL#>' IMMEDIATE;
 ```
@@ -250,6 +254,9 @@ ALTER SYSTEM KILL SESSION '<SID>,<SERIAL#>' IMMEDIATE;
 ---
 
 ### 13. Remover ambiente de teste
+
+Confirme que <LOCK_USER> foi criado exclusivamente por este laboratório,
+que não possui dados externos e que o backup/aceite da limpeza existe.
 
 ```sql
 DROP USER <LOCK_USER> CASCADE;
