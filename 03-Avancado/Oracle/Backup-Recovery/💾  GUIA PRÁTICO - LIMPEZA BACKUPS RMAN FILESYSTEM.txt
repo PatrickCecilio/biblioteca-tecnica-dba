@@ -1,9 +1,19 @@
-find <BACKUP_PATH> -type f -name '*.bkp' -mtime +<RETENTION_DAYS> -print
+RISCO D3 — backup RMAN não deve ser apagado pelo filesystem com find -delete.
+Confirme DB_UNIQUE_NAME, política de retenção, catálogo, Data Guard e restore testado.
 
-find <BACKUP_PATH> -type f -name '*.bkp' -mtime +<RETENTION_DAYS> -delete
+Inspeção no RMAN:
 
 rman target /
-
+SHOW RETENTION POLICY;
+LIST BACKUP SUMMARY;
+REPORT OBSOLETE;
 CROSSCHECK BACKUP;
+REPORT OBSOLETE;
 
-DELETE NOPROMPT EXPIRED BACKUP;
+Após revisar a lista, dependências e aprovação operacional, execute separadamente:
+DELETE OBSOLETE;
+
+Não use DELETE NOPROMPT nem remova peças de backup fora do RMAN. EXPIRED indica
+arquivo ausente após CROSSCHECK, não idade do backup. Investigue antes de limpar
+metadados expirados. Registre saída e valide a capacidade de recuperação.
+Referência: https://docs.oracle.com/en/database/oracle/oracle-database/19/rcmrf/DELETE.html

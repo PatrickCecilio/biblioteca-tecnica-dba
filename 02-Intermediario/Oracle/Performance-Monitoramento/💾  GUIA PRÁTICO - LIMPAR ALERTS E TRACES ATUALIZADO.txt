@@ -1,11 +1,10 @@
-find '<AUDIT_PATH>' -type f -name '*.aud' -mtime +<RETENTION_DAYS> -print
+RISCO D3 — valide ADR home, retenção, incidentes e evidências antes da limpeza.
+Runbook: 03-Avancado/Oracle/Performance-Monitoramento/RUNBOOK-LIMPEZA-DIAGNOSTICOS.md
+Para alert, trace e listener, prefira ADRCI no ADR home validado.
 
-find '<TRACE_PATH>' -type f \( -name '*.trc' -o -name '*.trm' \) -mtime +<RETENTION_DAYS> -print
+Para audit fora do ADR, apenas liste os candidatos:
 
-find '<LISTENER_LOG_PATH>' -type f -name 'log_*' -mtime +<RETENTION_DAYS> -print
+find '<ADUMP_VALIDADO>' -xdev -type f -name '*.aud' -mtime +<DIAS_APROVADOS> -print
 
-find '<AUDIT_PATH>' -type f -name '*.aud' -mtime +<RETENTION_DAYS> -delete
-
-find '<TRACE_PATH>' -type f \( -name '*.trc' -o -name '*.trm' \) -mtime +<RETENTION_DAYS> -delete
-
-find '<LISTENER_LOG_PATH>' -type f -name 'log_*' -mtime +<RETENTION_DAYS> -delete
+Não automatize -delete sobre caminhos copiados. Confira a listagem, o alvo resolvido
+e a política; execute uma categoria por vez conforme o runbook aprovado.

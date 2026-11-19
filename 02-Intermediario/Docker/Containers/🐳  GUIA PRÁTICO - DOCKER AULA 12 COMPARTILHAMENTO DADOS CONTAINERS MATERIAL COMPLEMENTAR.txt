@@ -14,8 +14,15 @@ $ ls -l /app/data
 
 / # echo "Try to break read/only" > /app/data/data.txt
 
-$ docker container rm -f $(docker container ls -aq)
-$ docker volume rm $(docker volume ls -q)
+# AVISO D3: o comando de remover todos os contêineres foi retirado.
+docker container ls -a
+# Inspecione o ID do contêiner de laboratório e remova somente esse ID após validar o escopo:
+# docker container inspect <ID_VALIDADO>
+# docker container rm <ID_VALIDADO>
+# AVISO D3: não remova todos os volumes do host. Verifique o projeto e o backup.
+docker volume ls
+# docker volume inspect <VOLUME_VALIDADO>
+# docker volume rm <VOLUME_VALIDADO>
 
 $ docker container run --rm -it \
 -v $(pwd)/src:/app/src \

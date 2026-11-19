@@ -1,12 +1,14 @@
-ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+RISCO D3 — laboratório isolado. Confirme que a imagem não existe, que o
+mapper está livre, que /app não contém dados e que há backup antes de formatar.
+Nunca aponte luksFormat ou mkfs para um dispositivo existente.
 
 sudo dnf install cryptsetup
 
-sudo dd if=/dev/zero of=/app.img bs=1M count=3072
+sudo dd if=/dev/zero of=<IMAGEM_NOVA_VALIDADA> bs=1M count=3072 oflag=excl
 
-sudo cryptsetup luksFormat /app.img
+sudo cryptsetup luksFormat <IMAGEM_NOVA_VALIDADA>
 
-sudo cryptsetup luksOpen /app.img app_crypt
+sudo cryptsetup luksOpen <IMAGEM_NOVA_VALIDADA> app_crypt
 
 sudo mkfs.ext4 /dev/mapper/app_crypt
 

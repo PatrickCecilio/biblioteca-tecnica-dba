@@ -1,4 +1,6 @@
-ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+RISCO D3 — laboratório isolado. Confirme que a imagem não existe, que o
+mapper está livre, que /app não contém dados e que há backup antes de formatar.
+Nunca aponte luksFormat ou mkfs para um dispositivo existente.
 
 CRIPTOGRAFIA
 
@@ -6,16 +8,16 @@ Instalar o cryptsetup
 sudo dnf install cryptsetup
 
 Criar um volume criptografado
-sudo dd if=/dev/zero of=/app.img bs=1M count=3072
+sudo dd if=/dev/zero of=<IMAGEM_NOVA_VALIDADA> bs=1M count=3072 oflag=excl
 
 Configurar o volume criptografado:
-sudo cryptsetup luksFormat /app.img
+sudo cryptsetup luksFormat <IMAGEM_NOVA_VALIDADA>
 
 Quando você for solicitado a confirmar a operação (com a palavra "YES"), digite em caixa alta:
 YES
 
 Abrir o volume criptografado
-sudo cryptsetup luksOpen /app.img app_crypt
+sudo cryptsetup luksOpen <IMAGEM_NOVA_VALIDADA> app_crypt
 
 Criar o sistema de arquivos:
 sudo mkfs.ext4 /dev/mapper/app_crypt

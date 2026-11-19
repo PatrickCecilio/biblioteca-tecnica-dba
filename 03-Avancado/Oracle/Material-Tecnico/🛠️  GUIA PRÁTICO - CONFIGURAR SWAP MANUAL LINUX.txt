@@ -3,7 +3,8 @@ free -m
 swapon -s
 
 # Criar arquivo swap de 11 GB
-dd if=/dev/zero of=/root/meuswap bs=1024 count=$((11*1024*1024))
+RISCO D3: confirme espaço e ausência de /root/meuswap antes de criar.
+dd if=/dev/zero of=/root/meuswap bs=1M count=11264 oflag=excl
 
 # Definir permissões e ativar
 chmod 600 /root/meuswap

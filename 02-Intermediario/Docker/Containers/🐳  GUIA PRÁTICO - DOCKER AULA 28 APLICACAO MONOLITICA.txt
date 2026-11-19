@@ -63,4 +63,7 @@ traefik:v2.0 --api.insecure=true --providers.docker
 curl
 curl
 
-docker container rm -f traefik eshop catalog
+# Confirme que os três contêineres pertencem a este laboratório.
+docker container inspect traefik eshop catalog
+docker container stop traefik eshop catalog
+docker container rm traefik eshop catalog

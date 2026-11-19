@@ -1,4 +1,6 @@
-ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+RISCO D3 — habilitar Flashback exige parada e espaço na FRA; restore point
+garantido pode consumir a FRA. Confirme banco, janela, backup restaurável,
+archivelogs, espaço e RPO/RTO. Execute cada etapa após validar o estado.
 
 sqlplus / as sysdba
 

@@ -1,4 +1,6 @@
--- ATENÇÃO: material de referência. Revise o banco, o escopo e os filtros antes de executar comandos destrutivos.
+-- RISCO D3: export histórico de usuários, perfis e privilégios amplos.
+-- NÃO execute em lote. Revise cada concessão, hash, perfil e schema em
+-- laboratório; aplique menor privilégio e obtenha aprovação por alteração.
 
 ALTER PROFILE DEFAULT LIMIT PASSWORD_LIFE_TIME UNLIMITED;
 

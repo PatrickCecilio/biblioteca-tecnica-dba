@@ -119,9 +119,13 @@ WHERE name = UPPER('<PDB_NAME>');
 
 ### 15. Remover a PDB e seus Datafiles
 
+RISCO D3: faça esta etapa separadamente. Confirme CDB, PDB, arquivos,
+serviços, dependências e backup restaurável. Registre a validação do clone
+ou da migração e obtenha aprovação antes de remover datafiles.
+
 ```sql
-DROP PLUGGABLE DATABASE <PDB_NAME>
-INCLUDING DATAFILES;
+-- ALTER PLUGGABLE DATABASE <PDB_NAME_VALIDADA> CLOSE IMMEDIATE;
+-- DROP PLUGGABLE DATABASE <PDB_NAME_VALIDADA> INCLUDING DATAFILES;
 ```
 
 ### 16. Validar a remoção

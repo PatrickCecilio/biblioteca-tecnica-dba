@@ -1,7 +1,10 @@
-delete archivelog until time 'sysdate -5';
+RISCO D3 — exclusão de archivelog não é tarefa de nível iniciante.
+Não execute uma janela fixa de cinco dias: confira banco, backup recuperável,
+política de exclusão, Data Guard e os logs candidatos no RMAN.
+Consulte 02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - DELETE ARCHIVE ATUALIZADO.txt.
 
 show parameter remote_login_passwordfile;
-CONFIGURE CONTROLFILE AUTOBACKUP FORMAT FOR DEVICE TYPE DISK TO '/mnt/backupoda/rman/cdbmpro/ctl_%F';
+CONFIGURE CONTROLFILE AUTOBACKUP FORMAT FOR DEVICE TYPE DISK TO '<BACKUP_PATH_VALIDADO>/ctl_%F';
 
 SELECT ID_USUARIO,
        NM_LOGIN,
@@ -18,4 +21,4 @@ FROM   INFOSAUDE.USUARIO
 WHERE  UPPER(NM_LOGIN) = 'SUPERVISOR';
 
 
-CONFIGURE CONTROLFILE AUTOBACKUP FORMAT FOR DEVICE TYPE DISK TO '/mnt/backupoda/rman/cdbmpro/ctl_%F';
+CONFIGURE CONTROLFILE AUTOBACKUP FORMAT FOR DEVICE TYPE DISK TO '<BACKUP_PATH_VALIDADO>/ctl_%F';

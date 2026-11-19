@@ -24,5 +24,7 @@ alpine:latest /bin/sh
 
 / # wget -qO - localhost
 
-$ docker container rm --force web
+$ docker container inspect web
+$ docker container stop web
+$ docker container rm web
 $ docker network rm test-net

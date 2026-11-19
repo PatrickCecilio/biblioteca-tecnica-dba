@@ -1,4 +1,7 @@
-ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+RISCO D3 — export histórico de privilégios. NÃO executar o arquivo inteiro.
+GRANT ... WITH ADMIN OPTION e privilégios ANY/DROP ampliam poder de alteração.
+Faça inventário de usuários, objetos e necessidades; aplique menor privilégio,
+revise em ambiente isolado e obtenha aprovação por concessão.
 
 GRANT "ROLE_INFOSAUDE" TO "INFOSAUDE" WITH ADMIN OPTION;
    GRANT "ROLE_INFODEVELOPER" TO "INFOSAUDE" WITH ADMIN OPTION;

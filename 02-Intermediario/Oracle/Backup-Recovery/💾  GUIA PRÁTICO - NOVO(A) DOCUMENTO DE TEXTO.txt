@@ -1,8 +1,13 @@
-set "ROOT=G:\Iniciar backup\aprendizado\Acessos"
+:: RISCO D3: script de concatenação. Valide ROOT e TARGET antes de executar.
+:: Não use dados sensíveis reais neste exemplo.
+set "ROOT=<DIRETORIO_VALIDADO>"
 
 set "TARGET=%ROOT%\unificado.txt"
 
-if exist "%TARGET%" del /q "%TARGET%"
+if exist "%TARGET%" (
+  echo O arquivo de saida ja existe. Escolha outro nome antes de executar.
+  exit /b 1
+)
 
 :: Loop recursivo (usa %%F porque está dentro de um .bat)
 for /R "%ROOT%" %%F in (*.txt) do (

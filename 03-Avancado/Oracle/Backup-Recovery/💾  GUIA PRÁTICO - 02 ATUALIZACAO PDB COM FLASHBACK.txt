@@ -1,7 +1,12 @@
 ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
 
 ============================================================
---- ATUALIZAÇÃO CCM — PROCEDIMENTO COM FLASHBACK DO PDB PROD
+--- ATUALIZAÇÃO CCM — REGISTRO HISTÓRICO COM FLASHBACK DO PDB PROD
+
+RISCO D3 — não execute este documento como runbook reutilizável. Os nomes, SCN,
+horários e resultados pertencem a um cenário específico. Antes de qualquer
+flashback, confirme CDB/PDB, restore point, FRA, backup recuperável, dependências,
+RPO/RTO, janela, serviços e plano de retorno; teste primeiro em laboratório.
 ============================================================
 
 Obs.: Comentar todos os jobs da crontab antes do início da atividade e descomentar somente após a conclusão do processo.
@@ -163,7 +168,8 @@ alter session set container=PROD;
 
 Executar o drop da tabela:
 
-drop table CCM_PROD.t1 purge;
+-- Registro histórico: DROP TABLE do objeto de teste no cenário original.
+-- Em novo laboratório, use somente <SCHEMA_TESTE>.<TABELA_TESTE> validada.
 
 Resultado obtido:
 
@@ -224,8 +230,9 @@ Pluggable database altered.
 
 Executar o flashback do PDB PROD para o restore point criado antes da atualização:
 
-flashback pluggable database PROD
-to restore point CCM_RESTORE_11062026;
+-- Etapa D3 separada, após aprovação:
+-- FLASHBACK PLUGGABLE DATABASE <PDB_VALIDADA>
+-- TO RESTORE POINT <RESTORE_POINT_VALIDADO>;
 
 Resultado obtido:
 
@@ -243,7 +250,7 @@ O PDB PROD foi restaurado para o ponto CCM_RESTORE_11062026.
 
 Após o flashback, abrir o PDB com RESETLOGS:
 
-alter pluggable database PROD open resetlogs;
+-- ALTER PLUGGABLE DATABASE <PDB_VALIDADA> OPEN RESETLOGS;
 
 Resultado obtido:
 

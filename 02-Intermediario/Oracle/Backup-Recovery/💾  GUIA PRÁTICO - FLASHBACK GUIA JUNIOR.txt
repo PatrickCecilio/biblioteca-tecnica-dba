@@ -1,4 +1,8 @@
-ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+RISCO D3 — Flashback Database altera a linha temporal e pode descartar
+transações posteriores ao ponto escolhido. Use apenas em laboratório ou
+mudança aprovada: confirme DB_UNIQUE_NAME, CDB/PDB, restore point/SCN,
+FRA, backup restaurável, cadeia de archivelogs, RPO/RTO, serviços,
+dependências e plano de retorno. Registre a saída antes e depois.
 
 ============================================================
               FLASHBACK DATABASE ORACLE - GUIA JÚNIOR DBA

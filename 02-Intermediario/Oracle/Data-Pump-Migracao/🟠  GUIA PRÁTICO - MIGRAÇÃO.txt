@@ -1,4 +1,6 @@
-ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+RISCO D3 — registro histórico de migração, não procedimento executável completo.
+Confirme origem/destino, CDB/PDB, backup restaurável, dump íntegro, grants,
+serviços e plano de retorno. Não faça DROP USER como preparação automática.
 
 Origem
 . oraenv
@@ -23,7 +25,9 @@ fazer o impdp-infosaude
 ------------------------------------------------------------------------------
 Destino
 
-drop user infosaude cascade;
+-- Etapa destrutiva separada: após confirmar import de teste, dependências,
+-- autorização e backup, planeje a substituição do esquema de destino.
+-- DROP USER <SCHEMA_DESTINO_VALIDADO> CASCADE;
 
 vi /u01/dump/impdp-infosaude.sh
 nohup ./impdp-infosaude.sh &

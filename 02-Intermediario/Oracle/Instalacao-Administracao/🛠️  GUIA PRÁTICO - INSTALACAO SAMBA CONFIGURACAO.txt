@@ -150,7 +150,9 @@ Esse erro está relacionado ao **SSSD (System Security Services Daemon)**, que g
 ### **1️⃣ Limpar o Cache do SSSD**
 Execute o seguinte comando para remover os arquivos de cache antigos:
 ```bash
-sudo rm -rf /var/lib/sss/db/*
+Não apague o cache do SSSD por comando genérico. Registre o problema,
+confirme serviço, domínio e usuários afetados e use o procedimento de
+invalidação de cache aprovado para a distribuição em uma etapa separada.
 ```
 
 ### **2️⃣ Reiniciar o Serviço SSSD**

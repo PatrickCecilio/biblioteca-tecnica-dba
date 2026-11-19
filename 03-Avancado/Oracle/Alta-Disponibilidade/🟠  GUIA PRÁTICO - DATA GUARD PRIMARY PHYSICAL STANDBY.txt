@@ -1,4 +1,7 @@
-ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+RISCO D3 — Data Guard, failover e REINSTATE alteram a topologia e podem
+descartar transações não aplicadas. Este material é referência por etapas,
+não um script de execução contínua. Confirme roles, lag, transporte,
+flashback logs, backup, RPO/RTO e decisão de failover antes da mudança.
 
 # GUIA PRÁTICO ORACLE
 
@@ -1292,7 +1295,8 @@ FROM v$database;
 
 Reintegrar o antigo Primary como Physical Standby.
 
-No antigo Primary:
+No antigo Primary, somente após confirmar qual instância perdeu o papel
+primário, preservar evidências e aprovar a reintegração:
 
 ```sql
 STARTUP MOUNT;

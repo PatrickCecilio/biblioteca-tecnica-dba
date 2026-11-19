@@ -1,4 +1,7 @@
-ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+RISCO D3 — confirme instância, PDB, SID/SERIAL#, usuário, SQL e transação
+antes de encerrar uma sessão. Registre impacto e autorização; priorize
+encerramento da sessão no Oracle. Intervenção no processo do SO exige
+procedimento de incidente separado.
 
 ============================================
    GUIA PRÁTICO DBA – GERENCIAMENTO DE SESSÕES PDB
@@ -42,7 +45,7 @@ SELECT SYS_CONTEXT('USERENV','CON_NAME') FROM DUAL;
 ALTER SYSTEM KILL SESSION 'sid,serial#' IMMEDIATE;
 
 Exemplo:
-ALTER SYSTEM KILL SESSION '123,4567' IMMEDIATE;
+-- Exemplo: ALTER SYSTEM KILL SESSION '<SID_VALIDADO>,<SERIAL_VALIDADO>' IMMEDIATE;
 
 ⚠️ Cuidado: pode abortar transações ativas.
 
@@ -55,7 +58,8 @@ WHERE  s.sid = &SID AND s.serial# = &SERIAL;
 
 3) Finalizar no Linux (somente se necessário)
 --------------------------------------------
-kill -9 <SPID>
+Não execute kill -9 por cópia de guia. Confirme a associação entre SPID e sessão,
+o impacto em outros processos e a autorização do responsável pelo incidente.
 
 Dica: sempre confirme o ambiente antes de executar comandos críticos.
 ⚠️ Use com extremo cuidado! Impacto direto no SO.

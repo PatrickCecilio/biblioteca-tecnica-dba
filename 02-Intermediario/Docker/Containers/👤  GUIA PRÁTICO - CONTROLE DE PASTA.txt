@@ -1,4 +1,6 @@
-ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+RISCO D3 — laboratório de LUKS e monitoramento. Não execute em host compartilhado.
+O monitor abaixo apenas registra eventos; nunca encerre processos automaticamente.
+Confirme arquivo contêiner novo, mapper, backup e diretório de montagem.
 
 1. Configuração Inicial do Volume Criptografado
 
@@ -10,21 +12,21 @@ sudo dnf install cryptsetup
 
 b. Criar um Arquivo Container (Exemplo: 1GB)
 
-sudo dd if=/dev/zero of=/script/master.img bs=1M count=1024
+sudo dd if=/dev/zero of=<IMAGEM_NOVA_VALIDADA> bs=1M count=1024 oflag=excl
 
 Esse comando cria um arquivo de 1 GB que servirá como container criptografado.
 
 
 c. Configurar o Container com LUKS
 
-sudo cryptsetup luksFormat /script/master.img
+sudo cryptsetup luksFormat <IMAGEM_NOVA_VALIDADA>
 
 Ao executar, confirme digitando YES em maiúsculas e defina uma senha forte.
 
 
 d. Abrir o Container e Mapear o Dispositivo
 
-sudo cryptsetup luksOpen /script/master.img cripto_vol
+sudo cryptsetup luksOpen <IMAGEM_NOVA_VALIDADA> cripto_vol
 
 
 e. Criar um Sistema de Arquivos no Volume
@@ -56,7 +58,7 @@ Com essas permissões, somente o usuário “protegido” poderá acessar o cont
 
 =================================================================================================================
 
-3. Instalação das ferramentas do Script de Monitoramento para Matar o usuário não permitido de forma Automática
+3. Instalação das ferramentas do Script de Monitoramento para registrar acesso
 
 agora iremos fazer as instalações das ferramentas do script que monitora eventos de acesso e, se detectar um usuário não autorizado.
 
@@ -84,7 +86,7 @@ sudo nano /usr/local/bin/monitor.sh
 
 ===============================================================================================================
 
-4. Script de Monitoramento para Matar o Usuário não permitido Automáticamente
+4. Script de Monitoramento para registrar acesso suspeito
 
 import os
 
@@ -149,46 +151,14 @@ class EventHandler(pyinotify.ProcessEvent):
           unauthorized_users.append(user)
 
 
-    # Se houver usuários não autorizados, chama o método para matar
+    # Registre o evento para investigação; não encerre processos automaticamente.
 
     if unauthorized_users:
 
       print(f"Acesso não autorizado detectado: {', '.join(unauthorized_users)}")
 
 
-    # Descobrir quais processos estão usando o diretório
-
-    result = subprocess.run(["lsof", "+D", MONITORED_DIR], capture_output=True, text=True)
-
-    lines = result.stdout.split("\n")
-
-
-    pids = []
-
-    for line in lines[1:]:
-
-      columns = line.split()
-
-      if len(columns) > 1:
-
-        try:
-
-          pids.append(int(columns[1])) # PID do processo
-
-        except ValueError:
-
-          continue
-
-
-    # Se houver processos usando a pasta, matá-los antes de desmontar
-
-    if pids:
-
-      print(f"Matando processos que estão usando {MONITORED_DIR}: {pids}")
-
-      for pid in pids:
-
-        subprocess.run(["kill", "-9", str(pid)])
+    # Para resposta ao incidente, valide usuário, PID e impacto em procedimento separado.
 
 
 def main():

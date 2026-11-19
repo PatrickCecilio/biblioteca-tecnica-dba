@@ -9,7 +9,8 @@ Vamos Criar um arquivo para ser utilizado como swap no tamanho desejado.
 Aqui vamos utilizar o comando dd e criar um arquivo com o nome “meuswap” no diretório /root.
 Vou criar um arquivo de 11G.
 
-dd if=/dev/zero of=/root/meuswap bs=1024 count=$((11*1024*1024))
+RISCO D3: confirme espaço, ausência do arquivo e alvo antes de criar swap.
+dd if=/dev/zero of=/root/meuswap bs=1M count=11264 oflag=excl
 
 obs: vai demorar alguns minutos para este arquivo de 11gb ser criado e preenchido
 inicialnente com zeros.
@@ -21,7 +22,7 @@ sudo chmod 600 /root/meuswap
 
 Agora vamos definir esse arquivo para ser utilizado como swap.
 
-sudo mkswap meuswap
+sudo mkswap /root/meuswap
 
 sudo mkswap meuswap
 mkswap: meuswap: warning: wiping old swap signature.

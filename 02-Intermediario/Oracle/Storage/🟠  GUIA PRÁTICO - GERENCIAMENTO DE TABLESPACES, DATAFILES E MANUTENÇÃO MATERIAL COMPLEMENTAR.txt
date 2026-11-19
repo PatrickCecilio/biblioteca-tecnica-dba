@@ -1,4 +1,5 @@
-ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+RISCO D3 — confirme CDB/PDB, schema, datafile, dependências, backup restaurável
+e aprovação. Caminhos e nomes abaixo são históricos; substitua pelos alvos validados.
 
 ================================================================================
                     📘 GUIA PRÁTICO – ORACLE DBA JÚNIOR
@@ -136,8 +137,9 @@ ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros
 
  ➖ REMOVER DATAFILE
  -------------------------------------------------------------------------------
- ALTER TABLESPACE "INFOSAUDE_DATA"
- DROP DATAFILE '/u01/oradata/DBPROD/infosaude_data09.dbf';
+ -- ALTER TABLESPACE <TABLESPACE_VALIDADA>
+ -- Execute somente após provar que o datafile validado está vazio:
+ -- DROP DATAFILE '<DATAFILE_VALIDADO>';
 
  ⚠️ Requisitos Críticos:
     - O datafile deve estar VAZIO (sem dados/segmentos).
@@ -150,7 +152,8 @@ ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros
 
  ☠️  DROP USER (Remover Usuário e Objetos)
  -------------------------------------------------------------------------------
- DROP USER infosaude CASCADE;
+ -- Etapa separada, após inventário dos objetos e aceite formal:
+ -- DROP USER <SCHEMA_VALIDADO> CASCADE;
 
  O que isso faz?
     -> Remove o usuário INFOSAUDE.

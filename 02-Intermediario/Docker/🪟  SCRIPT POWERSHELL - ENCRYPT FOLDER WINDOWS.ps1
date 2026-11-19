@@ -1,4 +1,4 @@
-<##>
+<# RISCO D3: somente laboratório. Requer -Execute e backup externo validado. #>
 <#
     🪟  SCRIPT POWERSHELL - ENCRYPT FOLDER WINDOWS.ps1
 
@@ -34,7 +34,12 @@
     Data: 2025-08-15
 #>
 
-param()
+param([switch]$Execute)
+
+$ErrorActionPreference = 'Stop'
+if (-not $Execute) {
+    throw 'Modo seguro: revise o script e execute novamente com -Execute em laboratório isolado.'
+}
 
 # Verifica se o script está sendo executado como administrador
 function Test-IsAdministrator {
@@ -61,6 +66,11 @@ do {
 
 # Normaliza caminho (remove barra final)
 $folderPath = (Get-Item $folderPath).FullName
+if ($folderPath -eq [IO.Path]::GetPathRoot($folderPath) -or
+    $folderPath -eq $env:SystemRoot -or
+    $folderPath.StartsWith($env:SystemRoot + '\', [StringComparison]::OrdinalIgnoreCase)) {
+    throw 'Pasta raiz ou de sistema não pode ser alvo.'
+}
 
 Write-Host "\nPasta a ser criptografada: $folderPath" -ForegroundColor Green
 
@@ -77,11 +87,15 @@ do {
         $vhdPath = $null
     }
     # Impede salvar o VHDX dentro da própria pasta para evitar recursão
-    elseif ($folderPath.StartsWith((Get-Item $vhdDir).FullName)) {
+    elseif ((Get-Item $vhdDir).FullName.Equals($folderPath, [StringComparison]::OrdinalIgnoreCase) -or
+            (Get-Item $vhdDir).FullName.StartsWith($folderPath.TrimEnd('\') + '\', [StringComparison]::OrdinalIgnoreCase)) {
         Write-Host "Não salve o contêiner dentro da pasta a ser criptografada. Escolha outro local." -ForegroundColor Yellow
         $vhdPath = $null
     }
 } until ($vhdPath)
+if (Test-Path -LiteralPath $vhdPath) {
+    throw 'O arquivo VHDX já existe; escolha um destino novo.'
+}
 
 # Calcula tamanho da pasta atual em bytes
 Write-Host "Calculando tamanho da pasta..." -NoNewline
@@ -127,7 +141,7 @@ $diskNumber = $disk.Number
 Initialize-Disk -Number $diskNumber -PartitionStyle GPT -ErrorAction Stop | Out-Null
 $partition = New-Partition -DiskNumber $diskNumber -UseMaximumSize -AssignDriveLetter
 $driveLetter = $partition.DriveLetter
-Write-Host "Disco virtual inicializado. Unidade atribuída: $driveLetter:" -ForegroundColor Green
+Write-Host "Disco virtual inicializado. Unidade atribuída: ${driveLetter}:" -ForegroundColor Green
 
 # Formata volume
 Write-Host "Formatando volume em NTFS..."
@@ -137,8 +151,7 @@ Write-Host "Volume formatado." -ForegroundColor Green
 # Solicita senha BitLocker
 do {
     $blPwd = Read-Host "Informe uma senha forte para o contêiner BitLocker (mínimo 8 caracteres)" -AsSecureString
-    $blPwdPlain = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto([System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($blPwd))
-    if ($blPwdPlain.Length -lt 8) {
+    if ($blPwd.Length -lt 8) {
         Write-Host "Senha muito curta. Escolha uma senha com pelo menos 8 caracteres." -ForegroundColor Yellow
         $blPwd = $null
         continue
@@ -146,26 +159,26 @@ do {
 } until ($blPwd)
 
 Write-Host "Ativando BitLocker no volume..."
-Enable-BitLocker -MountPoint "$driveLetter:`" -PasswordProtector -Password $blPwd -EncryptionMethod XtsAes256 -UsedSpaceOnly -ErrorAction Stop | Out-Null
+Enable-BitLocker -MountPoint "${driveLetter}:" -PasswordProtector -Password $blPwd -EncryptionMethod XtsAes256 -UsedSpaceOnly -ErrorAction Stop | Out-Null
 
 # Monitora o progresso da criptografia
 Write-Host "Criptografando volume (isso pode levar alguns minutos)..."
-while ((Get-BitLockerVolume -MountPoint "$driveLetter:`").VolumeStatus -ne 'FullyEncrypted') {
+while ((Get-BitLockerVolume -MountPoint "${driveLetter}:").VolumeStatus -ne 'FullyEncrypted') {
     Start-Sleep -Seconds 5
 }
 Write-Host "Criptografia concluída." -ForegroundColor Green
 
 # Copia dados
 Write-Host "Copiando arquivos da pasta original para o volume criptografado..."
-$source = Join-Path -Path $folderPath -ChildPath '*'  # todos os arquivos
-$dest   = "$driveLetter:`\"
+$dest   = "${driveLetter}:\"
 try {
-    # Usamos RoboCopy para preservar atributos e lidar bem com grandes quantidades de dados
-    Start-Process -FilePath robocopy.exe -ArgumentList @($folderPath, $dest, '/MIR', '/COPY:DATSO', '/R:0', '/W:0') -Wait -NoNewWindow
+    # /E copia subdiretórios sem apagar arquivos no destino.
+    & robocopy.exe $folderPath $dest /E /COPY:DATSO /R:0 /W:0
+    if ($LASTEXITCODE -gt 7) { throw "RoboCopy falhou com código $LASTEXITCODE" }
     Write-Host "Cópia concluída." -ForegroundColor Green
 } catch {
     Write-Host "Erro ao copiar arquivos: $_" -ForegroundColor Red
-    Write-Host "Encerrando script. O volume permanece montado em $driveLetter:." -ForegroundColor Yellow
+    Write-Host "Encerrando script. O volume permanece montado em ${driveLetter}:." -ForegroundColor Yellow
     exit 1
 }
 
@@ -187,7 +200,7 @@ $volumeId = (Get-Volume -DriveLetter $driveLetter).ObjectId
 Add-MountPoint -VolumeObjectId $volumeId -Path $folderPath
 
 # Remove a letra de unidade para evitar acesso acidental por letra (opcional)
-Remove-PartitionAccessPath -DiskNumber $diskNumber -PartitionNumber $partition.PartitionNumber -AccessPath "$driveLetter:`" -ErrorAction SilentlyContinue
+Remove-PartitionAccessPath -DiskNumber $diskNumber -PartitionNumber $partition.PartitionNumber -AccessPath "${driveLetter}:" -ErrorAction SilentlyContinue
 
 Write-Host "\nProcesso concluído! A pasta original agora é um volume criptografado BitLocker."
 Write-Host "Backup da pasta original: $backupDir"
@@ -195,15 +208,7 @@ Write-Host "O volume está montado em: $folderPath"
 Write-Host "Para desmontar o contêiner no futuro, use Dismount-VHD -Path '$vhdPath' e para montá-lo novamente use Mount-VHD -Path '$vhdPath'."
 Write-Host "Para desbloquear o volume, forneça a senha BitLocker quando solicitado."
 
-# Pergunta se deseja remover backup
-$resp = Read-Host "Deseja excluir o backup da pasta original ($backupDir)? (S/N)"
-if ($resp -match '^[Ss]$') {
-    try {
-        Remove-Item -Path $backupDir -Recurse -Force
-        Write-Host "Backup removido." -ForegroundColor Green
-    } catch {
-        Write-Host "Falha ao remover o backup: $_" -ForegroundColor Yellow
-    }
-}
+# O backup original permanece no local para validação e recuperação manual.
+Write-Host "Não remova o backup original até testar abertura, integridade e recuperação."
 
 Write-Host "\nLembre-se de guardar a senha de desbloqueio e a chave de recuperação do BitLocker em um local seguro."

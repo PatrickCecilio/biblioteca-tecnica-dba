@@ -1,9 +1,16 @@
 @echo off
 setlocal enabledelayedexpansion
+REM RISCO D3: exemplo de laboratório. Exige wallet Oracle configurada,
+REM validação do ZIP, backup restaurável e retenção aprovada.
+REM Não apaga dumps, logs nem ZIPs automaticamente.
+if /I not "%LAB_ONLY%"=="YES" (
+    echo Modo seguro: defina LAB_ONLY=YES somente em laboratorio isolado.
+    exit /b 2
+)
 
 REM ============================================================
 REM  BACKUP LÓGICO EXPDP - XEPDB1 (ORACLE XE 21c)
-REM  - Retenção: 7 dias (ZIP + logs)
+REM  - Retenção: definir pela política aprovada; aqui apenas listar candidatos
 REM  - Dump/Log: C:\DUMP   (DIRECTORY DUMP_DIR)
 REM  - ZIP + logs: C:\DUMP
 REM ============================================================
@@ -11,8 +18,7 @@ REM ============================================================
 REM --- PARÂMETROS ORACLE ---
 set "ORACLE_HOME=C:\oraclexe\product\21c\dbhomexe"
 set "ORACLE_SID=XE"
-set "ORACLE_USER=system"
-set "ORACLE_PWD=<SENHA_ORACLE>"
+REM Use autenticação externa por Oracle Wallet; não grave senha no arquivo.
 set "ORACLE_SERVICE=XEPDB1"
 set "ORACLE_DIRECTORY=DUMP_DIR"
 
@@ -50,7 +56,7 @@ REM ============================================================
 REM 1) EXECUTA O EXPDP
 REM ============================================================
 
-"%ORACLE_HOME%\bin\expdp" %ORACLE_USER%/%ORACLE_PWD%@%ORACLE_SERVICE% ^
+"%ORACLE_HOME%\bin\expdp" /@%ORACLE_SERVICE% ^
  directory=%ORACLE_DIRECTORY% ^
  dumpfile=%DUMPFILE% ^
  logfile=%EXPDP_LOG% ^
@@ -86,17 +92,21 @@ IF ERRORLEVEL 1 (
     echo [%date% %time%] ERRO ao compactar arquivos com 7-Zip. Dumps NAO serao apagados. >> "%RUN_LOG%"
 ) ELSE (
     echo [%date% %time%] Arquivos compactados em %ZIPFILE%. >> "%RUN_LOG%"
-    del /q "%DUMP_DIR_FS%\%BASE%_*.dmp"
-    del /q "%DUMP_DIR_FS%\%EXPDP_LOG%"
+    "%SEVENZIP%" t "%ZIPFILE%" >> "%RUN_LOG%" 2>&1
+    IF ERRORLEVEL 1 (
+        echo [%date% %time%] ZIP invalido. Preservar dumps e log. >> "%RUN_LOG%"
+        goto RETENCAO
+    )
+    echo [%date% %time%] ZIP validado. Preservar dumps ate restauracao de teste. >> "%RUN_LOG%"
 )
 
 :RETENCAO
 REM ============================================================
-REM 3) ROTINA DE RETENÇÃO (7 DIAS)
+REM 3) PRÉ-VISUALIZAÇÃO DE RETENÇÃO; revisar política antes de excluir
 REM ============================================================
 
-forfiles /p "%BACKUP_DIR%" /m "expdp_XEPDB1_*.zip" /d -7 /c "cmd /c del @file" >> "%RUN_LOG%" 2>&1
-forfiles /p "%LOG_DIR%" /m "expdp_XEPDB1_*_exec.log" /d -7 /c "cmd /c del @file" >> "%RUN_LOG%" 2>&1
+forfiles /p "%BACKUP_DIR%" /m "expdp_XEPDB1_*.zip" /d -7 /c "cmd /c echo @file" >> "%RUN_LOG%" 2>&1
+forfiles /p "%LOG_DIR%" /m "expdp_XEPDB1_*_exec.log" /d -7 /c "cmd /c echo @file" >> "%RUN_LOG%" 2>&1
 
 echo [%date% %time%] Fim da rotina. >> "%RUN_LOG%"
 
