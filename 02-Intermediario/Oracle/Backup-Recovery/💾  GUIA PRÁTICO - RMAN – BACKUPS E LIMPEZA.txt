@@ -1,3 +1,5 @@
+# RISCO D3: material de laboratório. Identifique DB_UNIQUE_NAME, política de
+# retenção, destino e backups recuperáveis antes de qualquer DELETE.
 # Conectar ao RMAN
 target /;
 
@@ -16,11 +18,20 @@ BACKUP DATABASE;
 CONFIGURE RETENTION POLICY TO REDUNDANCY 1;
 CONFIGURE CHANNEL DEVICE TYPE DISK MAXPIECESIZE 2G;
 
-# Limpeza de backups
-CROSSCHECK BACKUP;
-DELETE EXPIRED BACKUP;
-DELETE NOPROMPT OBSOLETE;
+# Inspeção: CROSSCHECK atualiza o repositório RMAN; não remove arquivos físicos.
+# EXPIRED significa ausente no destino consultado, não "antigo".
+SHOW RETENTION POLICY;
+SHOW ARCHIVELOG DELETION POLICY;
+LIST BACKUP SUMMARY;
+REPORT OBSOLETE;
 CROSSCHECK BACKUP;
 CROSSCHECK ARCHIVELOG ALL;
-DELETE NOPROMPT EXPIRED BACKUP;
-DELETE NOPROMPT EXPIRED ARCHIVELOG ALL;
+REPORT OBSOLETE;
+
+# Etapa D3 separada, somente após conferir a saída, dependências de
+# recuperação/standby e aprovação. Mantenha o prompt interativo.
+DELETE OBSOLETE;
+
+# DELETE EXPIRED apenas remove registros de arquivos ausentes do catálogo.
+# Investigue a causa antes de executar; não use NOPROMPT como padrão.
+# Referência: https://docs.oracle.com/en/database/oracle/oracle-database/19/rcmrf/DELETE.html

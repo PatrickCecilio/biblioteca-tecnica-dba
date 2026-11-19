@@ -16,7 +16,7 @@ O catálogo canônico, gerado automaticamente a partir da árvore real, está em
 
 O nível de conhecimento das pastas não representa o impacto de execução. Consulte [`COMANDOS-POR-RISCO.md`](COMANDOS-POR-RISCO.md) para classificar procedimentos de D0 (consulta) a D3 (destrutivo ou recuperação com perda potencial de dados). O índice aponta comandos críticos que hoje aparecem inclusive em `01-Iniciante`.
 
-O [inventário dos 464 arquivos](INVENTARIO-RISCO.md) aplica uma triagem textual reproduzível a todo o acervo. Ele registra o maior risco detectado por arquivo e separa os casos sem gatilho conhecido para revisão manual; a classificação contextual de cada comando continua necessária.
+O [inventário atualizado](INVENTARIO-RISCO.md) aplica uma triagem textual reproduzível a todo o acervo. Ele registra o maior risco detectado por arquivo e separa os casos sem gatilho conhecido para revisão manual; a classificação contextual de cada comando continua necessária.
 
 ## Uso seguro
 

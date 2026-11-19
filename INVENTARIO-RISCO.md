@@ -2,11 +2,11 @@
 
 Triagem de todo o conteúdo público por gatilhos textuais, com revisão manual das referências sem comandos. O nível D0-D3 é o **maior gatilho textual encontrado no arquivo**, não uma autorização de execução nem uma revisão semântica completa. Comandos citados em explicações também podem elevar o nível. `N` identifica arquivos revisados sem comando executável. `R` indica arquivo novo ou sem gatilho, ainda pendente de revisão; **não significa risco zero**. Consulte [Comandos por risco operacional](COMANDOS-POR-RISCO.md) para critérios e controles.
 
-Arquivos analisados: **465**. D3: **77**; D2: **113**; D1: **121**; D0: **118**; sem comando (`N`): **36**; revisão pendente (`R`): **0**.
+Arquivos analisados: **465**. D3: **80**; D2: **111**; D1: **120**; D0: **118**; sem comando (`N`): **36**; revisão pendente (`R`): **0**.
 
 Antes de usar qualquer procedimento, confira ambiente, versão, escopo, backup e linha exata do comando. Em caso de múltiplos níveis no mesmo arquivo, prevalece o maior risco.
 
-## D3 — destruição ou perda potencial (77)
+## D3 — destruição ou perda potencial (80)
 
 | Arquivo | Gatilhos textuais |
 |---|---|
@@ -26,8 +26,8 @@ Antes de usar qualquer procedimento, confira ambiente, versão, escopo, backup e
 | [01-Iniciante/Oracle/SQL/🟠  GUIA PRÁTICO - SITUAÇÕES DIVERGENTES.txt](<01-Iniciante/Oracle/SQL/%F0%9F%9F%A0%20%20GUIA%20PR%C3%81TICO%20-%20SITUA%C3%87%C3%95ES%20DIVERGENTES.txt>) | remoção de backups ou logs |
 | [01-Iniciante/PostgreSQL/📘  GUIA PRÁTICO - COM INTERFACE.txt](<01-Iniciante/PostgreSQL/%F0%9F%93%98%20%20GUIA%20PR%C3%81TICO%20-%20COM%20INTERFACE.txt>) | limpeza irreversível |
 | [01-Iniciante/PostgreSQL/📘  GUIA PRÁTICO - SEM INTERFACE.txt](<01-Iniciante/PostgreSQL/%F0%9F%93%98%20%20GUIA%20PR%C3%81TICO%20-%20SEM%20INTERFACE.txt>) | limpeza irreversível |
-| [01-Iniciante/SQL-Server/SQL-e-PLSQL/📘  GUIA PRÁTICO - COMPLETODROPBASE.txt](<01-Iniciante/SQL-Server/SQL-e-PLSQL/%F0%9F%93%98%20%20GUIA%20PR%C3%81TICO%20-%20COMPLETODROPBASE.txt>) | remoção de banco ou objeto |
-| [01-Iniciante/SQL-Server/SQL-e-PLSQL/🔷  GUIA PRÁTICO - GUIA RÁPIDO — REMOÇÃO DE DATABASE (SQL SERVER).txt](<01-Iniciante/SQL-Server/SQL-e-PLSQL/%F0%9F%94%B7%20%20GUIA%20PR%C3%81TICO%20-%20GUIA%20R%C3%81PIDO%20%E2%80%94%20REMO%C3%87%C3%83O%20DE%20DATABASE%20%28SQL%20SERVER%29.txt>) | remoção de banco ou objeto |
+| [01-Iniciante/SQL-Server/SQL-e-PLSQL/📘  GUIA PRÁTICO - COMPLETODROPBASE.txt](<01-Iniciante/SQL-Server/SQL-e-PLSQL/%F0%9F%93%98%20%20GUIA%20PR%C3%81TICO%20-%20COMPLETODROPBASE.txt>) | remoção de banco ou objeto, risco D3 declarado |
+| [01-Iniciante/SQL-Server/SQL-e-PLSQL/🔷  GUIA PRÁTICO - GUIA RÁPIDO — REMOÇÃO DE DATABASE (SQL SERVER).txt](<01-Iniciante/SQL-Server/SQL-e-PLSQL/%F0%9F%94%B7%20%20GUIA%20PR%C3%81TICO%20-%20GUIA%20R%C3%81PIDO%20%E2%80%94%20REMO%C3%87%C3%83O%20DE%20DATABASE%20%28SQL%20SERVER%29.txt>) | remoção de banco ou objeto, risco D3 declarado |
 | [01-Iniciante/SQL-Server/📘  GUIA PRÁTICO - COMPLETODROPBASE.txt](<01-Iniciante/SQL-Server/%F0%9F%93%98%20%20GUIA%20PR%C3%81TICO%20-%20COMPLETODROPBASE.txt>) | remoção de banco ou objeto, risco D3 declarado |
 | [01-Iniciante/SQL-Server/🔷  GUIA PRÁTICO - GUIA RÁPIDO — REMOÇÃO DE DATABASE (SQL SERVER).txt](<01-Iniciante/SQL-Server/%F0%9F%94%B7%20%20GUIA%20PR%C3%81TICO%20-%20GUIA%20R%C3%81PIDO%20%E2%80%94%20REMO%C3%87%C3%83O%20DE%20DATABASE%20%28SQL%20SERVER%29.txt>) | remoção de banco ou objeto, risco D3 declarado |
 | [02-Intermediario/Docker/Containers/🌐  GUIA PRÁTICO - DOCKER AULA 26 HOST REDE NULA.txt](<02-Intermediario/Docker/Containers/%F0%9F%8C%90%20%20GUIA%20PR%C3%81TICO%20-%20DOCKER%20AULA%2026%20HOST%20REDE%20NULA.txt>) | remoção Docker |
@@ -48,10 +48,13 @@ Antes de usar qualquer procedimento, confira ambiente, versão, escopo, backup e
 | [02-Intermediario/Linux/Conectividade/🌐  GUIA PRÁTICO - NOVO(A) DOCUMENTO DE TEXTO.txt](<02-Intermediario/Linux/Conectividade/%F0%9F%8C%90%20%20GUIA%20PR%C3%81TICO%20-%20NOVO%28A%29%20DOCUMENTO%20DE%20TEXTO.txt>) | exclusão por shell ou script |
 | [02-Intermediario/Linux/Containers/🔐  GUIA PRÁTICO - CRIPTOGRAFIA LINUX.txt](<02-Intermediario/Linux/Containers/%F0%9F%94%90%20%20GUIA%20PR%C3%81TICO%20-%20CRIPTOGRAFIA%20LINUX.txt>) | remoção de arquivos, formatação de volume |
 | [02-Intermediario/Oracle/Administracao-do-Sistema/🟠  GUIA PRÁTICO - UTILITARIOS.txt](<02-Intermediario/Oracle/Administracao-do-Sistema/%F0%9F%9F%A0%20%20GUIA%20PR%C3%81TICO%20-%20UTILITARIOS.txt>) | remoção de arquivos, exclusão por shell ou script |
+| [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - BACKUP DE ARCHIVE LOGS MATERIAL COMPLEMENTAR.txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20BACKUP%20DE%20ARCHIVE%20LOGS%20MATERIAL%20COMPLEMENTAR.txt>) | remoção de backups ou logs, risco D3 declarado |
+| [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - BACKUP DE ARCHIVE LOGS.txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20BACKUP%20DE%20ARCHIVE%20LOGS.txt>) | remoção de backups ou logs, risco D3 declarado |
 | [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - DELETE ARCHIVE ATUALIZADO.txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20DELETE%20ARCHIVE%20ATUALIZADO.txt>) | remoção de backups ou logs |
 | [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - FLASHBACK GUIA JUNIOR.txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20FLASHBACK%20GUIA%20JUNIOR.txt>) | mudança de linha temporal |
 | [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - MANUTENCAO E EXPIRACAO BACKUPS RMAN.txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20MANUTENCAO%20E%20EXPIRACAO%20BACKUPS%20RMAN.txt>) | remoção de backups ou logs |
 | [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - NOVO(A) DOCUMENTO DE TEXTO.txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20NOVO%28A%29%20DOCUMENTO%20DE%20TEXTO.txt>) | exclusão por shell ou script |
+| [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - RMAN – BACKUPS E LIMPEZA.txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20RMAN%20%E2%80%93%20BACKUPS%20E%20LIMPEZA.txt>) | remoção de backups ou logs, risco D3 declarado |
 | [02-Intermediario/Oracle/Conectividade/🌐  GUIA PRÁTICO - ALERT TRACE AMBIENTE ESPECIFICO.txt](<02-Intermediario/Oracle/Conectividade/%F0%9F%8C%90%20%20GUIA%20PR%C3%81TICO%20-%20ALERT%20TRACE%20AMBIENTE%20ESPECIFICO.txt>) | exclusão por shell ou script |
 | [02-Intermediario/Oracle/Conectividade/🌐  GUIA PRÁTICO - LIMPEZA E MANUTENÇÃO DE LOGS E TRACES.txt](<02-Intermediario/Oracle/Conectividade/%F0%9F%8C%90%20%20GUIA%20PR%C3%81TICO%20-%20LIMPEZA%20E%20MANUTEN%C3%87%C3%83O%20DE%20LOGS%20E%20TRACES.txt>) | remoção de arquivos |
 | [02-Intermediario/Oracle/Data-Pump-Migracao/💾  GUIA PRÁTICO - EXPDP MATERIAL COMPLEMENTAR.txt](<02-Intermediario/Oracle/Data-Pump-Migracao/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20EXPDP%20MATERIAL%20COMPLEMENTAR.txt>) | exclusão por shell ou script |
@@ -69,7 +72,7 @@ Antes de usar qualquer procedimento, confira ambiente, versão, escopo, backup e
 | [02-Intermediario/Oracle/Storage/🟠  GUIA PRÁTICO - GERENCIAMENTO TABLESPACES DATAFILES.txt](<02-Intermediario/Oracle/Storage/%F0%9F%9F%A0%20%20GUIA%20PR%C3%81TICO%20-%20GERENCIAMENTO%20TABLESPACES%20DATAFILES.txt>) | remoção de banco ou objeto |
 | [02-Intermediario/Oracle/Storage/🟠  GUIA PRÁTICO - STARTPACK MATERIAL COMPLEMENTAR.txt](<02-Intermediario/Oracle/Storage/%F0%9F%9F%A0%20%20GUIA%20PR%C3%81TICO%20-%20STARTPACK%20MATERIAL%20COMPLEMENTAR.txt>) | remoção de banco ou objeto |
 | [02-Intermediario/Oracle/🟠  GUIA PRÁTICO - DDL & DML.txt](<02-Intermediario/Oracle/%F0%9F%9F%A0%20%20GUIA%20PR%C3%81TICO%20-%20DDL%20%26%20DML.txt>) | remoção de banco ou objeto, esvaziamento ou exclusão de dados |
-| [02-Intermediario/PostgreSQL/Backup-Recovery/💾  GUIA PRÁTICO - RESTAURAR.txt](<02-Intermediario/PostgreSQL/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20RESTAURAR.txt>) | remoção de arquivos |
+| [02-Intermediario/PostgreSQL/Backup-Recovery/💾  GUIA PRÁTICO - RESTAURAR.txt](<02-Intermediario/PostgreSQL/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20RESTAURAR.txt>) | remoção de arquivos, risco D3 declarado |
 | [02-Intermediario/PostgreSQL/📘  GUIA PRÁTICO - RESTAURAR.txt](<02-Intermediario/PostgreSQL/%F0%9F%93%98%20%20GUIA%20PR%C3%81TICO%20-%20RESTAURAR.txt>) | risco D3 declarado |
 | [03-Avancado/Docker/Containers/🔐  GUIA PRÁTICO - CRIPTOGRAFIA LINUX.txt](<03-Avancado/Docker/Containers/%F0%9F%94%90%20%20GUIA%20PR%C3%81TICO%20-%20CRIPTOGRAFIA%20LINUX.txt>) | remoção de arquivos, formatação de volume |
 | [03-Avancado/Linux/05-logs-e-armazenamento/🌐  GUIA PRÁTICO - LIMPEZA LOGS GRID LISTENER.txt](<03-Avancado/Linux/05-logs-e-armazenamento/%F0%9F%8C%90%20%20GUIA%20PR%C3%81TICO%20-%20LIMPEZA%20LOGS%20GRID%20LISTENER.txt>) | exclusão por shell ou script |
@@ -88,7 +91,7 @@ Antes de usar qualquer procedimento, confira ambiente, versão, escopo, backup e
 | [03-Avancado/Oracle/Performance-Monitoramento/RUNBOOK-LIMPEZA-DIAGNOSTICOS.md](<03-Avancado/Oracle/Performance-Monitoramento/RUNBOOK-LIMPEZA-DIAGNOSTICOS.md>) | remoção de arquivos |
 | [03-Avancado/Oracle/Performance-Monitoramento/💾  GUIA PRÁTICO - SESSÃO PDB.txt](<03-Avancado/Oracle/Performance-Monitoramento/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20SESS%C3%83O%20PDB.txt>) | interrupção forçada |
 
-## D2 — indisponibilidade ou recuperação (113)
+## D2 — indisponibilidade ou recuperação (111)
 
 | Arquivo | Gatilhos textuais |
 |---|---|
@@ -123,8 +126,6 @@ Antes de usar qualquer procedimento, confira ambiente, versão, escopo, backup e
 | [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - 6 RECUPERAÇÃO NO RMAN (CITADA NOS.txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%206%20RECUPERA%C3%87%C3%83O%20NO%20RMAN%20%28CITADA%20NOS.txt>) | restore ou recovery |
 | [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - ATIVANDO ARCHIVELOG.txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20ATIVANDO%20ARCHIVELOG.txt>) | mudança em banco ou PDB, parada ou restart |
 | [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - ATIVIDADES BACKUP HEALTHCHECK.txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20ATIVIDADES%20BACKUP%20HEALTHCHECK.txt>) | parada ou restart |
-| [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - BACKUP DE ARCHIVE LOGS MATERIAL COMPLEMENTAR.txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20BACKUP%20DE%20ARCHIVE%20LOGS%20MATERIAL%20COMPLEMENTAR.txt>) | mudança em banco ou PDB |
-| [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - BACKUP DE ARCHIVE LOGS.txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20BACKUP%20DE%20ARCHIVE%20LOGS.txt>) | mudança em banco ou PDB |
 | [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - BANCO NO MODO NOAR MATERIAL COMPLEMENTAR.txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20BANCO%20NO%20MODO%20NOAR%20MATERIAL%20COMPLEMENTAR.txt>) | mudança em banco ou PDB, parada ou restart |
 | [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - BANCO NO MODO NOAR.txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20BANCO%20NO%20MODO%20NOAR.txt>) | mudança em banco ou PDB, parada ou restart |
 | [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - CONFIGURANDO O DIRETÓRIO DE ARCHIVELOGS.txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20CONFIGURANDO%20O%20DIRET%C3%93RIO%20DE%20ARCHIVELOGS.txt>) | mudança em banco ou PDB |
@@ -206,7 +207,7 @@ Antes de usar qualquer procedimento, confira ambiente, versão, escopo, backup e
 | [03-Avancado/Oracle/🟠  GUIA PRÁTICO - DATA GUARD & STAND BY.txt](<03-Avancado/Oracle/%F0%9F%9F%A0%20%20GUIA%20PR%C3%81TICO%20-%20DATA%20GUARD%20%26%20STAND%20BY.txt>) | mudança em banco ou PDB, parada ou restart |
 | [PROMPTS/Oracle/💬  PROMPT - AUTOMACAO INSTALACAO ORACLE 19C.txt](<PROMPTS/Oracle/%F0%9F%92%AC%20%20PROMPT%20-%20AUTOMACAO%20INSTALACAO%20ORACLE%2019C.txt>) | patch Oracle |
 
-## D1 — alteração localizada (121)
+## D1 — alteração localizada (120)
 
 | Arquivo | Gatilhos textuais |
 |---|---|
@@ -286,7 +287,6 @@ Antes de usar qualquer procedimento, confira ambiente, versão, escopo, backup e
 | [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - LISTAR BACKUPS RECENTES NO RMAN.txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20LISTAR%20BACKUPS%20RECENTES%20NO%20RMAN.txt>) | configuração e automação |
 | [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - MONITORAMENTO DE FRA E ARCHIVELOG ORA 19809 ORA 19804 (02).txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20MONITORAMENTO%20DE%20FRA%20E%20ARCHIVELOG%20ORA%2019809%20ORA%2019804%20%2802%29.txt>) | configuração e automação |
 | [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - POLÍTICA DE RETENÇÃO.txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20POL%C3%8DTICA%20DE%20RETEN%C3%87%C3%83O.txt>) | backup ou configuração |
-| [02-Intermediario/Oracle/Backup-Recovery/💾  GUIA PRÁTICO - RMAN – BACKUPS E LIMPEZA.txt](<02-Intermediario/Oracle/Backup-Recovery/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20RMAN%20%E2%80%93%20BACKUPS%20E%20LIMPEZA.txt>) | backup ou configuração, configuração e automação |
 | [02-Intermediario/Oracle/Conectividade/🌐  GUIA PRÁTICO - 4 CONEXÃO AO RMAN COM CATÁLOGO NO.txt](<02-Intermediario/Oracle/Conectividade/%F0%9F%8C%90%20%20GUIA%20PR%C3%81TICO%20-%204%20CONEX%C3%83O%20AO%20RMAN%20COM%20CAT%C3%81LOGO%20NO.txt>) | configuração e automação |
 | [02-Intermediario/Oracle/Data-Pump-Migracao/🐧  SCRIPT SHELL - EXPORTACAO DATAPUMP COMPLETA.sh](<02-Intermediario/Oracle/Data-Pump-Migracao/%F0%9F%90%A7%20%20SCRIPT%20SHELL%20-%20EXPORTACAO%20DATAPUMP%20COMPLETA.sh>) | Docker e exportação, configuração de ambiente, configuração e automação |
 | [02-Intermediario/Oracle/Data-Pump-Migracao/💾  GUIA PRÁTICO - EXPDP.txt](<02-Intermediario/Oracle/Data-Pump-Migracao/%F0%9F%92%BE%20%20GUIA%20PR%C3%81TICO%20-%20EXPDP.txt>) | Docker e exportação |

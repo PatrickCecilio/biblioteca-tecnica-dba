@@ -1,4 +1,6 @@
-ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+RISCO D3 — use somente em laboratório isolado após conferir instância, banco,
+dependências, backup restaurável e aprovação. Substitua <DATABASE_NAME> pelo
+alvo validado; não execute o bloco com o placeholder.
 
 📌 ETAPA 1 — GARANTIR QUE A SESSÃO NÃO ESTÁ CONECTADA NA BASE
 (O DROP deve ser executado fora da database)
@@ -17,18 +19,22 @@ SELECT DB_NAME() AS BancoAtual;
 
 ---
 
-ALTER DATABASE SANKHYA_TREINA
-SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+-- Execute ALTER DATABASE e DROP DATABASE no mesmo batch.
+ALTER DATABASE [<DATABASE_NAME>] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
 
 📌 ETAPA 3 — REMOVER A DATABASE
 ⚠️ ATENÇÃO: operação irreversível
 
 ---
 
-DROP DATABASE SANKHYA_TREINA;
+DROP DATABASE [<DATABASE_NAME>];
+GO
 
 ## 📌 ETAPA 4 — CONFIRMAR QUE A BASE FOI REMOVIDA
 
 SELECT name
 FROM sys.databases
-WHERE name = 'SANKHYA_TREINA';
+WHERE name = '<DATABASE_NAME>';
+
+Registre sessões encerradas e resultado. Pare se o alvo divergir do plano.
+Referência: https://learn.microsoft.com/en-us/sql/t-sql/statements/drop-database-transact-sql
