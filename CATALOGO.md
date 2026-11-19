@@ -26,9 +26,9 @@ O workflow de validação falha quando o arquivo versionado diverge da árvore r
 |---|---:|
 | `01-Iniciante` | 146 |
 | `02-Intermediario` | 231 |
-| `03-Avancado` | 75 |
+| `03-Avancado` | 76 |
 | `APRENDIZADO` | 5 |
 | `PROMPTS` | 7 |
-| **Total canônico** | **464** |
+| **Total canônico** | **465** |
 
 Arquivos de índice excluídos da contagem: **5**.

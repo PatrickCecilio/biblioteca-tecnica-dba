@@ -1,9 +1,31 @@
-PATH=/usr/local/bin:$PATH
-export PATH
-. /usr/local/bin/oraenv <<EOF
-CDB1
-EOF
-rman target / <<EOF
-delete noprompt force archivelog all completed before "sysdate-1";
-exit;
-EOF
+EXCLUSÃO DE ARCHIVELOG COM RMAN — D3
+
+Pré-requisitos: identificar banco, host, ORACLE_SID, destino de backup, política de
+exclusão de archivelogs e dependências de Data Guard/standby. Confirmar backup
+recuperável e janela de manutenção. Não presumir que a política de retenção de
+backups protege os archivelogs: são políticas distintas.
+
+Inspeção no banco correto, sem exclusão:
+
+rman target /
+SHOW ARCHIVELOG DELETION POLICY;
+LIST ARCHIVELOG ALL;
+LIST BACKUP OF ARCHIVELOG ALL;
+EXIT;
+
+Antes de executar, documente o intervalo e a quantidade de logs candidatos,
+os backups correspondentes, a necessidade de recuperação e o estado dos destinos
+standby. Pare se houver lacunas, política desconhecida ou replicação pendente.
+
+Execução controlada (substituir o período aprovado; revisar a lista e o prompt):
+
+rman target /
+DELETE ARCHIVELOG ALL COMPLETED BEFORE 'SYSDATE-<DIAS_APROVADOS>';
+EXIT;
+
+Não usar NOPROMPT nem FORCE como padrão. A política de exclusão de archivelogs
+deve ser configurada e verificada para o ambiente antes da etapa de exclusão.
+Depois, repita LIST ARCHIVELOG ALL, confirme o espaço na FRA e registre o log RMAN.
+
+Referência: Oracle Database 19c, RMAN DELETE:
+https://docs.oracle.com/en/database/oracle/oracle-database/19/rcmrf/DELETE.html

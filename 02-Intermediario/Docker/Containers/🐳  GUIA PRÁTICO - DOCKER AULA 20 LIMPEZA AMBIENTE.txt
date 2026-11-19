@@ -1,9 +1,40 @@
-docker image prune -f
+LIMPEZA DO AMBIENTE DOCKER — D3
 
-docker container rm <container-id>
+Objetivo: recuperar espaço sem remover contêineres, imagens ou volumes necessários.
+Execute no host e no contexto Docker aprovados; registre o estado antes da mudança.
 
-docker container prune --force
+1. Inspeção (sem exclusão)
 
-docker volume prune
+docker context show
+docker system df -v
+docker container ls -a
+docker image ls
+docker volume ls
 
-docker volume rm <volume-name>
+2. Confirmar dependências
+
+Identifique o projeto, o proprietário e os contêineres que usam cada imagem ou volume.
+Confirme backup e restauração testada dos dados persistentes antes de remover volumes.
+Não use prune global como rotina: objetos sem vínculo ativo ainda podem ser necessários.
+
+3. Remoção pontual, após aprovação
+
+docker container inspect <CONTAINER_ID_VALIDADO>
+docker container rm <CONTAINER_ID_VALIDADO>
+
+docker image inspect <IMAGE_ID_VALIDADA>
+docker image rm <IMAGE_ID_VALIDADA>
+
+docker volume inspect <VOLUME_VALIDADO>
+docker volume rm <VOLUME_VALIDADO>
+
+Se algum comando indicar dependência, pare e reavalie. Não acrescente --force
+automaticamente. Remova um objeto por vez e registre o identificador e o resultado.
+
+4. Validação
+
+docker system df -v
+docker container ls -a
+docker volume ls
+
+Confirme que os serviços esperados iniciam e que os dados persistentes continuam acessíveis.

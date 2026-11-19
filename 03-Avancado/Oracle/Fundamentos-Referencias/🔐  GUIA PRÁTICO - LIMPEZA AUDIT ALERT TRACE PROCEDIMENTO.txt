@@ -1,11 +1,12 @@
-find <ORACLE_BASE>/admin/<DB_NAME>/adump -type f -name '*.aud' -mtime +<RETENTION_DAYS> -print
+LIMPEZA DE DIAGNÓSTICOS ORACLE — D3
 
-find <ORACLE_BASE>/diag/rdbms/<DB_NAME>/<SID>/alert -type f -name '*.xml' -mtime +<RETENTION_DAYS> -print
+Runbook canônico: ../Performance-Monitoramento/RUNBOOK-LIMPEZA-DIAGNOSTICOS.md
 
-find <ORACLE_BASE>/diag/rdbms/<DB_NAME>/<SID>/trace -type f ( -name '*.trc' -o -name '*.trm' ) -mtime +<RETENTION_DAYS> -print
+1. Confirmar host, instância, ADR home, finalidade da limpeza, retenção aprovada e incidentes abertos.
+2. Preferir ADRCI para alert, incident e trace: SHOW HOMES; SET HOMEPATH <ADR_HOME_VALIDADO>; SHOW CONTROL.
+3. Para audit fora do ADR, listar candidatos com find -xdev -type f -name '*.aud' -mtime +<DIAS_APROVADOS> -print.
+4. Conferir caminho resolvido, datas, quantidade e evidências antes de qualquer exclusão.
+5. Executar a limpeza somente com aprovação operacional, uma categoria por vez, seguindo o runbook.
+6. Repetir a listagem e validar alertas, incidentes e espaço após a mudança.
 
-find <ORACLE_BASE>/admin/<DB_NAME>/adump -type f -name '*.aud' -mtime +<RETENTION_DAYS> -delete
-
-find <ORACLE_BASE>/diag/rdbms/<DB_NAME>/<SID>/alert -type f -name '*.xml' -mtime +<RETENTION_DAYS> -delete
-
-find <ORACLE_BASE>/diag/rdbms/<DB_NAME>/<SID>/trace -type f ( -name '*.trc' -o -name '*.trm' ) -mtime +<RETENTION_DAYS> -delete
+Não usar rm -rf, truncamento direto de listener.log nem retenção de um dia como procedimento padrão.
