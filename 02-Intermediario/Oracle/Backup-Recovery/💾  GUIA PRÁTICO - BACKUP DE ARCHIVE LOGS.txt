@@ -1,8 +1,17 @@
+# RISCO D3: DELETE INPUT remove archivelogs após o backup. Confirme banco,
+# destino, política de exclusão, necessidade de recuperação e Data Guard.
+SHOW ARCHIVELOG DELETION POLICY;
+LIST ARCHIVELOG ALL;
 BACKUP ARCHIVELOG ALL;
 
 RUN {
   SQL 'ALTER SYSTEM ARCHIVE LOG CURRENT';
-  BACKUP AS COMPRESSED BACKUPSET FORMAT '<BACKUP_PATH>' ARCHIVELOG ALL DELETE INPUT;
+  BACKUP AS COMPRESSED BACKUPSET FORMAT '<BACKUP_PATH_VALIDADO>' ARCHIVELOG ALL;
   CROSSCHECK ARCHIVELOG ALL;
-  DELETE NOPROMPT OBSOLETE;
+  REPORT OBSOLETE;
 }
+
+# Em uma etapa separada, após validar o backup e aprovar a remoção,
+# use DELETE OBSOLETE com prompt. DELETE OBSOLETE segue a política de
+# retenção de backups, não a política de exclusão de archivelogs.
+# Referência: https://docs.oracle.com/en/database/oracle/oracle-database/19/rcmrf/DELETE.html

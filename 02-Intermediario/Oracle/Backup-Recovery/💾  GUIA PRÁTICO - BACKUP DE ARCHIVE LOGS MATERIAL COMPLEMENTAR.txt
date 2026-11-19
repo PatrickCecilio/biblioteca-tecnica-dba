@@ -1,9 +1,16 @@
+# RISCO D3: validar banco, backup, destino e Data Guard antes de excluir logs.
+SHOW ARCHIVELOG DELETION POLICY;
+LIST ARCHIVELOG ALL;
 BACKUP ARCHIVELOG ALL;
 
-Forçar archivelog atual e deletar após backup:
+Arquivar o redo atual e fazer backup sem exclusão automática:
 RUN {
   SQL 'ALTER SYSTEM ARCHIVE LOG CURRENT';
-  BACKUP AS COMPRESSED BACKUPSET FORMAT 'C:\oraclebackup\arch_%d_%s_%p.arc' ARCHIVELOG ALL DELETE INPUT;
+  BACKUP AS COMPRESSED BACKUPSET FORMAT '<BACKUP_PATH_VALIDADO>' ARCHIVELOG ALL;
   CROSSCHECK ARCHIVELOG ALL;
-  DELETE NOPROMPT OBSOLETE;
+  REPORT OBSOLETE;
 }
+
+# Após conferir backups, política de retenção e dependências, uma etapa
+# operacional separada pode usar DELETE OBSOLETE com prompt e aprovação.
+# Referência: https://docs.oracle.com/en/database/oracle/oracle-database/19/rcmrf/DELETE.html

@@ -1,4 +1,6 @@
-ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+RISCO D3 — restore substitui o estado do cluster e pode descartar alterações posteriores.
+Confirme host, stanza, PGDATA, backup selecionado, PITR, WAL disponível, espaço e plano de retorno.
+Registre pgbackrest --stanza=main info antes de parar o serviço. Execute somente em ambiente autorizado.
 
 1️⃣ Preparar o ambiente
 
@@ -18,7 +20,8 @@ O comando pgBackRest identifica automaticamente os incrementais mais recentes se
 pgbackrest --stanza=main --repo1-path=/database/backup restore
 
 
-Por padrão, ele vai restaurar o full mais recente e aplicar todos os incrementais posteriores até o último backup.
+Sem --set, o pgBackRest seleciona o backup mais recente elegível do repositório.
+Confira a seleção com pgbackrest --stanza=main info; não presuma uma cadeia específica.
 
 O parâmetro --delta pode ser usado para manter arquivos que não mudaram, evitando copiar tudo de novo.
 
@@ -61,14 +64,24 @@ Você tem duas opções:
 sudo systemctl stop postgresql
 
 
-2. 	Limpe o diretório de dados (⚠️ isso apaga o banco atual):
-rm -rf /var/lib/pgsql/14/data/*
+2. 	Confirme o diretório de dados da instância parada, os tablespaces e o backup
+    escolhido. Preserve o estado anterior conforme o plano de retorno aprovado.
+    Não use rm -rf em PGDATA: uma variável, versão ou instância incorreta apaga
+    dados fora do escopo. O restore padrão exige diretórios adequados e vazios;
+    --delta altera o conteúdo existente conforme o manifesto do backup.
 
 
 3. 	Rode o restore:
-pgbackrest --stanza=main --set=20260126-113130F_20260126-132516I restore
-pgbackrest --stanza=main --set=20251218-204005F_20251219-132807I restore
+pgbackrest --stanza=<STANZA_VALIDADA> --set=<BACKUP_ID_VALIDADO> restore
+
+    Execute uma única seleção de backup. Para --delta, valide antes o estado
+    do cluster e aceite explicitamente que arquivos divergentes podem ser removidos.
 
 4. 	Inicie novamente o PostgreSQL:
 
 sudo systemctl start postgresql
+
+5. 	Valide logs de recuperação, timeline, dados esperados e integridade da aplicação.
+    Interrompa se houver WAL ausente, backup inconsistente ou destino inesperado.
+
+Referência: https://pgbackrest.org/user-guide.html

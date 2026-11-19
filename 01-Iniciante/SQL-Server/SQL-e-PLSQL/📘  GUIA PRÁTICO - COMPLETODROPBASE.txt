@@ -1,8 +1,10 @@
-ATENÇÃO: material de referência. Revise o ambiente, o escopo e os parâmetros antes de executar comandos destrutivos.
+RISCO D3 — exemplo para laboratório isolado. Confirme instância, banco, dependências,
+backup restaurável e autorização antes de desconectar sessões ou excluir a base.
+Substitua <DATABASE_NAME> pelo nome validado; não execute o bloco com o placeholder.
 
 ================================================================================
 🗄️  GUIA RÁPIDO — REMOÇÃO DE DATABASE (SQL SERVER)
-Base: SANKHYA_TREINA
+Base: <DATABASE_NAME>
 Objetivo: Validar existência da base, encerrar conexões e executar DROP DATABASE
 ================================================================================
 ## 📌 ETAPA 0 — VERIFICAR AS BASES
@@ -16,7 +18,7 @@ ORDER BY name;
 
 SELECT name
 FROM sys.databases
-WHERE name = 'SANKHYA_TREINA';
+WHERE name = '<DATABASE_NAME>';
 
 📌 ETAPA 2 — VERIFICAR SESSÕES ATIVAS NA BASE
 (Identifica usuários ou aplicações conectadas)
@@ -29,7 +31,7 @@ login_name,
 host_name,
 program_name
 FROM sys.dm_exec_sessions
-WHERE database_id = DB_ID('SANKHYA_TREINA');
+WHERE database_id = DB_ID('<DATABASE_NAME>');
 
 📌 ETAPA 3 — GARANTIR QUE A SESSÃO NÃO ESTÁ CONECTADA NA BASE
 (O DROP deve ser executado fora da database)
@@ -48,21 +50,23 @@ SELECT DB_NAME() AS BancoAtual;
 
 ---
 
-ALTER DATABASE SANKHYA_TREINA
-SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+-- Após aprovação, execute ALTER DATABASE e DROP DATABASE no mesmo batch,
+-- conectado a master, para que outra sessão não ocupe a conexão exclusiva.
+ALTER DATABASE [<DATABASE_NAME>] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
 
 📌 ETAPA 5 — REMOVER A DATABASE
 ⚠️ ATENÇÃO: operação irreversível
 
 ---
 
-DROP DATABASE SANKHYA_TREINA;
+DROP DATABASE [<DATABASE_NAME>];
+GO
 
 ## 📌 ETAPA 6 — CONFIRMAR QUE A BASE FOI REMOVIDA
 
 SELECT name
 FROM sys.databases
-WHERE name = 'SANKHYA_TREINA';
+WHERE name = '<DATABASE_NAME>';
 
 ## 📌 COMANDO OPCIONAL — VERIFICAR BANCO ATUAL DA SESSÃO
 
@@ -74,6 +78,10 @@ SELECT DB_NAME() AS BancoAtual;
 ✔ Sempre confirmar aceite do cliente antes da execução.
 ✔ Garantir que não existem backups pendentes ou dependências.
 ✔ Executar o DROP estando conectado na base "master".
+✔ Registrar a quantidade de sessões encerradas, horário e resultado da validação.
+✔ Parar se o banco, o backup ou as dependências divergirem do plano.
+
+Referência: https://learn.microsoft.com/en-us/sql/t-sql/statements/drop-database-transact-sql
 
 ================================================================================
 FIM DO PROCEDIMENTO
